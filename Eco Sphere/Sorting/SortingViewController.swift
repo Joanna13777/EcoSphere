@@ -1,12 +1,39 @@
 import UIKit
 
+// экран Сортировки в стиле Eco-Minimalism
 class SortingViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
 
-    // 1. Программные элементы интерфейса
-    private let searchBar: UISearchBar = {
+    // MARK: - Палитра цветов
+    private let appBgColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.0)       // #F5F5F5
+    private let darkTextColor = UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1.0)    // #1A1A1A
+    private let secondaryTextColor = UIColor(red: 0.49, green: 0.49, blue: 0.49, alpha: 1.0) // #7E7E7E
+    private let accentYellowColor = UIColor(red: 0.96, green: 0.71, blue: 0.10, alpha: 1.0)   // #F4B41A
+
+    // MARK: - UI-Элементы
+    private lazy var searchBar: UISearchBar = {
         let search = UISearchBar()
         search.placeholder = "Что вы хотите выбросить?"
-        search.backgroundImage = UIImage()
+        search.backgroundImage = UIImage() // Убираем стандартную серую обводку
+        search.backgroundColor = .clear
+        
+        // Кастомизируем внутреннее текстовое поле поиска под стиль Modern Clean
+        if let textField = search.value(forKey: "searchField") as? UITextField {
+            textField.backgroundColor = .white
+            textField.font = .systemFont(ofSize: 15, weight: .medium)
+            textField.textColor = darkTextColor
+            textField.layer.cornerRadius = 16 // Мягкое скругление
+            textField.layer.masksToBounds = true
+            
+            textField.layer.shadowColor = UIColor.black.cgColor
+            textField.layer.shadowOpacity = 0.02
+            textField.layer.shadowOffset = CGSize(width: 0, height: 4)
+            textField.layer.shadowRadius = 8
+            
+            if let leftView = textField.leftView as? UIImageView {
+                leftView.tintColor = accentYellowColor
+            }
+        }
+        
         search.translatesAutoresizingMaskIntoConstraints = false
         return search
     }()
@@ -14,6 +41,8 @@ class SortingViewController: UIViewController, UITableViewDataSource, UITableVie
     private let tableView: UITableView = {
         let table = UITableView()
         table.backgroundColor = .clear
+        table.separatorStyle = .none // Полностью убираем старые системные разделители линий
+        table.showsVerticalScrollIndicator = false
         table.translatesAutoresizingMaskIntoConstraints = false
         return table
     }()
@@ -24,7 +53,7 @@ class SortingViewController: UIViewController, UITableViewDataSource, UITableVie
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = appBgColor // Меняем стандартный фон на пастельный эко-оттенок
         title = "Сортировка"
         
         setupDelegates()
@@ -37,8 +66,8 @@ class SortingViewController: UIViewController, UITableViewDataSource, UITableVie
         tableView.dataSource = self
         tableView.delegate = self
         
-        // Регистрируем стандартную ячейку со встроенными стилями текста (Subtitle)
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "TrashCell")
+        // Регистрируем вынесенную кастомную ячейку
+        tableView.register(CustomTrashCell.self, forCellReuseIdentifier: "TrashCell")
     }
     
     private func setupLayout() {
@@ -46,13 +75,13 @@ class SortingViewController: UIViewController, UITableViewDataSource, UITableVie
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
-            // Поиск строго под верхним Navigation Bar
-            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            // Поиск строго под верхним Navigation Bar с красивыми отступами по бокам
+            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
             
             // Таблица занимает всё оставшееся пространство до самого низа
-            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 8),
+            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 12),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -94,34 +123,18 @@ class SortingViewController: UIViewController, UITableViewDataSource, UITableVie
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        // Достаем ячейку и используем современную конфигурацию контента iOS 14+
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TrashCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "TrashCell", for: indexPath) as! CustomTrashCell
         let item = filteredItems[indexPath.row]
-        
-        var content = cell.defaultContentConfiguration()
-        content.text = item.name
-        content.secondaryText = "\(item.category) • \(item.comment)"
-        
-        // Меняем цвета текста в зависимости от того, перерабатывается предмет или нет
-        content.textProperties.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
-        content.secondaryTextProperties.color = UIColor.secondaryLabel 
-
-
-        content.secondaryTextProperties.font = UIFont.systemFont(ofSize: 13, weight: .regular)
-        
-        cell.contentConfiguration = content
-        
-        // Маленький цветной индикатор справа (зеленый чекбокс или красный крестик)
-        let iconName = item.isRecyclable ? "checkmark.seal.fill" : "xmark.seal.fill"
-        let iconView = UIImageView(image: UIImage(systemName: iconName))
-        iconView.tintColor = item.isRecyclable ? .systemGreen : .systemRed
-        cell.accessoryView = iconView
-        
+        cell.configure(with: item)
         return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 64 // Комфортная высота для двухстрочной ячейки
+        return UITableView.automaticDimension // Автоматический расчет высоты ячейки
+    }
+    
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 88
     }
 }
 

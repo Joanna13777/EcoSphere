@@ -1,8 +1,12 @@
-// нижний бар
+// нижний бар в стиле Eco-Minimalism
 
 import UIKit
 
 class MainTabBarController: UITabBarController {
+
+    // Палитра цветов для таб-бара
+    private let accentYellowColor = UIColor(red: 0.96, green: 0.71, blue: 0.10, alpha: 1.0)  // #F4B41A
+    private let secondaryTextColor = UIColor(red: 0.49, green: 0.49, blue: 0.49, alpha: 1.0) // #7E7E7E
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -10,21 +14,32 @@ class MainTabBarController: UITabBarController {
     }
     
     private func setupTabBar() {
-        // Системная настройка внешнего вида таб-бара
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = .white // белый фон таб-бара
+        appearance.backgroundColor = .white // Чистый белый фон таб-бара
         
-        // Настройка состояний для элементов
+        // Настройка теней таб-бара (мягкая вуальная тень)
+        appearance.shadowColor = .clear
+        tabBar.layer.shadowColor = UIColor.black.cgColor
+        tabBar.layer.shadowOpacity = 0.04
+        tabBar.layer.shadowOffset = CGSize(width: 0, height: -4)
+        tabBar.layer.shadowRadius = 10
+        
         let itemAppearance = UITabBarItemAppearance()
         
-        // 1. Неактивное (негативное) состояние — темно-серый цвет
-        itemAppearance.normal.iconColor = .darkGray
-        itemAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.darkGray]
+        // 1. Неактивное состояние
+        itemAppearance.normal.iconColor = secondaryTextColor
+        itemAppearance.normal.titleTextAttributes = [
+            .foregroundColor: secondaryTextColor,
+            .font: UIFont.systemFont(ofSize: 11, weight: .medium)
+        ]
         
-        // 2. Активное (выделенное) состояние — зеленый цвет
-        itemAppearance.selected.iconColor = .systemGreen
-        itemAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.systemGreen]
+        // 2. Активное состояние (Иконка и текст просто становятся сочно-желтыми, БЕЗ КВАДРАТОВ)
+        itemAppearance.selected.iconColor = accentYellowColor
+        itemAppearance.selected.titleTextAttributes = [
+            .foregroundColor: accentYellowColor,
+            .font: UIFont.systemFont(ofSize: 11, weight: .semibold)
+        ]
         
         appearance.stackedLayoutAppearance = itemAppearance
         tabBar.standardAppearance = appearance
@@ -48,42 +63,60 @@ class MainTabBarController: UITabBarController {
         viewControllers = [nav1, nav2, nav3]
     }
     
-    // Элегантный метод для добавления светло-серых закругленных квадратов вокруг иконок при отрисовке
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        
-        // Перебираем все кнопки внутри таб-бара
-        let tabBarButtons = tabBar.subviews.filter { id(of: $0) == "UITabBarButton" }
-        
-        for (_, button) in tabBarButtons.enumerated() {
-            // Ищем иконку (ImageView) внутри кнопки таба
-            if let imageView = button.subviews.first(where: { $0 is UIImageView }) {
-                let backgroundTag = 999
-                
-                // Проверяем, добавлена ли уже подложка, чтобы не плодить их при каждом повороте экрана
-                if button.viewWithTag(backgroundTag) == nil {
-                    let bgView = UIView()
-                    bgView.tag = backgroundTag
-                    bgView.backgroundColor = UIColor(white: 0.95, alpha: 1.0) // Светло-серый фон
-                    bgView.layer.cornerRadius = 10 // Закругленные углы
-                    bgView.isUserInteractionEnabled = false
-                    
-                    // Помещаем подложку строго под иконку
-                    button.insertSubview(bgView, at: 0)
-                    bgView.translatesAutoresizingMaskIntoConstraints = false
-                    
-                    NSLayoutConstraint.activate([
-                        bgView.centerXAnchor.constraint(equalTo: imageView.centerXAnchor),
-                        bgView.centerYAnchor.constraint(equalTo: imageView.centerYAnchor),
-                        bgView.widthAnchor.constraint(equalTo: imageView.widthAnchor, constant: 16),
-                        bgView.heightAnchor.constraint(equalTo: imageView.heightAnchor, constant: 12)
-                    ])
-                }
-            }
-        }
+//    // Метод динамического обновления подложек при переключении табов и изменении лейаута
+//    override func viewDidLayoutSubviews() {
+//        super.viewDidLayoutSubviews()
+//        updateTabBarButtonBackgrounds()
+//    }
+//    
+//    // Переопределяем метод выбора таба, чтобы мгновенно обновлять цвета подложек при нажатии
+//    override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+//        // Запускаем небольшую задержку, чтобы UIKit успел обновить внутреннее состояние выбранной кнопки
+//        DispatchQueue.main.async {
+//            self.updateTabBarButtonBackgrounds()
+//        }
+//    }
+//    
+//    private func updateTabBarButtonBackgrounds() {
+//        let tabBarButtons = tabBar.subviews.filter { id(of: $0) == "UITabBarButton" }
+//        
+//        for (index, button) in tabBarButtons.enumerated() {
+//            if let imageView = button.subviews.first(where: { $0 is UIImageView }) {
+//                let backgroundTag = 999
+//                
+//                // Получаем или создаем вью подложки
+//                let bgView: UIView
+//                if let existingBg = button.viewWithTag(backgroundTag) {
+//                    bgView = existingBg
+//                } else {
+//                    bgView = UIView()
+//                    bgView.tag = backgroundTag
+//                    bgView.layer.cornerRadius = 12 // Чуть увеличили скругление для мягкости стиля
+//                    bgView.isUserInteractionEnabled = false
+//                    
+//                    button.insertSubview(bgView, at: 0)
+//                    bgView.translatesAutoresizingMaskIntoConstraints = false
+//                    
+//                    NSLayoutConstraint.activate([
+//                        bgView.centerXAnchor.constraint(equalTo: imageView.centerXAnchor),
+//                        bgView.centerYAnchor.constraint(equalTo: imageView.centerYAnchor),
+//                        bgView.widthAnchor.constraint(equalTo: imageView.widthAnchor, constant: 20), // Больше воздуха вокруг иконки
+//                        bgView.heightAnchor.constraint(equalTo: imageView.heightAnchor, constant: 12)
+//                    ])
+//                }
+//                
+//                // Проверяем, выбран ли этот таб прямо сейчас
+//                let isSelected = index == selectedIndex
+//                
+//                // Анимируем смену цвета подложки для плавного UI эффекта
+//                UIView.animate(withDuration: 0.2) {
+//                    bgView.backgroundColor = isSelected ? self.bgView : .clear
+//                }
+//            }
+//        }
     }
     
     private func id(of object: AnyObject) -> String {
         return String(describing: type(of: object))
     }
-}
+

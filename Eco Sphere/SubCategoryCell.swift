@@ -2,20 +2,14 @@ import UIKit
 
 class SubCategoryCell: UICollectionViewCell {
     
-    // Программное создание элементов интерфейса
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    private let underlineView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .systemGreen
-        view.layer.cornerRadius = 2
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+        label.numberOfLines = 1 // Строго в одну линию
+            label.adjustsFontSizeToFitWidth = false // Запрещаем уменьшать размер шрифта
+            
+            label.translatesAutoresizingMaskIntoConstraints = false
+            return label
     }()
     
     override init(frame: CGRect) {
@@ -29,41 +23,39 @@ class SubCategoryCell: UICollectionViewCell {
     }
     
     private func setupUI() {
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(underlineView)
+        // Задаем большое скругление для эффекта "чипсов"
+        layer.cornerRadius = 14
+        clipsToBounds = true
         
-        // Констрейнты: жестко привязываем элементы к границам ячейки
+        contentView.addSubview(titleLabel)
+        
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            titleLabel.bottomAnchor.constraint(equalTo: underlineView.topAnchor, constant: -4),
-            
-            underlineView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 4),
-            underlineView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -4),
-            underlineView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            underlineView.heightAnchor.constraint(equalToConstant: 3)
+            // Важно задавать внутренние отступы (padding) для contentView, чтобы система знала, как рассчитать ширину ячейки
+            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
+            titleLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),
+            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 18),
+            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -18)
         ])
     }
+    
+    
     
     func configure(with title: String, isSelected: Bool) {
         titleLabel.text = title
         
+        // Цвета в стиле референса: сочный зеленый для активного, полупрозрачный белый на сером фоне для пассивного
         if isSelected {
-            titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
-            titleLabel.textColor = .label
-            underlineView.isHidden = false
-            underlineView.alpha = 0
-            UIView.animate(withDuration: 0.25) {
-                self.underlineView.alpha = 1
-            }
+            backgroundColor = UIColor(red: 0.96, green: 0.71, blue: 0.10, alpha: 1.0) // #F4B41A (Выбранный таб залит желтым)
+            titleLabel.textColor = .darkText
+            titleLabel.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
         } else {
+            backgroundColor = .white.withAlphaComponent(0.6)
+            titleLabel.textColor = UIColor(red: 0.49, green: 0.49, blue: 0.49, alpha: 1.0) // #7E7E7E (Невыбранный — серый)
             titleLabel.font = UIFont.systemFont(ofSize: 15, weight: .medium)
-            titleLabel.textColor = .secondaryLabel
-            underlineView.isHidden = true
         }
     }
 }
+
 #Preview {
     let cell = SubCategoryCell(frame: CGRect(x: 0, y: 0, width: 120, height: 44))
     cell.configure(with: "Макулатура", isSelected: true)
