@@ -45,6 +45,9 @@ class MainTabBarController: UITabBarController {
         tabBar.standardAppearance = appearance
         if #available(iOS 15.0, *) {
             tabBar.scrollEdgeAppearance = appearance
+            
+                // UINavigationBar.appearance().tintColor = .black // Сделает иконку стрелки назад черной
+
         }
         
         // Создаем экраны для вкладок
@@ -62,59 +65,7 @@ class MainTabBarController: UITabBarController {
         
         viewControllers = [nav1, nav2, nav3]
     }
-    
-//    // Метод динамического обновления подложек при переключении табов и изменении лейаута
-//    override func viewDidLayoutSubviews() {
-//        super.viewDidLayoutSubviews()
-//        updateTabBarButtonBackgrounds()
-//    }
-//    
-//    // Переопределяем метод выбора таба, чтобы мгновенно обновлять цвета подложек при нажатии
-//    override func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
-//        // Запускаем небольшую задержку, чтобы UIKit успел обновить внутреннее состояние выбранной кнопки
-//        DispatchQueue.main.async {
-//            self.updateTabBarButtonBackgrounds()
-//        }
-//    }
-//    
-//    private func updateTabBarButtonBackgrounds() {
-//        let tabBarButtons = tabBar.subviews.filter { id(of: $0) == "UITabBarButton" }
-//        
-//        for (index, button) in tabBarButtons.enumerated() {
-//            if let imageView = button.subviews.first(where: { $0 is UIImageView }) {
-//                let backgroundTag = 999
-//                
-//                // Получаем или создаем вью подложки
-//                let bgView: UIView
-//                if let existingBg = button.viewWithTag(backgroundTag) {
-//                    bgView = existingBg
-//                } else {
-//                    bgView = UIView()
-//                    bgView.tag = backgroundTag
-//                    bgView.layer.cornerRadius = 12 // Чуть увеличили скругление для мягкости стиля
-//                    bgView.isUserInteractionEnabled = false
-//                    
-//                    button.insertSubview(bgView, at: 0)
-//                    bgView.translatesAutoresizingMaskIntoConstraints = false
-//                    
-//                    NSLayoutConstraint.activate([
-//                        bgView.centerXAnchor.constraint(equalTo: imageView.centerXAnchor),
-//                        bgView.centerYAnchor.constraint(equalTo: imageView.centerYAnchor),
-//                        bgView.widthAnchor.constraint(equalTo: imageView.widthAnchor, constant: 20), // Больше воздуха вокруг иконки
-//                        bgView.heightAnchor.constraint(equalTo: imageView.heightAnchor, constant: 12)
-//                    ])
-//                }
-//                
-//                // Проверяем, выбран ли этот таб прямо сейчас
-//                let isSelected = index == selectedIndex
-//                
-//                // Анимируем смену цвета подложки для плавного UI эффекта
-//                UIView.animate(withDuration: 0.2) {
-//                    bgView.backgroundColor = isSelected ? self.bgView : .clear
-//                }
-//            }
-//        }
-    }
+}
     
     private func id(of object: AnyObject) -> String {
         return String(describing: type(of: object))

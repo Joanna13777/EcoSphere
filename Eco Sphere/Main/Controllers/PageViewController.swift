@@ -9,7 +9,7 @@ class PageViewController: UIPageViewController, UIPageViewControllerDataSource, 
 
     // ВАЖНО: Весь массив данных [WasteType] должен находиться строго ЗДЕСЬ, внутри класса
     let wasteDataList: [WasteType] = [
-        WasteType(title: "Макулатура", imageName: "Wastepaper",
+        WasteType(title: "Бумага", imageName: "Wastepaper",
                   shortDescription: "• Картон, гофрокороб\n• Измельченная бумага из шредера\n• Втулки\n• Яичные кассеты\n• Книги, тетради, крафт, офисная бумага, газеты",
                   fullDescription: "Чтобы сдать макулатуру, необходимо отделить металлические элементы (пружины, скрепки) и пластиковые элементы (обложки, файлы, папки).\n\nПо возможности спрессуйте бумагу, чтобы уменьшить объем. Не сдавайте бумагу в пластиковых пакетах, достаточно перевязать кипу веревкой или сложить в коробку."),
         
@@ -21,17 +21,18 @@ class PageViewController: UIPageViewController, UIPageViewControllerDataSource, 
                   shortDescription: "• ПЭТ-бутылки (маркировка 1)\n• Флаконы от бытовой химии (маркировка 2)\n• Контейнеры для еды (маркировка 5)",
                   fullDescription: "Обращайте внимание на треугольник маркировки на дне. Тщательно сполосните пластик и максимально сомните его перед сдачей."),
         
-        WasteType(title: "Электро", imageName: "Electro",
-                  shortDescription: "• Сломанные телефоны и зарядки\n• Бытовая техника\n• Провода, клавиатуры и мышки",
-                  fullDescription: "Электронный лом содержит опасные вещества. Не выбрасывайте его в общий бак, сдавайте исключительно в специализированные пункты приема."),
+        WasteType(title: "Металл", imageName: "Metall",
+                  shortDescription: "• Алюминиевые банки от напитков\n• Жестяные банки от консервов\n• Металлические крышки",
+                  fullDescription: "Сполосните банки от остатков еды. Жестяные банки рекомендуется аккуратно сплющить, чтобы они занимали меньше места при транспортировке."),
         
         WasteType(title: "Органика", imageName: "Organic",
                   shortDescription: "• Очистки овощей и фруктов\n• Остатки готовой пищи\n• Чайные пакетики и кофейная гуща",
                   fullDescription: "Не смешивайте органику с пластиковой упаковкой. По возможности используйте домашние компостеры или специальные биоразлагаемые пакеты."),
         
-        WasteType(title: "Металл", imageName: "Metall",
-                  shortDescription: "• Алюминиевые банки от напитков\n• Жестяные банки от консервов\n• Металлические крышки",
-                  fullDescription: "Сполосните банки от остатков еды. Жестяные банки рекомендуется аккуратно сплющить, чтобы они занимали меньше места при транспортировке.")
+        WasteType(title: "Электро", imageName: "Electro",
+                  shortDescription: "• Сломанные телефоны и зарядки\n• Бытовая техника\n• Провода, клавиатуры и мышки",
+                  fullDescription: "Электронный лом содержит опасные вещества. Не выбрасывайте его в общий бак, сдавайте исключительно в специализированные пункты приема.")
+    
     ]
 
     lazy var orderedViewControllers: [UIViewController] = {
@@ -62,13 +63,27 @@ class PageViewController: UIPageViewController, UIPageViewControllerDataSource, 
             setViewControllers([firstVC], direction: .forward, animated: true, completion: nil)
         }
     }
-
+        
     func moveToPage(at index: Int) {
         guard index >= 0 && index < orderedViewControllers.count else { return }
+        // Если мы уже на этой странице, ничего не делаем
+        guard index != currentIndex else { return }
+        
         let direction: UIPageViewController.NavigationDirection = index > currentIndex ? .forward : .reverse
         currentIndex = index
-        setViewControllers([orderedViewControllers[index]], direction: direction, animated: true, completion: nil)
+
+        // Отключаем dataSource перед программной анимацией, чтобы избежать конфликтов свайпа и тапа
+        self.dataSource = nil
+        
+        setViewControllers([orderedViewControllers[index]], direction: direction, animated: true) { [weak self] finished in
+            // Возвращаем dataSource на место строго ПОСЛЕ завершения анимации
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.dataSource = self
+            }
+        }
     }
+
 
     // MARK: - UIPageViewControllerDataSource
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {

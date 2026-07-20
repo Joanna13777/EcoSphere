@@ -26,29 +26,31 @@ extension MapViewController: UICollectionViewDataSource, UICollectionViewDelegat
         return cell
     }
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+   
         // ЗАЩИТА 2: Проверяем индекс при нажатии на кнопку фильтра
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        // ЗАЩИТА: Игнорируем нажатие, если индекс некорректен
         guard indexPath.item >= 0 && indexPath.item < filterCategories.count else { return }
         
-        let previousIndex = selectedCategoryIndex
         selectedCategoryIndex = indexPath.item
         
-        // Перерисовываем только те ячейки, которые гарантированно существуют в массиве
-        let indexPathsToReload = [IndexPath(item: previousIndex, section: 0), indexPath].filter { $0.item >= 0 && $0.item < filterCategories.count }
-        collectionView.reloadItems(at: indexPathsToReload)
+        // БЕЗОПАСНО: Вместо reloadItems используем reloadData,
+        // чтобы коллекция мгновенно сбросила старые индексы и перекрасила кнопки
+        collectionView.reloadData()
         
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         updateVisiblePoints(animated: true)
     }
+
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         // ЗАЩИТА 3: Проверяем индекс при расчете размера ячеек
         guard indexPath.item >= 0 && indexPath.item < filterCategories.count else {
-            return CGSize(width: 60, height: 38)
+            return CGSize(width: 80, height: 38)
         }
         
         let text = filterCategories[indexPath.item]
-        let font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        let font = UIFont.systemFont(ofSize: 14, weight: .bold)
         let attributes: [NSAttributedString.Key : Any] = [.font : font]
         let textWidth = text.size(withAttributes: attributes).width
         
@@ -160,7 +162,7 @@ extension MapViewController {
             RecyclingPoint(title: "Эко-Пункт ЦУМ",
                            subtitle: "Мирабадский р-н, ул. Шахрисабз, 5",
                            coordinate: CLLocationCoordinate2D(latitude: 41.3101, longitude: 69.2715),
-                           acceptedWasteTypes: ["Макулатура", "Пластик", "Стекло"]),
+                           acceptedWasteTypes: ["Бумага", "Пластик", "Стекло"]),
             
             RecyclingPoint(title: "Сбор Электроники Чиланзар",
                            subtitle: "Чиланзарский р-н, квартал-1, 42",
@@ -170,7 +172,7 @@ extension MapViewController {
             RecyclingPoint(title: "Зеленый Двор Экопарк",
                            subtitle: "Яшнабадский р-н, ул. Махтумкули",
                            coordinate: CLLocationCoordinate2D(latitude: 41.3125, longitude: 69.2950),
-                           acceptedWasteTypes: ["Органика", "Макулатура"]),
+                           acceptedWasteTypes: ["Органика", "Бумага"]),
             
             RecyclingPoint(title: "Пункт Сбора Юнусабад",
                            subtitle: "Юнусабадский р-н, Квартал-4, к.2",

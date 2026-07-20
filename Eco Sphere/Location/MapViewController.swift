@@ -80,7 +80,7 @@ class MapViewController: UIViewController {
     
     var allPoints: [RecyclingPoint] = []
     var filteredPoints: [RecyclingPoint] = []
-    let filterCategories = ["Все", "Макулатура", "Стекло", "Пластик", "Электро", "Органика", "Металл"]
+    let filterCategories = ["Все", "Бумага", "Стекло", "Пластик", "Электро", "Органика", "Металл"]
     var selectedCategoryIndex = 0
     var currentSearchText = ""
 
@@ -95,6 +95,8 @@ class MapViewController: UIViewController {
         setupKeyboardObservers()
         setupGestureToHideKeyboard()
         
+     
+        
         updateVisiblePoints(animated: false)
         centerMapOnData()
     }
@@ -103,30 +105,52 @@ class MapViewController: UIViewController {
     private func setupMainConfiguration() {
         view.backgroundColor = appBgColor
         
-        // ИСПРАВЛЕНО: Полностью удаляем текстовый заголовок с экрана
-            title = nil
-            navigationItem.title = nil
+        // Создаем кастомную кнопку со стрелкой
+            let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"),
+                                             style: .plain,
+                                             target: self,
+                                             action: #selector(backTapped))
             
-            // Оставляем только аккуратную стрелку возврата без текста предыдущего экрана
+            // Красим стрелочку в черный (под ваш стиль)
+            backButton.tintColor = .black
+            
+            // Устанавливаем кнопку слева на верхнем баре
+            navigationItem.leftBarButtonItem = backButton
+        }
+
+        // Метод, который будет срабатывать при нажатии
+        @objc private func backTapped() {
+            // Если это Push-переход:
+            navigationController?.popViewController(animated: true)
+            
+            // Или если это Modal-переход:
+             dismiss(animated: true, completion: nil)
+        
+        
+        // Прячет текст кнопки назад для всех экранов, открываемых из этого контроллера
             let backButton = UIBarButtonItem()
-            backButton.title = "" // Пустая строка убирает текст, оставляя чистую стрелку "Back"
-            backButton.tintColor = accentYellowColor // Красим стрелку в наш фирменный желтый цвет
-            navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
+            backButton.title = ""
+            navigationItem.backBarButtonItem = backButton
     }
     
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.estimatedItemSize = .zero
-        layout.minimumInteritemSpacing = 8
+            layout.estimatedItemSize = .zero
+            layout.minimumInteritemSpacing = 8
+            layout.minimumLineSpacing = 8
         
         
         filterCollectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         filterCollectionView.showsHorizontalScrollIndicator = false
         filterCollectionView.backgroundColor = .clear
+        // Включаем нативный скролл и отскок
+            filterCollectionView.alwaysBounceHorizontal = true
+            filterCollectionView.isScrollEnabled = true
+        
         filterCollectionView.register(FilterCell.self, forCellWithReuseIdentifier: FilterCell.reuseIdentifier)
-        filterCollectionView.contentInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        filterCollectionView.translatesAutoresizingMaskIntoConstraints = false
+            filterCollectionView.contentInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+            filterCollectionView.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func setupDelegates() {
