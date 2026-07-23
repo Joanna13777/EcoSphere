@@ -18,10 +18,8 @@ class ArticleDetailViewController: UIViewController {
         return view
     }()
     
-    private let titleLabel: UILabel = {
+    private let textLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 22, weight: .bold)
-        label.textColor = UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1.0)
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -36,21 +34,6 @@ class ArticleDetailViewController: UIViewController {
         return iv
     }()
     
-    private let textLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 15, weight: .regular)
-        label.textColor = UIColor(red: 0.20, green: 0.20, blue: 0.20, alpha: 1.0)
-        label.numberOfLines = 0
-        
-        // Настройка межстрочного интервала для удобства чтения по ТЗ
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = 6
-        label.attributedText = NSAttributedString(string: "", attributes: [.paragraphStyle: paragraphStyle])
-        
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
     // MARK: - Жизненный цикл
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,14 +44,30 @@ class ArticleDetailViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        navigationItem.title = "" // Чистый верхний бар без текста
+        navigationItem.title = ""
         
-        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"),
-                                         style: .plain,
-                                         target: self,
-                                         action: #selector(backTapped))
+        let backButton = UIButton(type: .system)
+        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
         backButton.tintColor = .black
-        navigationItem.leftBarButtonItem = backButton
+        backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
+        
+        backButton.translatesAutoresizingMaskIntoConstraints = false
+        backButton.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        backButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        
+        let titleLabelButton = UILabel()
+        titleLabelButton.text = article?.title ?? ""
+        titleLabelButton.font = .systemFont(ofSize: 18, weight: .semibold)
+        titleLabelButton.textColor = .black
+        titleLabelButton.numberOfLines = 1
+        
+        let customNavBarStack = UIStackView(arrangedSubviews: [backButton, titleLabelButton])
+        customNavBarStack.axis = .horizontal
+        customNavBarStack.spacing = 12
+        customNavBarStack.alignment = .center
+        
+        let leftBarItem = UIBarButtonItem(customView: customNavBarStack)
+        navigationItem.leftBarButtonItem = leftBarItem
     }
     
     @objc private func backTapped() {
@@ -78,9 +77,13 @@ class ArticleDetailViewController: UIViewController {
     private func setupLayout() {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(articleImageView)
         contentView.addSubview(textLabel)
+        contentView.addSubview(articleImageView)
+        
+        // Фиксируем высоту картинки внизу
+        let imageHeight = articleImageView.heightAnchor.constraint(equalToConstant: 180)
+        imageHeight.priority = .defaultHigh
+        imageHeight.isActive = true
         
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -94,28 +97,22 @@ class ArticleDetailViewController: UIViewController {
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
-            titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            
-            // Динамический констрейнт для картинки (высота 0, если картинки нет)
-            articleImageView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
-            articleImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            articleImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            articleImageView.heightAnchor.constraint(equalToConstant: 180),
-            
-            textLabel.topAnchor.constraint(equalTo: articleImageView.bottomAnchor, constant: 16),
+            // Текст статьи теперь идет на самом верху контента
+            textLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
             textLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             textLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            textLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -30)
+            
+            // Картинка размещается строго ПОД текстом статьи
+            articleImageView.topAnchor.constraint(equalTo: textLabel.bottomAnchor, constant: 20),
+            articleImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            articleImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            articleImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -30)
         ])
     }
     
     private func configureData() {
         guard let article = article else { return }
-        titleLabel.text = article.title
         
-        // Настраиваем текст с отступами
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineSpacing = 6
         textLabel.attributedText = NSAttributedString(
@@ -127,14 +124,16 @@ class ArticleDetailViewController: UIViewController {
             ]
         )
         
-        // Проверяем наличие картинки (например, для статьи "Подключите окружающих")
-        if let imageName = article.imageName, let image = UIImage(named: imageName) {
+        // Проверяем наличие картинки в поле detailImageName
+        if let imageName = article.detailImageName, let image = UIImage(named: imageName) {
             articleImageView.image = image
             articleImageView.isHidden = false
         } else {
+            articleImageView.image = nil
             articleImageView.isHidden = true
-            // Перепривязываем верхний констрейнт текста к заголовку, если картинки нет
-            textLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16).isActive = true
+            
+            // Если картинки внизу нет, притягиваем дно контейнера прямо к тексту
+            textLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -30).isActive = true
         }
     }
 }

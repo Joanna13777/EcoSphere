@@ -3,17 +3,37 @@
 import UIKit
 
 class MainTabBarController: UITabBarController {
-
+    
     // Палитра цветов для таб-бара
     private let accentYellowColor = UIColor(red: 0.96, green: 0.71, blue: 0.10, alpha: 1.0)  // #F4B41A
     private let secondaryTextColor = UIColor(red: 0.49, green: 0.49, blue: 0.49, alpha: 1.0) // #7E7E7E
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTabBar()
     }
     
     private func setupTabBar() {
+        // --- 1. ГЛОБАЛЬНАЯ НАСТРОЙКА ВЕРХНЕГО НАВИГАЦИОННОГО БАРА (ЧЕРНЫЙ ЦВЕТ ЗАГОЛОВКА И СТРЕЛКИ) ---
+        let navBarAppearance = UINavigationBarAppearance()
+        navBarAppearance.configureWithOpaqueBackground()
+        navBarAppearance.backgroundColor = .white // Чистый белый фон верхнего бара
+        
+        // Задаем глубокий черный цвет для текста вверху рядом со стрелкой back
+        navBarAppearance.titleTextAttributes = [
+            .foregroundColor: UIColor.black,
+            .font: UIFont.systemFont(ofSize: 17, weight: .semibold)
+        ]
+        
+        // Применяем внешний вид ко всем UINavigationBar в приложении
+        UINavigationBar.appearance().standardAppearance = navBarAppearance
+        UINavigationBar.appearance().scrollEdgeAppearance = navBarAppearance
+        UINavigationBar.appearance().compactAppearance = navBarAppearance
+        
+        // Делаем иконку стрелки назад «chevron.left» строго черной по всему приложению
+        UINavigationBar.appearance().tintColor = .black
+        
+        // --- 2. НАСТРОЙКА НИЖНЕГО ТАБ-БАРА ---
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = .white // Чистый белый фон таб-бара
@@ -27,14 +47,14 @@ class MainTabBarController: UITabBarController {
         
         let itemAppearance = UITabBarItemAppearance()
         
-        // 1. Неактивное состояние
+        // Неактивное состояние вкладок
         itemAppearance.normal.iconColor = secondaryTextColor
         itemAppearance.normal.titleTextAttributes = [
             .foregroundColor: secondaryTextColor,
             .font: UIFont.systemFont(ofSize: 11, weight: .medium)
         ]
         
-        // 2. Активное состояние (Иконка и текст просто становятся сочно-желтыми, БЕЗ КВАДРАТОВ)
+        // Активное состояние вкладок (сочно-желтый цвет)
         itemAppearance.selected.iconColor = accentYellowColor
         itemAppearance.selected.titleTextAttributes = [
             .foregroundColor: accentYellowColor,
@@ -45,12 +65,9 @@ class MainTabBarController: UITabBarController {
         tabBar.standardAppearance = appearance
         if #available(iOS 15.0, *) {
             tabBar.scrollEdgeAppearance = appearance
-            
-                // UINavigationBar.appearance().tintColor = .black // Сделает иконку стрелки назад черной
-
         }
         
-        // Создаем экраны для вкладок
+        // --- 3. ИНИЦИАЛИЗАЦИЯ СТЕКА ЭКРАНОВ ДЛЯ ВКЛАДОК ---
         let viewsVC = MainContainerViewController()
         let nav1 = UINavigationController(rootViewController: viewsVC)
         nav1.tabBarItem = UITabBarItem(title: "Виды", image: UIImage(systemName: "arrow.3.trianglepath"), tag: 0)
@@ -66,7 +83,6 @@ class MainTabBarController: UITabBarController {
         viewControllers = [nav1, nav2, nav3]
     }
 }
-    
     private func id(of object: AnyObject) -> String {
         return String(describing: type(of: object))
     }

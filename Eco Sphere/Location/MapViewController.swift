@@ -87,6 +87,8 @@ class MapViewController: UIViewController {
     // MARK: - Жизненный цикл (Lifecycle)
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = "Пункты"
+
         setupMainConfiguration()
         setupCollectionView()
         setupDelegates()
@@ -94,9 +96,7 @@ class MapViewController: UIViewController {
         setupMockData()
         setupKeyboardObservers()
         setupGestureToHideKeyboard()
-        
-     
-        
+
         updateVisiblePoints(animated: false)
         centerMapOnData()
     }

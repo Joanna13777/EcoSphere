@@ -27,10 +27,10 @@ class MainContainerViewController: UIViewController, UICollectionViewDataSource,
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = appBgColor // Меняем стандартный фон на пастельный эко-оттенок
+        
+        title = "Виды"
+
         setupMainConfiguration()
-        
-        
-        
         setupCollectionView()
         setupPageViewController()
         setupLayout()
