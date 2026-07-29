@@ -18,12 +18,17 @@ class ArticleDetailViewController: UIViewController {
         return view
     }()
     
-    private let textLabel: UILabel = {
-        let label = UILabel()
-        label.numberOfLines = 0
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
+    private let textView: UITextView = {
+        let tv = UITextView()
+        tv.isEditable = false // Запрещаем редактирование
+        tv.isScrollEnabled = false // Выключаем внутренний скролл, так как у нас есть UIScrollView
+        tv.textContainerInset = .zero // Убираем внутренние отступы, чтобы текст не съезжал
+        tv.textContainer.lineFragmentPadding = 0 // Убираем боковые микро-поля
+        tv.backgroundColor = .clear
+        tv.translatesAutoresizingMaskIntoConstraints = false
+        return tv
     }()
+
     
     private let articleImageView: UIImageView = {
         let iv = UIImageView()
@@ -42,6 +47,8 @@ class ArticleDetailViewController: UIViewController {
         setupLayout()
         configureData()
     }
+    
+    
     
     private func setupNavigationBar() {
         navigationItem.title = ""
@@ -77,7 +84,7 @@ class ArticleDetailViewController: UIViewController {
     private func setupLayout() {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-        contentView.addSubview(textLabel)
+        contentView.addSubview(textView)
         contentView.addSubview(articleImageView)
         
         // Фиксируем высоту картинки внизу
@@ -98,12 +105,12 @@ class ArticleDetailViewController: UIViewController {
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
             // Текст статьи теперь идет на самом верху контента
-            textLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
-            textLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            textLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            textView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+            textView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            textView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
             // Картинка размещается строго ПОД текстом статьи
-            articleImageView.topAnchor.constraint(equalTo: textLabel.bottomAnchor, constant: 20),
+            articleImageView.topAnchor.constraint(equalTo: textView.bottomAnchor, constant: 20),
             articleImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             articleImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             articleImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -30)
@@ -113,27 +120,46 @@ class ArticleDetailViewController: UIViewController {
     private func configureData() {
         guard let article = article else { return }
         
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = 6
-        textLabel.attributedText = NSAttributedString(
-            string: article.fullText,
-            attributes: [
-                .paragraphStyle: paragraphStyle,
-                .font: UIFont.systemFont(ofSize: 15, weight: .regular),
-                .foregroundColor: UIColor(red: 0.15, green: 0.15, blue: 0.15, alpha: 1.0)
-            ]
+        let regularFont = UIFont.systemFont(ofSize: 15, weight: .regular)
+        let boldFont = UIFont.systemFont(ofSize: 15, weight: .bold)
+        
+        let formattedString = article.fullText.bolding(
+            article.boldPhrases,
+            normalFont: regularFont,
+            boldFont: boldFont,
+            lineSpacing: 6
         )
         
-        // Проверяем наличие картинки в поле detailImageName
+        let finalAttributedString = NSMutableAttributedString(attributedString: formattedString)
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 6
+        paragraphStyle.alignment = .left
+        
+        // Включаем перенос по слогам на максимум (1.0)
+        paragraphStyle.hyphenationFactor = 1.0
+        
+        let fullRange = NSRange(location: 0, length: finalAttributedString.length)
+        finalAttributedString.addAttribute(.paragraphStyle, value: paragraphStyle, range: fullRange)
+        finalAttributedString.addAttribute(
+            .foregroundColor,
+            value: UIColor(red: 0.15, green: 0.15, blue: 0.15, alpha: 1.0),
+            range: fullRange
+        )
+        
+        // Присваиваем текст нашему новому тексту
+        textView.attributedText = finalAttributedString
+        
         if let imageName = article.detailImageName, let image = UIImage(named: imageName) {
             articleImageView.image = image
             articleImageView.isHidden = false
         } else {
             articleImageView.image = nil
             articleImageView.isHidden = true
-            
-            // Если картинки внизу нет, притягиваем дно контейнера прямо к тексту
-            textLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -30).isActive = true
+            // Поменяли на textView
+            textView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -30).isActive = true
         }
     }
+
+
 }

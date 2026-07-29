@@ -8,8 +8,9 @@ extension SortingViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ArticleCell", for: indexPath) as! ArticleTableViewCell
+        
         let article = articlesData[indexPath.row]
-        cell.configure(with: article)
+            cell.configure(with: article)
         return cell
     }
 }
