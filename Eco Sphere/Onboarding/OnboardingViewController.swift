@@ -3,7 +3,8 @@ import UIKit
 class OnboardingViewController: UIViewController {
     
     private var pageViewController: UIPageViewController!
-    var pages: [OnboardingCardViewController] = []
+    var pages: [UIViewController] = []
+
     private var currentIndex = 0
     
     override func viewDidLoad() {
@@ -15,24 +16,28 @@ class OnboardingViewController: UIViewController {
     
     private func setupPages() {
         pages.removeAll() // Очищаем стек перед заполнением
+        
         for data in onboardingData {
             let vc = OnboardingCardViewController(data: data)
             
             vc.onSkipPressed = { [weak self] in self?.finishOnboarding() }
             vc.onBackPressed = { [weak self] in self?.goToPreviousPage() }
             
-            vc.onNextPressed = { [weak self] targetIndex in
-                self?.goToPage(targetIndex)
+            vc.onNextPressed = { [weak self] currentIndex in
+                let nextIndex = currentIndex + 1
+                if nextIndex < onboardingData.count {
+                    self?.goToPage(nextIndex)
+                }
             }
             
             vc.onLanguageChangedGlobal = { [weak self] in
-                self?.pages.forEach { $0.refreshLanguage() }
+                self?.pages.compactMap { $0 as? OnboardingCardViewController }.forEach { $0.refreshLanguage() }
             }
             
             pages.append(vc)
         }
     }
-    
+
     private func setupPageViewController() {
         pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
         pageViewController.dataSource = self
@@ -63,10 +68,9 @@ class OnboardingViewController: UIViewController {
             navigationController?.popViewController(animated: true)
         }
     }
-    // на последнем экране теперь должно логически завершать онбординг и перенаправлять на экран «Виды» (то есть запускать ваш MainTabBarController)
+
     private func finishOnboarding() {
         UserDefaults.standard.set(false, forKey: "is_first_launch")
-        // Перекидываем пользователя на главный экран приложения (MainTabBarController)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
             let mainTabBar = MainTabBarController()
@@ -76,26 +80,32 @@ class OnboardingViewController: UIViewController {
     }
 }
 
+// MARK: - UIPageViewController DataCore & Delegate
 extension OnboardingViewController: UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+    
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-        guard let vc = viewController as? OnboardingCardViewController, let index = pages.firstIndex(of: vc), index > 0 else { return nil }
+        // ИСПРАВЛЕНИЕ 1: Меняем тип проверяемого класса с OnboardingViewController на OnboardingCardViewController
+        guard let vc = viewController as? OnboardingCardViewController,
+              let index = pages.firstIndex(of: vc),
+              index > 0 else { return nil }
         return pages[index - 1]
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        guard let vc = viewController as? OnboardingCardViewController, let index = pages.firstIndex(of: vc), index < pages.count - 1 else { return nil }
+        // ИСПРАВЛЕНИЕ 2: Меняем тип проверяемого класса с OnboardingViewController на OnboardingCardViewController
+        guard let vc = viewController as? OnboardingCardViewController,
+              let index = pages.firstIndex(of: vc),
+              index < pages.count - 1 else { return nil }
         return pages[index + 1]
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-        // Если анимация свайпа успешно завершилась
-               if completed,
-                  let currentVC = pageViewController.viewControllers?.first as? OnboardingCardViewController,
-                  let index = pages.firstIndex(of: currentVC) {
-                   
-                   // Просто обновляем текущий индекс контейнера.
-                   // Каждая карточка сама знает свой индекс и уже отображает правильную точку при создании!
-                   currentIndex = index
+        // ИСПРАВЛЕНИЕ 3: Приводим первый контроллер к OnboardingCardViewController для синхронизации индекса при свайпах
+        if completed,
+           let currentVC = pageViewController.viewControllers?.first as? OnboardingCardViewController,
+           let index = pages.firstIndex(of: currentVC) {
+            currentIndex = index
         }
     }
 }
+

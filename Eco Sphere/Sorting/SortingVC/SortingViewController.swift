@@ -22,10 +22,14 @@ class SortingViewController: UIViewController {
     // MARK: - Жизненный цикл
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        tableView.register(ArticleTableViewCell.self, forCellReuseIdentifier: "ArticleCell")
+        
+        setupMockData()
         setupMainConfiguration()
         setupDelegates()
         setupLayout()
-        setupMockData()
+        
     }
     
     // MARK: - Первичная настройка

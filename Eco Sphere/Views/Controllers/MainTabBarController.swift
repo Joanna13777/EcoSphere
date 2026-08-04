@@ -82,8 +82,9 @@ class MainTabBarController: UITabBarController {
         
         viewControllers = [nav1, nav2, nav3]
     }
-}
+    
+    //  Перенесли вспомогательную функцию внутрь класса
     private func id(of object: AnyObject) -> String {
         return String(describing: type(of: object))
     }
-
+}

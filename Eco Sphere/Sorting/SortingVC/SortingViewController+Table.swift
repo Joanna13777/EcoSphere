@@ -26,11 +26,17 @@ extension SortingViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        
-        let article = articlesData[indexPath.row]
+        // 1. Создаем или достаем со Storyboard ваш экран деталей
         let detailVC = ArticleDetailViewController()
-        detailVC.article = article
+        
+        // 2. БЕРЕМ выбранную статью из вашего массива мок-данных
+        let selectedArticle = articlesData[indexPath.row]
+        
+        // 3. ОБЯЗАТЕЛЬНО передаем её в переменную экрана деталей (вот этот мостик!)
+        detailVC.article = selectedArticle
+        
+        // 4. Открываем экран
         navigationController?.pushViewController(detailVC, animated: true)
     }
+
 }

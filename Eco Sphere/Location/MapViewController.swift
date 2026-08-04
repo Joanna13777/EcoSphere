@@ -168,14 +168,17 @@ class MapViewController: UIViewController {
             bottomContainerView.addSubview(searchBackgroundView)
             searchBackgroundView.addSubview(searchBar)
         
-        containerBottomConstraint = bottomContainerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        // Безопасно привязываем контейнер к абсолютному низу экрана
+        containerBottomConstraint = bottomContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         
         NSLayoutConstraint.activate([
+            // Карта на весь экран
             mapView.topAnchor.constraint(equalTo: view.topAnchor),
             mapView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             mapView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             mapView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
+            // Позиционирование главного контейнера внизу
             bottomContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             containerBottomConstraint,
@@ -186,17 +189,20 @@ class MapViewController: UIViewController {
             filterCollectionView.trailingAnchor.constraint(equalTo: bottomContainerView.trailingAnchor),
             filterCollectionView.heightAnchor.constraint(equalToConstant: 44),
             
-            // Белый фон за баром поиска (начинается строго под фильтрами и идет до самого низа)
-                    searchBackgroundView.topAnchor.constraint(equalTo: filterCollectionView.bottomAnchor, constant: 12),
-                    searchBackgroundView.leadingAnchor.constraint(equalTo: bottomContainerView.leadingAnchor),
-                    searchBackgroundView.trailingAnchor.constraint(equalTo: bottomContainerView.trailingAnchor),
-                    searchBackgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor), // Тянем до физического низа экрана, чтобы перекрыть карту полностью
-            
-            searchBar.topAnchor.constraint(equalTo: filterCollectionView.bottomAnchor, constant: 12),
-            searchBar.leadingAnchor.constraint(equalTo: bottomContainerView.leadingAnchor, constant: 8),
-            searchBar.trailingAnchor.constraint(equalTo: bottomContainerView.trailingAnchor, constant: -8),
-            searchBar.bottomAnchor.constraint(equalTo: bottomContainerView.bottomAnchor, constant: -16)
-        ])
+            // Белая подложка начинается ПОД фильтрами и идет до самого низа контейнера
+            searchBackgroundView.topAnchor.constraint(equalTo: filterCollectionView.bottomAnchor, constant: 12),
+            searchBackgroundView.leadingAnchor.constraint(equalTo: bottomContainerView.leadingAnchor),
+            searchBackgroundView.trailingAnchor.constraint(equalTo: bottomContainerView.trailingAnchor),
+            searchBackgroundView.bottomAnchor.constraint(equalTo: bottomContainerView.bottomAnchor),
+                    
+                    // Строка поиска позиционируется СТРОГО внутри белой подложки
+            searchBar.topAnchor.constraint(equalTo: searchBackgroundView.topAnchor, constant: 12),
+            searchBar.leadingAnchor.constraint(equalTo: searchBackgroundView.leadingAnchor, constant: 8),
+            searchBar.trailingAnchor.constraint(equalTo: searchBackgroundView.trailingAnchor, constant: -8),
+                    
+                    // Нижний край поиска привязываем к Safe Area экрана (чтобы учесть челку/индикатор Home на iPhone)
+            searchBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
+                ])
     }
     
     // Добавьте эти методы внутрь класса MapViewController в основном файле
