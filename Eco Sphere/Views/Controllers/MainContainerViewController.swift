@@ -217,7 +217,7 @@ class MainContainerViewController: UIViewController, UICollectionViewDataSource,
     }
 }
 
-//#Preview {
-//    let mainContainerVC = MainContainerViewController()
-//    return UINavigationController(rootViewController: mainContainerVC)
-//}
+#Preview {
+    let mainContainerVC = MainContainerViewController()
+    return UINavigationController(rootViewController: mainContainerVC)
+}

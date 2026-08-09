@@ -3,27 +3,54 @@ import UIKit
 class RegisterViewController: UIViewController {
 
     // MARK: - UI Элементы
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Регистрация"
-        label.font = .systemFont(ofSize: 28, weight: .bold)
-        label.textColor = UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1.0)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
+    let registrationImageView: UIImageView = {
+        let iv = UIImageView()
+        iv.image = UIImage(named: "user-verification")
+        iv.contentMode = .scaleAspectFit
+        iv.clipsToBounds = true
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
     }()
     
-    private let emailTextField: UITextField = {
+    let nameTextField: UITextField = {
         let tf = UITextField()
-        tf.placeholder = "Email или Телефон"
+        tf.placeholder = "Имя и Фамилия"
         tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
         tf.font = .systemFont(ofSize: 16)
         tf.layer.cornerRadius = 16
-        tf.setLeftPadding(16) // Отступ текста от левого края
+        tf.autocorrectionType = .no
+        tf.setLeftPadding(16)
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
     }()
     
-    private let passwordTextField: UITextField = {
+    let phoneTextField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Телефон"
+        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.font = .systemFont(ofSize: 16)
+        tf.layer.cornerRadius = 16
+        tf.keyboardType = .phonePad
+        tf.setLeftPadding(16)
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        return tf
+    }()
+    
+    let emailTextField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Email"
+        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.font = .systemFont(ofSize: 16)
+        tf.layer.cornerRadius = 16
+        tf.keyboardType = .emailAddress
+        tf.autocapitalizationType = .none
+        tf.autocorrectionType = .no
+        tf.setLeftPadding(16)
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        return tf
+    }()
+    
+    let passwordTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Пароль"
         tf.isSecureTextEntry = true
@@ -35,82 +62,96 @@ class RegisterViewController: UIViewController {
         return tf
     }()
     
-    private let submitButton: UIButton = {
+    let eyeButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "eye.slash"), for: .normal)
+        button.tintColor = .systemGray
+        button.frame = CGRect(x: 0, y: 0, width: 40, height: 24)
+        return button
+    }()
+    
+    let submitButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Создать аккаунт", for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
-        button.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1.0) // Графитовый черный
+        button.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1.0)
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
 
-    // MARK: - Жизненный цикл
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupNavigationBar()
-        setupLayout()
-        
-        submitButton.addTarget(self, action: #selector(submitTapped), for: .touchUpInside)
+        setupLayout()            // Реализован в файле +Layout
+        setupActions()           // Реализован в файле +Actions
+        setupTextFieldComponents()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        nameTextField.becomeFirstResponder()
     }
     
     private func setupNavigationBar() {
-        // Кнопка возврата обратно на онбординг
-        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"),
-                                         style: .plain,
-                                         target: self,
-                                         action: #selector(backTapped))
-        backButton.tintColor = .black
-        navigationItem.leftBarButtonItem = backButton
-    }
-    
-    @objc private func backTapped() {
-        navigationController?.popViewController(animated: true)
-    }
-    
-    @objc private func submitTapped() {
-        // Логика после успешного нажатия на кнопку регистрации
-        view.endEditing(true)
-        print("Регистрация успешна")
-    }
-
-    // MARK: - Верстка (Auto Layout)
-    private func setupLayout() {
-        view.addSubview(titleLabel)
-        view.addSubview(emailTextField)
-        view.addSubview(passwordTextField)
-        view.addSubview(submitButton)
+        navigationItem.title = ""
         
-        NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            
-            emailTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 32),
-            emailTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            emailTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            emailTextField.heightAnchor.constraint(equalToConstant: 54),
-            
-            passwordTextField.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
-            passwordTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            passwordTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            passwordTextField.heightAnchor.constraint(equalToConstant: 54),
-            
-            submitButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 32),
-            submitButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            submitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            submitButton.heightAnchor.constraint(equalToConstant: 54)
-        ])
+        let backButton = UIButton(type: .system)
+        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        backButton.tintColor = UIColor.black
+        backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside) // Реализован в файле +Logic
+        
+        backButton.translatesAutoresizingMaskIntoConstraints = false
+        backButton.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        backButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        
+        let titleLabelButton = UILabel()
+        titleLabelButton.text = "Регистрация"
+        titleLabelButton.font = .systemFont(ofSize: 18, weight: .semibold)
+        titleLabelButton.textColor = .black
+        
+        let customNavBarStack = UIStackView(arrangedSubviews: [backButton, titleLabelButton])
+        customNavBarStack.axis = .horizontal
+        customNavBarStack.spacing = 12
+        customNavBarStack.alignment = .center
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: customNavBarStack)
+    }
+    
+    private func setupTextFieldComponents() {
+        nameTextField.delegate = self
+        phoneTextField.delegate = self
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
+        
+        // Присваиваем жесткие номера каждому полю, чтобы исключить путаницу в логике
+        nameTextField.tag = 1
+        phoneTextField.tag = 2
+        emailTextField.tag = 3
+        passwordTextField.tag = 4
+        
+        let paddingContainer = UIView(frame: CGRect(x: 0, y: 0, width: 56, height: 24))
+        eyeButton.frame = CGRect(x: 8, y: 0, width: 40, height: 24)
+        paddingContainer.addSubview(eyeButton)
+        
+        passwordTextField.rightView = paddingContainer
+        passwordTextField.rightViewMode = .always
     }
 }
 
-// MARK: - Хелпер для отступа в текстовом поле
+// MARK: - Хелпер для UITextField
 extension UITextField {
     func setLeftPadding(_ amount: CGFloat) {
-        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: amount, height: self.frame.size.height))
+        let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: amount, height: 1))
         self.leftView = paddingView
         self.leftViewMode = .always
     }
+}
+// MARK: - Canvas Preview (для Xcode 15 и новее)
+#Preview {
+    let registerVC = RegisterViewController()
+    return UINavigationController(rootViewController: registerVC)
 }

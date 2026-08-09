@@ -69,15 +69,34 @@ class OnboardingViewController: UIViewController {
         }
     }
 
+    // Находится в файле: OnboardingViewController.swift
     private func finishOnboarding() {
+        // 1. Фиксируем в памяти, что онбординг успешно пройден
         UserDefaults.standard.set(false, forKey: "is_first_launch")
+        
+        // 2. Получаем доступ к текущему окну через современный UIWindowScene API
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
+            
+            // 3. Инициализируем главный Таб-Бар с вкладками "Виды", "Сортировка", "Пункты"
             let mainTabBar = MainTabBarController()
+            
+            // 4. Оборачиваем его в UINavigationController, чтобы работали переходы вперед/назад
+            let rootNavigationController = UINavigationController(rootViewController: mainTabBar)
+            rootNavigationController.isNavigationBarHidden = true // Скрываем системный верхний бар
+            
+            // 5. Назначаем его главным экраном приложения
             window.rootViewController = mainTabBar
-            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil, completion: nil)
+            
+            // 6. Запускаем красивую плавную анимацию смены экранов
+            UIView.transition(with: window,
+                             duration: 0.3,
+                             options: .transitionCrossDissolve,
+                             animations: nil,
+                             completion: nil)
         }
     }
+
 }
 
 // MARK: - UIPageViewController DataCore & Delegate
@@ -109,3 +128,13 @@ extension OnboardingViewController: UIPageViewControllerDataSource, UIPageViewCo
     }
 }
 
+#Preview {
+    // Инициализируем весь контейнер онбординга целиком
+    let onboardingVC = OnboardingViewController()
+    
+    // Оборачиваем его в UINavigationController, чтобы симулировать реальное поведение приложения
+    let navController = UINavigationController(rootViewController: onboardingVC)
+    navController.isNavigationBarHidden = true
+    
+    return navController
+}

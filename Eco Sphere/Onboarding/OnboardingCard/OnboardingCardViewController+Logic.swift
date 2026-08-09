@@ -88,17 +88,24 @@ extension OnboardingCardViewController {
     }
     
     @objc func registrationTapped() {
+        // ИСПРАВЛЕНИЕ 1: Меняем имя класса на верное (RegistrationViewController)
         let registerVC = RegisterViewController()
         
         if let navigationController = self.navigationController {
             navigationController.pushViewController(registerVC, animated: true)
         } else {
             let navController = UINavigationController(rootViewController: registerVC)
-            navController.modalPresentationStyle = .fullScreen
+            
+            // ИСПРАВЛЕНИЕ 2: Явно указываем UIModalPresentationStyle, чтобы Xcode понял .fullScreen
+            navController.modalPresentationStyle = UIModalPresentationStyle.fullScreen
+            
             self.present(navController, animated: true, completion: nil)
         }
     }
     
     @objc func backAction() { onBackPressed?() }
-    @objc func skipAction() { onSkipPressed?() }
+    @objc func skipAction() {
+        onSkipPressed?()
+    }
+
 }

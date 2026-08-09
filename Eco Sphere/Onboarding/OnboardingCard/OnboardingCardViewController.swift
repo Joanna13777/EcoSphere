@@ -53,3 +53,19 @@ class OnboardingCardViewController: UIViewController {
         updateTextForCurrentLanguage()
     }
 }
+
+#Preview {
+    // Если массив onboardingData объявлен в другом файле, Xcode сам его увидит.
+    guard let firstPageData = onboardingData.first else {
+        fatalError("Массив onboardingData пуст или не найден!")
+    }
+    
+    // 2. Инициализируем контроллер карточки с этими данными
+    let cardVC = OnboardingCardViewController(data: firstPageData)
+    
+    // 3. Оборачиваем в UINavigationController, чтобы верхний бар (кнопки Back и Языка) встал на свои места
+    let navController = UINavigationController(rootViewController: cardVC)
+    navController.isNavigationBarHidden = true
+    
+    return navController
+}
