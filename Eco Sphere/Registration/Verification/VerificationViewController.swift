@@ -206,18 +206,25 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
         verifyButton.isEnabled = false
         view.endEditing(true)
         
-        // Достаем код, который мы сгенерировали на первом экране (или при переотправке)
-        // Если кода почему-то нет в памяти, по умолчанию используем тестовый "1111"
         let savedMockCode = UserDefaults.standard.string(forKey: "mock_verification_code") ?? "1111"
         
-        // Имитируем небольшую задержку сети (0.5 секунды), чтобы кнопка красиво заблокировалась
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else { return }
             
             if cleanCode == savedMockCode {
-                // КОД ВЕРНЫЙ ➔ Пускаем в приложение
+                // 1. Фиксируем прохождение онбординга
                 UserDefaults.standard.set(false, forKey: "is_first_launch")
                 
+                // --- АВТОМАТИЧЕСКИЙ ВХОД ДЛЯ БОКОВОГО МЕНЮ ---
+                // Достаем имя, которое пользователь ввел на самом первом экране регистрации
+                let registeredName = UserDefaults.standard.string(forKey: "saved_user_name") ?? "Пользователь"
+                
+                // Выставляем флаги авторизации для меню, чтобы кнопка сразу заменилась на профиль
+                UserDefaults.standard.set(true, forKey: "menu_user_logged_in")
+                UserDefaults.standard.set(registeredName, forKey: "menu_user_name")
+                // ----------------------------------------------
+                
+                // 2. Переключаем интерфейс на главный Таб-Бар
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                    let window = windowScene.windows.first {
                     let mainTabBar = MainTabBarController()
@@ -225,13 +232,11 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
                     UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
                 }
             } else {
-                // КОД НЕВЕРНЫЙ ➔ Показываем ошибку и очищаем поле ввода
                 self.verifyButton.isEnabled = true
                 self.codeTextField.text = ""
-                
-                let alert = UIAlertController(title: "Ошибка", message: "Введен неверный код подтверждения. Попробуйте еще раз.", preferredStyle: .alert)
+                let alert = UIAlertController(title: "Ошибка", message: "Введен неверный код подтверждения.", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "ОК", style: .default) { _ in
-                    self.codeTextField.becomeFirstResponder() // Возвращаем фокус на ввод
+                    self.codeTextField.becomeFirstResponder()
                 })
                 self.present(alert, animated: true)
             }

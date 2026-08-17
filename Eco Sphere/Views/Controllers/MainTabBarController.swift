@@ -80,11 +80,23 @@ class MainTabBarController: UITabBarController {
         let nav3 = UINavigationController(rootViewController: pointsVC)
         nav3.tabBarItem = UITabBarItem(title: "Пункты", image: UIImage(systemName: "mappin.and.ellipse"), tag: 2)
         
-        viewControllers = [nav1, nav2, nav3]
+        // НОВАЯ ВКЛАДКА: Боковое меню, перенесенное в нижний таб-бар
+        let menuVC = MenuViewController()
+        let nav4 = UINavigationController(rootViewController: menuVC)
+        nav4.tabBarItem = UITabBarItem(title: "Меню", image: UIImage(systemName: "line.3.horizontal"), tag: 3)
+        
+        // Добавляем четвертый контроллер nav4 в общий массив вкладок нижнего бара
+        viewControllers = [nav1, nav2, nav3, nav4]
     }
     
-    //  Перенесли вспомогательную функцию внутрь класса
+    // Перенесли вспомогательную функцию внутрь класса
     private func id(of object: AnyObject) -> String {
         return String(describing: type(of: object))
     }
+}
+
+// MARK: - Canvas Preview (для проверки верстки таб-бара в Xcode)
+#Preview {
+    let tabBarController = MainTabBarController()
+    return tabBarController
 }

@@ -10,9 +10,7 @@ class WasteDetailViewController: UIViewController {
             updateUI()
         }
     }
-    
 
-    
     // MARK: - Палитра цветов
     private let appBgColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.0) // #F5F5F5
     private let darkTextColor = UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1.0) // #1A1A1A

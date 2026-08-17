@@ -71,32 +71,38 @@ extension RegisterViewController: UITextFieldDelegate {
         
         view.endEditing(true)
         
-        // --- СИМУЛЯЦИЯ ОТПРАВКИ СМС ---
-        // Генерируем случайное 4-значное число от 1000 до 9999
-        let mockGeneratedCode = String(Int.random(in: 1000...9999))
+        // --- ЗАПИСЬ ДАННЫХ РЕГИСТРАЦИИ В ПАМЯТЬ ---
+        // Приводим email к нижнему регистру, чтобы избежать ошибок при вводе разным шрифтом
+        let cleanEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // Сохраняем код в память устройства, чтобы проверить его на следующем экране
+        UserDefaults.standard.set(name, forKey: "saved_user_name")
+        UserDefaults.standard.set(phone, forKey: "saved_user_phone")
+        UserDefaults.standard.set(cleanEmail, forKey: "saved_user_email")
+        UserDefaults.standard.set(password, forKey: "saved_user_password")
+        
+        // Имитируем отправку проверочного кода на экран СМС (как делали ранее)
+        let mockGeneratedCode = String(Int.random(in: 1000...9999))
         UserDefaults.standard.set(mockGeneratedCode, forKey: "mock_verification_code")
         
-        // Печатаем код в консоль Xcode жирным шрифтом, чтобы вы видели его при тестировании
         print("\n========================================")
-        print("📱 СИМУЛЯЦИЯ СМС: Код подтверждения для \(phone) ➔ [ \(mockGeneratedCode) ]")
+        print("💾 АККАУНТ ЗАРЕГИСТРИРОВАН:")
+        print("👤 Имя: \(name)")
+        print("📧 Email: \(cleanEmail)")
+        print("🔑 Пароль: \(password)")
+        print("📱 Код СМС: [ \(mockGeneratedCode) ]")
         print("========================================\n")
         
-        // НАСТРОЙКА ПЕРЕХОДА:
         let verifyVC = VerificationViewController()
-        verifyVC.destinationText = phone // По умолчанию пишем телефон для СМС
+        verifyVC.destinationText = phone
         verifyVC.isEmailType = false
-        verifyVC.userName = name         // Передаем имя
+        verifyVC.userName = name
         
-        // Новая строка: Передаем введенный пользователем Email в память экрана верификации
-        // Чтобы при переключении на Email мы знали, куда слать код
-        if let enteredEmail = emailTextField.text {
-            UserDefaults.standard.set(enteredEmail, forKey: "user_registered_email")
-        }
+        // Передаем email на экран верификации
+        UserDefaults.standard.set(cleanEmail, forKey: "user_registered_email")
         
         navigationController?.pushViewController(verifyVC, animated: true)
     }
+
     
     private func showAlert(message: String) {
         let alert = UIAlertController(title: "Внимание", message: message, preferredStyle: .alert)
