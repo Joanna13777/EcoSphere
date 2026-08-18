@@ -184,54 +184,69 @@ class PickupViewController: UIViewController {
         return stack
     }()
     
-    // MARK: - Новая цельная кнопка заказа в стиле Eco-Minimalism (ИСПРАВЛЕНО)
+    // MARK: -  КНОПКА ЗАКАЗА
     let orderButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.backgroundColor = UIColor(red: 0.18, green: 0.18, blue: 0.18, alpha: 1.0)
-        button.layer.cornerRadius = 14
+        // 1. Создаем базовую конфигурацию кнопки
+        var config = UIButton.Configuration.filled()
+        
+        // Настраиваем темный фон и скругление
+        config.baseBackgroundColor = UIColor(red: 0.18, green: 0.18, blue: 0.18, alpha: 1.0)
+        config.background.cornerRadius = 14
+        
+        // 2. Настраиваем текст по умолчанию через AttributedString
+        var titleAttr = AttributedString("Заказать вывоз")
+        titleAttr.font = .systemFont(ofSize: 15, weight: .semibold)
+        config.attributedTitle = titleAttr
+        
+        // 3. Настраиваем иконку CAR из SF Symbols
+        // Задаем конфигурацию размера, чтобы она не сжималась на симуляторе
+        let imageConfig = UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold)
+        config.image = UIImage(systemName: "truck.box")?.withConfiguration(imageConfig)
+        
+        // 4. Позиционирование иконки
+        config.imagePlacement = .trailing // Переносит машину в правую часть от текста
+        config.imagePadding = 12          // Создает фиксированный отступ 12pt между текстом и машиной
+        
+        // 5. Цвет контента
+        config.baseForegroundColor = .white // Жестко красит и текст, и иконку car в БЕЛЫЙ цвет
+        
+        // Создаем саму кнопку
+        let button = UIButton(configuration: config, primaryAction: nil)
         button.clipsToBounds = true
-        
-        // 1. Настраиваем текст "Заказать вывоз" по центру
-        button.setTitle("Заказать вывоз", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 15, weight: .semibold)
-        
-        // 2. Создаем и принудительно окрашиваем иконку грузовика в белый цвет шаблона
-        let truckImage = UIImage(systemName: "truck.fill")?.withRenderingMode(.alwaysTemplate)
-        let truckImageView = UIImageView(image: truckImage)
-        truckImageView.tintColor = .white // Строго белый цвет
-        truckImageView.contentMode = .scaleAspectFit
-        truckImageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        button.addSubview(truckImageView)
-        
-        // 3. Жестко привязываем белую машинку к правому краю внутри самой кнопки
-        NSLayoutConstraint.activate([
-            truckImageView.trailingAnchor.constraint(equalTo: button.trailingAnchor, constant: -20),
-            truckImageView.centerYAnchor.constraint(equalTo: button.centerYAnchor),
-            truckImageView.widthAnchor.constraint(equalToConstant: 24),
-            truckImageView.heightAnchor.constraint(equalToConstant: 24)
-        ])
-        
-        // 4. Тонкая вертикальная разделительная линия перед машинкой (как на вашем макете)
-        let verticalLine = UIView()
-        verticalLine.backgroundColor = UIColor(red: 0.25, green: 0.25, blue: 0.25, alpha: 1.0)
-        verticalLine.translatesAutoresizingMaskIntoConstraints = false
-        button.addSubview(verticalLine)
-        
-        NSLayoutConstraint.activate([
-            verticalLine.trailingAnchor.constraint(equalTo: truckImageView.leadingAnchor, constant: -16),
-            verticalLine.topAnchor.constraint(equalTo: button.topAnchor),
-            verticalLine.bottomAnchor.constraint(equalTo: button.bottomAnchor),
-            verticalLine.widthAnchor.constraint(equalToConstant: 1)
-        ])
-        
         button.translatesAutoresizingMaskIntoConstraints = false
+        
+//            Изначально выключаем кнопку
+                button.isEnabled = false
+                // Настраиваем поведение: когда кнопка выключена, она становится полупрозрачной
+                button.configurationUpdateHandler = { btn in
+                    btn.alpha = btn.isEnabled ? 1.0 : 0.4
+                }
         return button
     }()
+    
+    // Убрали private, теперь метод виден в файлах +Logic и +Layout
+    func validateFields() {
+        let isWasteTypeFilled = !(wasteTypeTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        let isPickupPointFilled = !(pickupPointTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        let isWeightFilled = !(weightTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        
+        let isFormValid: Bool
+        
+        if isLoggedIn {
+            isFormValid = isWasteTypeFilled && isPickupPointFilled && isWeightFilled
+        } else {
+            let isNameFilled = !(nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+            let isPhoneFilled = !(phoneTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+            let isAddressFilled = !(addressTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+            
+            isFormValid = isWasteTypeFilled && isPickupPointFilled && isWeightFilled &&
+                          isNameFilled && isPhoneFilled && isAddressFilled
+        }
+        
+        orderButton.isEnabled = isFormValid
+    }
 
-
-
+   
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -241,11 +256,36 @@ class PickupViewController: UIViewController {
         setupActions() // Из файла +Logic
         setupDelegates() // Из файла +Logic
         
+        // Собираем все текстовые поля в один массив
+            let allTextFields = [
+                wasteTypeTextField,
+                pickupPointTextField,
+                weightTextField,
+                nameTextField,
+                phoneTextField,
+                addressTextField
+            ]
+            
+            // Каждому полю вешаем слушатель на изменение текста
+            allTextFields.forEach { textField in
+                textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+            }
+            
+            // Вызываем проверку один раз при старте, чтобы кнопка сразу заблокировалась
+            validateFields()
+        
+                // Скрывает текст кнопки назад, оставляя чистую стрелочку (работает в iOS 14+)
+                   navigationItem.backButtonDisplayMode = .minimal
+        
         // Назначаем пустой UIView вместо клавиатуры, чтобы она не вылетала при нажатии на дропдауны
         wasteTypeTextField.inputView = UIView()
         pickupPointTextField.inputView = UIView()
-
     }
+    
+//     Селектор, который вызывается при вводе любого символа
+       @objc private func textFieldDidChange() {
+           validateFields()
+       }
     
     private func setupNavigationBar() {
         title = "Вывоз вторсырья"

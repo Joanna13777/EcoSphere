@@ -1,52 +1,38 @@
 import UIKit
 
-// Структура данных для элементов выпадающего списка
-struct DropDownItem {
-    let title: String
-    let subtitle: String
-    let iconName: String
-    let iconColor: UIColor
-}
-
 class SortingDropDownView: UIView, UITableViewDelegate, UITableViewDataSource {
     
-    // Блок замыкания (closure) для передачи выбранных данных обратно в контроллер
     var onItemSelected: ((DropDownItem) -> Void)?
-    
     private var allItems: [DropDownItem] = []
     
-    // MARK: - UI Элементы (Свойство объявлено открытым внутри класса, чтобы убрать ошибку)
     let tableView: UITableView = {
         let tv = UITableView(frame: .zero, style: .plain)
         tv.backgroundColor = .white
         tv.separatorStyle = .singleLine
         tv.separatorColor = UIColor(red: 0.92, green: 0.92, blue: 0.92, alpha: 1.0)
-        
-        // СРАЗУ ОТКЛЮЧАЕМ СКРОЛЛ ТУТ: Все 6 элементов поместятся без прокрутки
         tv.isScrollEnabled = false
-        
         tv.translatesAutoresizingMaskIntoConstraints = false
         return tv
     }()
     
-    // MARK: - Init
-    init(items: [DropDownItem]) {
-        super.init(frame: .zero)
-        self.allItems = items
-        
-        backgroundColor = .white
-        layer.cornerRadius = 14
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.12
-        layer.shadowOffset = CGSize(width: 0, height: 6)
-        layer.shadowRadius = 12
-        layer.borderWidth = 1
-        layer.borderColor = UIColor(red: 0.88, green: 0.88, blue: 0.88, alpha: 1.0).cgColor
-        clipsToBounds = true // Округляет края таблицы вместе с рамкой
-        
-        setupLayout()
-        setupComponents()
-    }
+    // MARK: - Инициализатор внутри класса SortingDropDownView
+        init(items: [DropDownItem]) {
+            super.init(frame: .zero)
+            self.allItems = items
+            
+            backgroundColor = .white
+            layer.cornerRadius = 14
+            layer.shadowColor = UIColor.black.cgColor
+            layer.shadowOpacity = 0.12
+            layer.shadowOffset = CGSize(width: 0, height: 6)
+            layer.shadowRadius = 12
+            layer.borderWidth = 1
+            layer.borderColor = UIColor(red: 0.88, green: 0.88, blue: 0.88, alpha: 1.0).cgColor
+            clipsToBounds = true
+            
+            setupLayout()
+            setupComponents()
+        }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -54,7 +40,6 @@ class SortingDropDownView: UIView, UITableViewDelegate, UITableViewDataSource {
     
     private func setupLayout() {
         addSubview(tableView)
-        
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: topAnchor, constant: 2),
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -67,12 +52,7 @@ class SortingDropDownView: UIView, UITableViewDelegate, UITableViewDataSource {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(CustomDropDownCell.self, forCellReuseIdentifier: "DropCell")
-        tableView.tableFooterView = UIView() // Убирает пустые линии внизу таблицы
-    }
-    
-    // MARK: - UITableView Data Source & Delegate
-    func tableView(_ tableView: UITableView, numberOfItemsInSection section: Int) -> Int {
-        return allItems.count
+        tableView.tableFooterView = UIView()
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -80,7 +60,6 @@ class SortingDropDownView: UIView, UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        // Используем строго стандартный системный вызов dequeue с аргументом 'for:'
         let cell = tableView.dequeueReusableCell(withIdentifier: "DropCell", for: indexPath) as! CustomDropDownCell
         let item = allItems[indexPath.row]
         cell.configure(with: item)
@@ -88,7 +67,7 @@ class SortingDropDownView: UIView, UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 64 // Высота строк под две строчки текста
+        return 64
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -98,7 +77,6 @@ class SortingDropDownView: UIView, UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-// MARK: - КАСТОМНАЯ ЯЧЕЙКА ДРОПДАУНА (Маркер + Заголовок + Подзаголовок)
 class CustomDropDownCell: UITableViewCell {
     
     let markerImageView: UIImageView = {

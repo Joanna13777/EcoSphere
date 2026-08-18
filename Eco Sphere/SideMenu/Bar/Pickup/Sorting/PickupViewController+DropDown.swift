@@ -26,39 +26,39 @@ extension PickupViewController {
     func showCustomDropDown(anchorField: UITextField, type: DropDownType) {
         removeExistingDropDown()
         
-        let opacityGrayColor = UIColor(red: 0.35, green: 0.35, blue: 0.35, alpha: 1.0)
+        // ЧИТАЕМ ДАННЫЕ ИЗ НАШЕЙ НОВОЙ МОДЕЛИ PICKUPMODEL.SWIFT
+        let currentItems: [DropDownItem]
         
-        let wasteItems = [
-            DropDownItem(title: "Макулатура (бумага)", subtitle: "картон, втулки, яичные кассеты, книги, тетради, газеты", iconName: "doc.text.fill", iconColor: .systemBlue),
-            DropDownItem(title: "Стекло", subtitle: "бутылки, банки для консервации, флаконы от духов", iconName: "wineglass.fill", iconColor: .systemGreen),
-            DropDownItem(title: "Пластик", subtitle: "бутылки, крышки, банки, пакеты, посуда, контейнеры", iconName: "capsule.fill", iconColor: UIColor(red: 0.96, green: 0.71, blue: 0.10, alpha: 1.0)),
-            DropDownItem(title: "Металл", subtitle: "консервные банки, гвозди, проволока, мет. лом", iconName: "hammer.fill", iconColor: .systemPurple),
-            DropDownItem(title: "Органические отходы", subtitle: "Пищевые отходы", iconName: "leaf.fill", iconColor: opacityGrayColor),
-            DropDownItem(title: "Пункты приёма металла", subtitle: "Сломанные телефоны, бытовая техника, провода", iconName: "tv.fill", iconColor: .systemGray)
-        ]
+        if type == .wasteType {
+            // Берем готовый полный список видов сырья из менеджера моделей
+            currentItems = PickupModelManager.shared.wasteItems
+        } else {
+            // Извлекаем название отхода, выбранного пользователем в первом поле
+            let selectedWasteType = wasteTypeTextField.text ?? ""
+            
+            // Фильтруем адреса: модель отдаст только те пункты, которые принимают этот тип сырья
+            currentItems = PickupModelManager.shared.getAddresses(for: selectedWasteType)
+        }
         
-        let addressItems = [
-            DropDownItem(title: "ул. Амира Темура, 14", subtitle: "Пункт сбора пластика и макулатуры", iconName: "mappin.and.ellipse", iconColor: .darkGray),
-            DropDownItem(title: "ул. Нукусская, 44", subtitle: "Пункт приема электронных отходов", iconName: "mappin.and.ellipse", iconColor: .darkGray),
-            DropDownItem(title: "проспект Навои, 89", subtitle: "Центральный хаб сортировки сырья", iconName: "mappin.and.ellipse", iconColor: .darkGray)
-        ]
+        // Если для адресов список пуст (пользователь не выбрал первый пункт), покажем базовый набор
+        let itemsToDisplay = currentItems.isEmpty ? [DropDownItem(title: "Выберите сначала вид отхода", subtitle: "Поле выше не должно быть пустым", iconName: "exclamationmark.circle", iconColor: .systemGray)] : currentItems
         
-        let currentItems = type == .wasteType ? wasteItems : addressItems
-        
-        let dropDownView = SortingDropDownView(items: currentItems)
+        // Создаем выпадающее окно, передавая отфильтрованные данные
+        let dropDownView = SortingDropDownView(items: itemsToDisplay)
         dropDownView.translatesAutoresizingMaskIntoConstraints = false
         dropDownView.tag = 999
         
         view.addSubview(dropDownView)
         
         dropDownView.onItemSelected = { [weak self] (selectedItem: DropDownItem) in
+            // Защита от выбора заглушки "Выберите сначала вид отхода"
+            if selectedItem.iconName == "exclamationmark.circle" { return }
+            
             anchorField.text = selectedItem.title
             
             if type == .wasteType {
-                // Вставляем цветную иконку сырья и делаем красивый отступ
                 self?.setFieldLeftIcon(anchorField, systemName: selectedItem.iconName, color: selectedItem.iconColor)
             } else {
-                // ПУНКТ 2: При выборе адреса вставляем иконку локации перед текстом
                 self?.setFieldLeftIcon(anchorField, systemName: "mappin.and.ellipse", color: .systemGray)
             }
             
@@ -67,19 +67,25 @@ extension PickupViewController {
         
         anchorField.setRightImage(systemName: "chevron.up", tintColor: .systemGray2)
         
-        let dynamicHeight: CGFloat = type == .wasteType ? 390 : 200
+        // Динамический расчет высоты окна: если адресов 2, рамка сожмется под них, а не будет пустой внизу
+        let itemHeight: CGFloat = 64
+        let padding: CGFloat = 8
+        let calculatedHeight = CGFloat(itemsToDisplay.count) * itemHeight + padding
+        let finalHeight = min(calculatedHeight, 390) // Ограничиваем максимальный размер до 390 поинтов
         
         NSLayoutConstraint.activate([
             dropDownView.topAnchor.constraint(equalTo: anchorField.bottomAnchor, constant: 4),
             dropDownView.leadingAnchor.constraint(equalTo: anchorField.leadingAnchor),
             dropDownView.trailingAnchor.constraint(equalTo: anchorField.trailingAnchor),
-            dropDownView.heightAnchor.constraint(equalToConstant: dynamicHeight)
+            dropDownView.heightAnchor.constraint(equalToConstant: finalHeight)
         ])
         
         let closeTap = UITapGestureRecognizer(target: self, action: #selector(closeDropDownByTap))
         closeTap.cancelsTouchesInView = false
         view.addGestureRecognizer(closeTap)
+        
     }
+
     
     // ПУНКТ 1: Метод установки иконки с увеличенным дочерним отступом для текста
     private func setFieldLeftIcon(_ textField: UITextField, systemName: String, color: UIColor) {

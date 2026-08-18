@@ -38,6 +38,7 @@ extension PickupViewController: UITextFieldDelegate {
     
     @objc func dismissKeyboard() {
         view.endEditing(true)
+        validateFields() // Проверяем поля при закрытии клавиатуры или дропдауна
     }
     
     @objc private func wasteTypeFieldTapped() {
@@ -62,6 +63,8 @@ extension PickupViewController: UITextFieldDelegate {
                 } else {
                     textField.text = "\(updatedDigits) кг"
                 }
+                
+                validateFields() // Перепроверяем кнопку при удалении символа веса
                 return false
             }
             return true
@@ -80,6 +83,8 @@ extension PickupViewController: UITextFieldDelegate {
             
             let newDigits = cleanDigits + string
             textField.text = "\(newDigits) кг"
+            
+            validateFields() // Перепроверяем кнопку при добавлении цифры веса
             return false
         }
         
@@ -92,7 +97,12 @@ extension PickupViewController: UITextFieldDelegate {
         }
     }
     
-    // --- ОФОРМЛЕНИЕ ЗАКАЗА ---
+    // Срабатывает автоматически, когда фокус уходит из любого текстового поля или дропдауна
+    public func textFieldDidEndEditing(_ textField: UITextField) {
+        validateFields()
+    }
+    
+    // --- ОФОРМЛЕНИЕ ЗАКАЗА ДЛЯ ОБЩЕЙ МОДЕЛИ MODEL.SWIFT ---
     @objc func orderTapped() {
         view.endEditing(true)
         
@@ -107,6 +117,29 @@ extension PickupViewController: UITextFieldDelegate {
     }
     
     private func showSuccessAlert() {
+        let selectedWaste = wasteTypeTextField.text ?? "Вторсырье"
+        let selectedAddress = pickupPointTextField.text ?? "Адрес не указан"
+        let selectedWeight = weightTextField.text?.isEmpty ?? true ? "0 кг" : (weightTextField.text ?? "0 кг")
+        
+        // Формируем красивую дату из встроенного календаря для экрана истории
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "d MMMM, HH:mm"
+        let fullDateString = formatter.string(from: inlineDatePicker.date)
+        
+        let newOrder = HistoryOrder(
+            wasteType: selectedWaste,
+            iconName: "clock.arrow.circlepath",
+            iconColor: .systemGray,
+            date: fullDateString,
+            weight: selectedWeight,
+            address: selectedAddress,
+            status: "В обработке",
+            isCompleted: false
+        )
+        
+        OrderManager.shared.addNewOrder(newOrder)
+        
         let successAlert = UIAlertController(
             title: "Заказ принят  \u{2705}",
             message: "\nОтследить данные можно\nв \"Истории вывозов\"",
