@@ -73,34 +73,28 @@ class PickupViewController: UIViewController {
         tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
         tf.font = .systemFont(ofSize: 15)
         tf.layer.cornerRadius = 12
-        tf.keyboardType = .numberPad
+        tf.keyboardType = .decimalPad
         tf.setLeftPadding(16)
         tf.clearButtonMode = .whileEditing
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
     }()
     
-    // MARK: - НОВЫЕ ВСТРОЕННЫЕ КАЛЕНДАРИ (Как на вашем скриншоте)
-    // Компактный встроенный выбор Даты
+    // MARK: - ВСТРОЕННЫЕ КАЛЕНДАРИ
     let inlineDatePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .date
-        if #available(iOS 14.0, *) {
-            picker.preferredDatePickerStyle = .compact // Отображает красивую кнопку-плашку на месте
-        }
+        if #available(iOS 14.0, *) { picker.preferredDatePickerStyle = .compact }
         picker.locale = Locale(identifier: "ru_RU")
-        picker.tintColor = .black // Стиль Eco-Minimalism (черный акцент кружка)
+        picker.tintColor = .black
         picker.translatesAutoresizingMaskIntoConstraints = false
         return picker
     }()
     
-    // Встроенный выбор Времени (От и До интервал)
     let startTimePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .time
-        if #available(iOS 13.4, *) {
-            picker.preferredDatePickerStyle = .compact
-        }
+        if #available(iOS 13.4, *) { picker.preferredDatePickerStyle = .compact }
         picker.locale = Locale(identifier: "ru_RU")
         picker.translatesAutoresizingMaskIntoConstraints = false
         return picker
@@ -109,15 +103,12 @@ class PickupViewController: UIViewController {
     let endTimePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .time
-        if #available(iOS 13.4, *) {
-            picker.preferredDatePickerStyle = .compact
-        }
+        if #available(iOS 13.4, *) { picker.preferredDatePickerStyle = .compact }
         picker.locale = Locale(identifier: "ru_RU")
         picker.translatesAutoresizingMaskIntoConstraints = false
         return picker
     }()
     
-    // Контейнеры-подложки, чтобы визуально сохранить ваши серые рамки вокруг дат
     let dateBorderView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
@@ -138,7 +129,6 @@ class PickupViewController: UIViewController {
         return view
     }()
     
-    // Вспомогательные текстовые метки-подсказки внутри рамок
     let dateTitleLabel: UILabel = {
         let label = UILabel()
         label.text = "Желаемая дата:"
@@ -157,7 +147,6 @@ class PickupViewController: UIViewController {
         return label
     }()
     
-    // MARK: - Поле описания
     let descriptionTextView: UITextView = {
         let tv = UITextView()
         tv.text = "Добавить описание"
@@ -172,7 +161,6 @@ class PickupViewController: UIViewController {
         return tv
     }()
     
-    // MARK: - Разделенная нижняя кнопка
     let bottomContainerStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
@@ -184,134 +172,71 @@ class PickupViewController: UIViewController {
         return stack
     }()
     
-    // MARK: -  КНОПКА ЗАКАЗА
+    // MARK: - КНОПКА ЗАКАЗА
     let orderButton: UIButton = {
-        // 1. Создаем базовую конфигурацию кнопки
         var config = UIButton.Configuration.filled()
-        
-        // Настраиваем темный фон и скругление
         config.baseBackgroundColor = UIColor(red: 0.18, green: 0.18, blue: 0.18, alpha: 1.0)
         config.background.cornerRadius = 14
         
-        // 2. Настраиваем текст по умолчанию через AttributedString
         var titleAttr = AttributedString("Заказать вывоз")
         titleAttr.font = .systemFont(ofSize: 15, weight: .semibold)
         config.attributedTitle = titleAttr
         
-        // 3. Настраиваем иконку CAR из SF Symbols
-        // Задаем конфигурацию размера, чтобы она не сжималась на симуляторе
         let imageConfig = UIImage.SymbolConfiguration(pointSize: 16, weight: .semibold)
         config.image = UIImage(systemName: "truck.box")?.withConfiguration(imageConfig)
+        config.imagePlacement = .trailing
+        config.imagePadding = 12
+        config.baseForegroundColor = .white
         
-        // 4. Позиционирование иконки
-        config.imagePlacement = .trailing // Переносит машину в правую часть от текста
-        config.imagePadding = 12          // Создает фиксированный отступ 12pt между текстом и машиной
-        
-        // 5. Цвет контента
-        config.baseForegroundColor = .white // Жестко красит и текст, и иконку car в БЕЛЫЙ цвет
-        
-        // Создаем саму кнопку
         let button = UIButton(configuration: config, primaryAction: nil)
         button.clipsToBounds = true
         button.translatesAutoresizingMaskIntoConstraints = false
-        
-//            Изначально выключаем кнопку
-                button.isEnabled = false
-                // Настраиваем поведение: когда кнопка выключена, она становится полупрозрачной
-                button.configurationUpdateHandler = { btn in
-                    btn.alpha = btn.isEnabled ? 1.0 : 0.4
-                }
+        button.isEnabled = false
+        button.configurationUpdateHandler = { btn in
+            btn.alpha = btn.isEnabled ? 1.0 : 0.4
+        }
         return button
     }()
     
-    // Убрали private, теперь метод виден в файлах +Logic и +Layout
-    func validateFields() {
-        let isWasteTypeFilled = !(wasteTypeTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-        let isPickupPointFilled = !(pickupPointTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-        let isWeightFilled = !(weightTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-        
-        let isFormValid: Bool
-        
-        if isLoggedIn {
-            isFormValid = isWasteTypeFilled && isPickupPointFilled && isWeightFilled
-        } else {
-            let isNameFilled = !(nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-            let isPhoneFilled = !(phoneTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-            let isAddressFilled = !(addressTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-            
-            isFormValid = isWasteTypeFilled && isPickupPointFilled && isWeightFilled &&
-                          isNameFilled && isPhoneFilled && isAddressFilled
-        }
-        
-        orderButton.isEnabled = isFormValid
-    }
+    // MARK: - ЭЛЕМЕНТЫ ОКНА НАПОМИНАЛКИ
+    let reminderTextLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 13, weight: .regular)
+        label.textColor = UIColor(red: 0.15, green: 0.25, blue: 0.18, alpha: 1.0)
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
 
-   
-    // MARK: - Lifecycle
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .white
-        setupNavigationBar()
-        setupLayout() // Из файла +Layout
-        setupActions() // Из файла +Logic
-        setupDelegates() // Из файла +Logic
+    lazy var sortingReminderView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 0.96, alpha: 1.0)
+        view.layer.cornerRadius = 12
+        view.layer.borderWidth = 1
+        view.layer.borderColor = UIColor(red: 0.85, green: 0.90, blue: 0.85, alpha: 1.0).cgColor
+        view.translatesAutoresizingMaskIntoConstraints = false
         
-        // Собираем все текстовые поля в один массив
-            let allTextFields = [
-                wasteTypeTextField,
-                pickupPointTextField,
-                weightTextField,
-                nameTextField,
-                phoneTextField,
-                addressTextField
-            ]
+        let iconImageView = UIImageView()
+        iconImageView.image = UIImage(systemName: "info.circle.fill")
+        iconImageView.tintColor = UIColor(red: 0.27, green: 0.54, blue: 0.35, alpha: 1.0)
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(iconImageView)
+        view.addSubview(reminderTextLabel)
+        
+        NSLayoutConstraint.activate([
+            iconImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
+            iconImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 12),
+            iconImageView.widthAnchor.constraint(equalToConstant: 20),
+            iconImageView.heightAnchor.constraint(equalToConstant: 20),
             
-            // Каждому полю вешаем слушатель на изменение текста
-            allTextFields.forEach { textField in
-                textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-            }
-            
-            // Вызываем проверку один раз при старте, чтобы кнопка сразу заблокировалась
-            validateFields()
+            reminderTextLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 10),
+            reminderTextLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
+            reminderTextLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 12),
+            reminderTextLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -12)
+        ])
         
-                // Скрывает текст кнопки назад, оставляя чистую стрелочку (работает в iOS 14+)
-                   navigationItem.backButtonDisplayMode = .minimal
-        
-        // Назначаем пустой UIView вместо клавиатуры, чтобы она не вылетала при нажатии на дропдауны
-        wasteTypeTextField.inputView = UIView()
-        pickupPointTextField.inputView = UIView()
-    }
-    
-//     Селектор, который вызывается при вводе любого символа
-       @objc private func textFieldDidChange() {
-           validateFields()
-       }
-    
-    private func setupNavigationBar() {
-        title = "Вывоз вторсырья"
-        
-        let backButton = UIButton(type: .system)
-        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        backButton.tintColor = .black
-        backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
-        backButton.translatesAutoresizingMaskIntoConstraints = false
-        
-        backButton.widthAnchor.constraint(equalToConstant: 24).isActive = true
-        backButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
-        
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backButton)
-    }
-}
-
-// MARK: - Canvas Preview
-#Preview("Не зарегистрирован") {
-    UserDefaults.standard.set(false, forKey: "menu_user_logged_in")
-    let pickupVC = PickupViewController()
-    return UINavigationController(rootViewController: pickupVC)
-}
-
-#Preview("Зарегистрирован") {
-    UserDefaults.standard.set(true, forKey: "menu_user_logged_in")
-    let pickupVC = PickupViewController()
-    return UINavigationController(rootViewController: pickupVC)
+        view.alpha = 0.0
+        return view
+    }()
 }

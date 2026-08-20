@@ -45,11 +45,13 @@ extension PickupViewController {
         
         // Создаем выпадающее окно, передавая отфильтрованные данные
         let dropDownView = SortingDropDownView(items: itemsToDisplay)
-        dropDownView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // === ИСПРАВЛЕНИЕ: ВОЗВРАЩАЕМ ПРОПУЩЕННЫЕ СТРОКИ СЮДА ===
+        dropDownView.translatesAutoresizingMaskIntoConstraints = false // Разрешаем Auto Layout [1]
         dropDownView.tag = 999
-        
-        view.addSubview(dropDownView)
-        
+        view.addSubview(dropDownView) // Обязательно добавляем на экран ДО активации констрейнтов [1]
+        // ======================================================
+
         dropDownView.onItemSelected = { [weak self] (selectedItem: DropDownItem) in
             // Защита от выбора заглушки "Выберите сначала вид отхода"
             if selectedItem.iconName == "exclamationmark.circle" { return }
@@ -62,9 +64,12 @@ extension PickupViewController {
                 self?.setFieldLeftIcon(anchorField, systemName: "mappin.and.ellipse", color: .systemGray)
             }
             
+            self?.validateFields()           // Активирует и зажигает кнопку заказа
+            self?.updateSortingReminder()    // ПРИНУДИТЕЛЬНО выкатывает зеленую плашку подсказки!
+            
             self?.removeExistingDropDown()
         }
-        
+
         anchorField.setRightImage(systemName: "chevron.up", tintColor: .systemGray2)
         
         // Динамический расчет высоты окна: если адресов 2, рамка сожмется под них, а не будет пустой внизу
@@ -83,10 +88,8 @@ extension PickupViewController {
         let closeTap = UITapGestureRecognizer(target: self, action: #selector(closeDropDownByTap))
         closeTap.cancelsTouchesInView = false
         view.addGestureRecognizer(closeTap)
-        
     }
 
-    
     // ПУНКТ 1: Метод установки иконки с увеличенным дочерним отступом для текста
     private func setFieldLeftIcon(_ textField: UITextField, systemName: String, color: UIColor) {
         let iv = UIImageView(image: UIImage(systemName: systemName))

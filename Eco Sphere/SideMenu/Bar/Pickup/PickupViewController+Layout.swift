@@ -31,6 +31,7 @@ extension PickupViewController {
         
         // Добавляем только нашу монолитную кнопку orderButton
         view.addSubview(orderButton)
+        view.addSubview(sortingReminderView)
         
         // Базовые констрейнты для верхних полей
         NSLayoutConstraint.activate([
@@ -109,16 +110,22 @@ extension PickupViewController {
             timePickersStack.trailingAnchor.constraint(equalTo: timeBorderView.trailingAnchor, constant: -12),
             timePickersStack.centerYAnchor.constraint(equalTo: timeBorderView.centerYAnchor),
             
-            descriptionTextView.topAnchor.constraint(equalTo: timeBorderView.bottomAnchor, constant: 16),
-            descriptionTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            descriptionTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            descriptionTextView.heightAnchor.constraint(equalToConstant: 80),
-            
-            // Привязываем саму кнопку orderButton к низу экрана
-            orderButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            orderButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            orderButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            orderButton.heightAnchor.constraint(equalToConstant: 52)
+            // 1. Привязываем карточку-напоминание под блоком времени
+                sortingReminderView.topAnchor.constraint(equalTo: timeBorderView.bottomAnchor, constant: 16),
+                sortingReminderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+                sortingReminderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+                
+                // 2. Поле описания теперь опускается ниже карточки-напоминания
+                descriptionTextView.topAnchor.constraint(equalTo: sortingReminderView.bottomAnchor, constant: 16),
+                descriptionTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+                descriptionTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+                descriptionTextView.heightAnchor.constraint(equalToConstant: 80),
+                
+                // 3. Кнопка заказа привязана к низу как обычно
+                orderButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+                orderButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+                orderButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+                orderButton.heightAnchor.constraint(equalToConstant: 52)
         ])
     }
 }

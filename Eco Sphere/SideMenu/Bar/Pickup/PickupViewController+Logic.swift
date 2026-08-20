@@ -39,32 +39,48 @@ extension PickupViewController: UITextFieldDelegate {
     @objc func dismissKeyboard() {
         view.endEditing(true)
         validateFields() // Проверяем поля при закрытии клавиатуры или дропдауна
+        updateSortingReminder()
     }
     
     @objc private func wasteTypeFieldTapped() {
         showCustomDropDown(anchorField: wasteTypeTextField, type: PickupViewController.DropDownType.wasteType)
+        
+        // Искусственный пинг через 0.15 секунды, когда таблица дропдауна уже отдала текст полю
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+            self?.validateFields()
+            self?.updateSortingReminder()
+        }
     }
-    
+
+
     @objc private func pickupPointFieldTapped() {
         showCustomDropDown(anchorField: pickupPointTextField, type: PickupViewController.DropDownType.pickupPoint)
+        
+        // Запускаем небольшую задержку для адреса
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.validateFields()
+        }
     }
+
     
     // --- ИНТЕЛЛЕКТУАЛЬНЫЙ МАСОЧНЫЙ ВВОД ВЕСА ("... кг") ---
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        // Внутри метода textField(shouldChangeCharactersIn...) замените обработку веса:
+        
         if string.isEmpty {
             if textField == weightTextField {
                 let currentText = textField.text ?? ""
-                let cleanDigits = currentText.replacingOccurrences(of: " кг", with: "").replacingOccurrences(of: " ", with: "")
-                if cleanDigits.isEmpty { return false }
-                let updatedDigits = String(cleanDigits.dropLast())
+                let cleanText = currentText.replacingOccurrences(of: " кг", with: "").replacingOccurrences(of: " ", with: "")
+                if cleanText.isEmpty { return false }
+                let updatedText = String(cleanText.dropLast())
                 
-                if updatedDigits.isEmpty {
+                if updatedText.isEmpty {
                     textField.text = ""
                 } else {
-                    textField.text = "\(updatedDigits) кг"
+                    textField.text = "\(updatedText) кг"
                 }
                 
-                validateFields() // Перепроверяем кнопку при удалении символа веса
+                validateFields()
                 return false
             }
             return true
@@ -76,17 +92,29 @@ extension PickupViewController: UITextFieldDelegate {
         
         if textField == weightTextField {
             let currentText = textField.text ?? ""
-            let cleanDigits = currentText.replacingOccurrences(of: " кг", with: "").replacingOccurrences(of: " ", with: "")
+            // Очищаем текст от маски, оставляя цифры, точки и запятые
+            let cleanText = currentText.replacingOccurrences(of: " кг", with: "").replacingOccurrences(of: " ", with: "")
             
-            guard string.allSatisfy({ $0.isNumber }) else { return false }
-            guard cleanDigits.count + string.count <= 5 else { return false }
+            // Автоматически заменяем точку на запятую для единообразия интерфейса
+            let processedString = string.replacingOccurrences(of: ".", with: ",")
             
-            let newDigits = cleanDigits + string
-            textField.text = "\(newDigits) кг"
+            // Разрешаем вводить только цифры и ОДНУ запятую
+            let allowedCharacters = CharacterSet(charactersIn: "0123456789,")
+            guard processedString.allSatisfy({ $0.unicodeScalars.allSatisfy(allowedCharacters.contains) }) else { return false }
             
-            validateFields() // Перепроверяем кнопку при добавлении цифры веса
+            // Если запятая уже есть, вторую ввести не даем
+            if processedString == "," && cleanText.contains(",") { return false }
+            
+            // Ограничиваем длину ввода до 5 символов (например, "104,5")
+            guard cleanText.count + processedString.count <= 5 else { return false }
+            
+            let newText = cleanText + processedString
+            textField.text = "\(newText) кг"
+            
+            validateFields()
             return false
         }
+
         
         return true
     }
@@ -99,8 +127,14 @@ extension PickupViewController: UITextFieldDelegate {
     
     // Срабатывает автоматически, когда фокус уходит из любого текстового поля или дропдауна
     public func textFieldDidEndEditing(_ textField: UITextField) {
-        validateFields()
+        validateFields() // Проверяет активность кнопки
+        
+        // Если пользователь закончил выбирать вид отхода — обновляем карточку!
+        if textField == wasteTypeTextField {
+            updateSortingReminder()
+        }
     }
+
     
     // --- ОФОРМЛЕНИЕ ЗАКАЗА ДЛЯ ОБЩЕЙ МОДЕЛИ MODEL.SWIFT ---
     @objc func orderTapped() {
@@ -166,4 +200,61 @@ extension PickupViewController: UITextViewDelegate {
             textView.textColor = .lightGray
         }
     }
+    
+
+    
+    var sortingReminders: [String: String] {
+        return [
+            "Макулатура (бумага)": "Сдавайте картон и бумагу сухими. Удалите скотч, скрепки и металлические пружины перед сдачей.",
+            "Стекло": "Принимаются чистые банки и бутылки. Снимите крышки и пробки. Битое стекло сложите в отдельную коробку.",
+            "Пластик": "Обязательно сполосните бутылки от остатков пищи и обожмите их, чтобы они занимали меньше места.",
+            "Металл": "Промойте консервные банки. По возможности удалите бумажные этикетки и сдавите банки для компактности.",
+            "Органические отходы": "Убедитесь, что отходы не содержат пластиковой упаковки, пленок и пакетов. Только органика для компоста.",
+            "Электро": "Убедитесь, что из устройств извлечены съемные батарейки и аккумуляторы — их нужно сдавать отдельно."
+        ]
+    }
+
+    func updateSortingReminder() {
+        let selectedWaste = wasteTypeTextField.text ?? ""
+        
+        if let reminderText = sortingReminders[selectedWaste] {
+            reminderTextLabel.text = reminderText
+            
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut, animations: {
+                self.sortingReminderView.alpha = 1.0
+                self.view.layoutIfNeeded()
+            }, completion: nil)
+        } else {
+            reminderTextLabel.text = ""
+            UIView.animate(withDuration: 0.2, animations: {
+                self.sortingReminderView.alpha = 0.0
+                self.view.layoutIfNeeded()
+            })
+        }
+    }
+
+    func validateFields() {
+        let isWasteTypeFilled = !(wasteTypeTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        let isPickupPointFilled = !(pickupPointTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        let isWeightFilled = !(weightTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        
+        let isFormValid: Bool
+        
+        if isLoggedIn {
+            // Если пользователь авторизован — проверяем только эти 3 поля
+            isFormValid = isWasteTypeFilled && isPickupPointFilled && isWeightFilled
+        } else {
+            // Если НЕ авторизован — проверяем еще имя, телефон и адрес
+            let isNameFilled = !(nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+            let isPhoneFilled = !(phoneTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+            let isAddressFilled = !(addressTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+            
+            isFormValid = isWasteTypeFilled && isPickupPointFilled && isWeightFilled &&
+                          isNameFilled && isPhoneFilled && isAddressFilled
+        }
+        
+        // Включаем или выключаем кнопку заказа
+        orderButton.isEnabled = isFormValid
+    }
+
 }

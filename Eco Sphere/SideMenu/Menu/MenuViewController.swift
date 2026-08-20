@@ -260,6 +260,20 @@ extension MenuViewController: UITableViewDataSource, UITableViewDelegate {
             break
         }
     }
+    // Пример кода перехода в обработчик клика по профилю в Меню:
+    @objc private func openProfileDetails() {
+        let editProfileVC = EditProfileViewController()
+        
+        // Если меню открыто внутри NavigationController:
+        if let navigationController = self.navigationController {
+            navigationController.pushViewController(editProfileVC, animated: true)
+        } else {
+            // Если навигационного бара нет — открываем модально на весь экран
+            editProfileVC.modalPresentationStyle = .fullScreen
+            self.present(editProfileVC, animated: true, completion: nil)
+        }
+    }
+
 
 }
 
