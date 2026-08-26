@@ -5,7 +5,8 @@ class HistoryViewController: UIViewController {
     // MARK: - UI Элементы
     let tableView: UITableView = {
         let tv = UITableView(frame: .zero, style: .plain)
-        tv.backgroundColor = .white
+        // Автоматически берет прозрачный фон и настраивает линии через расширение UIColor+Theme
+        tv.backgroundColor = .clear
         tv.separatorStyle = .none // Карточки будут раздельными
         tv.translatesAutoresizingMaskIntoConstraints = false
         return tv
@@ -14,7 +15,11 @@ class HistoryViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        
+        UIColor.applyGlobalTheme(for: self)
+        // ВАЖНО: Привязываем фон к нашему умному динамическому свойству всего одной строкой
+        view.backgroundColor = .appBackground
+        
         setupNavigationBar()
         setupLayout() // Метод возьмется из файла +Layout
         setupTableView()
@@ -22,16 +27,29 @@ class HistoryViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // Глобальный перехватчик Swizzling сам настроит цвета баров и стрелочек,
+        // поэтому просто активируем отображение панели:
         navigationController?.setNavigationBarHidden(false, animated: animated)
+    UIColor.applyGlobalTheme(for: self, withTableView: tableView)
+        // Принудительно обновляем иконку стрелочки кастомной кнопки под текущую тему
+        if let backButton = navigationItem.leftBarButtonItem?.customView as? UIButton {
+            let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1
+            backButton.tintColor = isDark ? .white : .black
+        }
+        
         tableView.reloadData() // Обновляем данные при каждом открытии экрана
     }
     
     private func setupNavigationBar() {
         title = "История вывозов"
         
+        let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1
+        
         let backButton = UIButton(type: .system)
         backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        backButton.tintColor = .black
+        
+        // Стрелочка будет белой в тёмной теме и чёрной в светлой автоматически
+        backButton.tintColor = isDark ? .white : .black
         backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
         backButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -52,7 +70,7 @@ class HistoryViewController: UIViewController {
     }
 }
 
-// MARK: - TableView Core Logic (ИСПРАВЛЕНО: Точка перед параметром полностью удалена)
+// MARK: - TableView Core Logic
 extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

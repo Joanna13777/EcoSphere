@@ -43,8 +43,7 @@ class OnboardingCardViewController: UIViewController {
     // MARK: - Жизненный цикл (Lifecycle)
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
-        
+        view.backgroundColor = .appBackground
         if UserDefaults.standard.string(forKey: "app_lang") == nil {
             UserDefaults.standard.set("ru", forKey: "app_lang")
         }

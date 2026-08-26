@@ -18,7 +18,7 @@ extension OnboardingCardViewController {
         languageButton.addTarget(self, action: #selector(languageAction), for: .touchUpInside)
         
         titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
-        titleLabel.textColor = .black
+        titleLabel.textColor = .label
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 0
         

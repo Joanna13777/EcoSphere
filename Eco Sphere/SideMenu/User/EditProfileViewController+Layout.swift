@@ -5,12 +5,24 @@ extension EditProfileViewController: UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        
+        UIColor.applyGlobalTheme(for: self)
+        
+        view.backgroundColor = .appBackground
         setupLayout()
         setupActions()
         loadUserData()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        // Эта строчка принудительно перекрасит профиль в темно-серый цвет
+        view.backgroundColor = .appBackground
+
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+
     private func setupLayout() {
         // Добавляем элементы на экран
         view.addSubview(avatarImageView)
@@ -120,31 +132,67 @@ extension EditProfileViewController: UITextFieldDelegate {
     }
     
     // MARK: - Нажатие кнопки Сохранить (Показ Тоста)
+//
+    // блок считывания данных из UserDefaults
+    func loadUserData() {
+        // Используем единый ключ "menu_user_name", который уже работает на экране Меню
+        let savedName = UserDefaults.standard.string(forKey: "menu_user_name") ?? ""
+        
+        // Если имя составное (например, "Иван Cok"), разделим его для полей Имя и Фамилия
+        let nameComponents = savedName.components(separatedBy: " ")
+        if nameComponents.count >= 2 {
+            nameTextField.text = nameComponents[0]
+            surnameTextField.text = nameComponents[1]
+        } else {
+            nameTextField.text = savedName
+            surnameTextField.text = UserDefaults.standard.string(forKey: "user_surname") ?? ""
+        }
+        
+        // Загружаем остальные поля
+        cityTextField.text = UserDefaults.standard.string(forKey: "user_city") ?? "Ташкент"
+        addressTextField.text = UserDefaults.standard.string(forKey: "user_address") ?? ""
+        phoneTextField.text = UserDefaults.standard.string(forKey: "user_phone") ?? ""
+        if let email = UserDefaults.standard.string(forKey: "user_email") {
+            emailTextField.text = email
+        } else if let authEmail = UserDefaults.standard.string(forKey: "auth_email") {
+            emailTextField.text = authEmail
+        } else if let loginEmail = UserDefaults.standard.string(forKey: "login_email") {
+            emailTextField.text = loginEmail
+        } else {
+            emailTextField.text = UserDefaults.standard.string(forKey: "menu_user_email") ?? ""
+        }
+        
+        // Принудительно вызываем проверку, чтобы кнопка СРАЗУ загорелась желтым
+        textFieldDidChange()
+    }
+
     @objc private func saveTapped() {
         view.endEditing(true)
         
-        // СОХРАНЯЕМ ОБНОВЛЕННЫЕ ДАННЫЕ В ПАМЯТЬ
-            UserDefaults.standard.set(nameTextField.text, forKey: "user_name")
-            UserDefaults.standard.set(surnameTextField.text, forKey: "user_surname")
-            UserDefaults.standard.set(cityTextField.text, forKey: "user_city")
-            UserDefaults.standard.set(addressTextField.text, forKey: "user_address")
-            UserDefaults.standard.set(phoneTextField.text, forKey: "user_phone")
-            UserDefaults.standard.set(emailTextField.text, forKey: "user_email")
+        let name = nameTextField.text ?? ""
+        let surname = surnameTextField.text ?? ""
         
-        // Создаем слой легкого затемнения фона
+        // Склеиваем имя и фамилию для корректного отображения в шапке Меню
+        let fullName = "\(name) \(surname)".trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Сохраняем обратно в память устройства
+        UserDefaults.standard.set(fullName, forKey: "menu_user_name")
+        UserDefaults.standard.set(surname, forKey: "user_surname")
+        UserDefaults.standard.set(cityTextField.text, forKey: "user_city")
+        UserDefaults.standard.set(addressTextField.text, forKey: "user_address")
+        UserDefaults.standard.set(phoneTextField.text, forKey: "user_phone")
+        UserDefaults.standard.set(emailTextField.text, forKey: "user_email")
+        
+        // Код вызова Toast-уведомления "Сохранено"
         let dimmingView = UIView(frame: view.bounds)
-        dimmingView.backgroundColor = UIColor.black.withAlphaComponent(0.15)
+        dimmingView.backgroundColor = .appBackground
         dimmingView.alpha = 0.0
-        
-        // ИСПРАВЛЕНИЕ: Правильный метод добавления слоя ПОД всплывающее окно toastView
         view.insertSubview(dimmingView, belowSubview: toastView)
         
-        // Плавно показываем Toast и легкое затемнение
         UIView.animate(withDuration: 0.25, animations: {
             self.toastView.alpha = 1.0
             dimmingView.alpha = 1.0
         }) { _ in
-            // Через 1.5 секунды автоматически скрываем уведомление обратно
             UIView.animate(withDuration: 0.25, delay: 1.5, options: .curveEaseOut, animations: {
                 self.toastView.alpha = 0.0
                 dimmingView.alpha = 0.0
@@ -153,35 +201,7 @@ extension EditProfileViewController: UITextFieldDelegate {
             }
         }
     }
-    // блок считывания данных из UserDefaults
-    func loadUserData() {
-        // Читаем сохраненные значения из UserDefaults (убедитесь, что ключи совпадают с вашим онбордингом)
-            nameTextField.text = UserDefaults.standard.string(forKey: "user_name")
-            surnameTextField.text = UserDefaults.standard.string(forKey: "user_surname")
-            cityTextField.text = UserDefaults.standard.string(forKey: "user_city")
-            addressTextField.text = UserDefaults.standard.string(forKey: "user_address")
-            phoneTextField.text = UserDefaults.standard.string(forKey: "user_phone")
-            emailTextField.text = UserDefaults.standard.string(forKey: "user_email")
-        
-        // Принудительно вызываем проверку полей, чтобы кнопка СРАЗУ стала ЖЕЛТОЙ, так как данные есть
-       textFieldDidChange()
-    }
-//    @objc func textFieldDidChange() {
-//            let isNameFilled = !(nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-//            let isSurnameFilled = !(surnameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-//            
-//            if var currentConfig = saveButton.configuration {
-//                if isNameFilled || isSurnameFilled {
-//                    // Красивый желтый цвет для активного состояния кнопки
-//                    currentConfig.baseBackgroundColor = UIColor(red: 0.98, green: 0.82, blue: 0.24, alpha: 1.0)
-//                    currentConfig.baseForegroundColor = .black
-//                } else {
-//                    // Серый цвет по умолчанию
-//                    currentConfig.baseBackgroundColor = UIColor(red: 0.35, green: 0.35, blue: 0.35, alpha: 1.0)
-//                    currentConfig.baseForegroundColor = .white
-//                }
-//                saveButton.configuration = currentConfig
-//            }
+
 }
 
 // MARK: - Canvas Preview

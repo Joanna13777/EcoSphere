@@ -22,6 +22,7 @@ class ArticleDetailViewController: UIViewController {
         let label = UILabel()
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
+        label.textColor = .label
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -35,25 +36,33 @@ class ArticleDetailViewController: UIViewController {
         return iv
     }()
     
-    
-    // Переменная для динамического переключения низа экрана
     var noImageBottomConstraint: NSLayoutConstraint!
 
     // MARK: - Жизненный цикл
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .appBackground
         setupNavigationBar()
-        setupLayout()
-        configureData() // Метод наполнения вызовется строго ПОСЛЕ сборки UI
+        setupLayout() // Вызовется из +Layout.swift
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+        
+        // Считываем и обновляем тему экрана при каждом открытии статьи
+        UIColor.applyGlobalTheme(for: self)
+        configureData() // Вызовется из +Logic.swift
+    }
+    
+    // MARK: - Настройка навигационной панели
     private func setupNavigationBar() {
         navigationItem.title = ""
+        let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1
         
         let backButton = UIButton(type: .system)
         backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        backButton.tintColor = .black
+        backButton.tintColor = isDark ? .white : .black
         backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
         
         backButton.translatesAutoresizingMaskIntoConstraints = false
@@ -63,7 +72,7 @@ class ArticleDetailViewController: UIViewController {
         let titleLabelButton = UILabel()
         titleLabelButton.text = article?.title ?? ""
         titleLabelButton.font = .systemFont(ofSize: 18, weight: .semibold)
-        titleLabelButton.textColor = .black
+        titleLabelButton.textColor = isDark ? .white : .black
         titleLabelButton.numberOfLines = 1
         
         let customNavBarStack = UIStackView(arrangedSubviews: [backButton, titleLabelButton])

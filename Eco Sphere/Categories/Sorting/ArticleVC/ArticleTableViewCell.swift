@@ -5,13 +5,14 @@ class ArticleTableViewCell: UITableViewCell {
     // MARK: - UI Элементы
     private let cardBackgroundView: UIView = {
         let view = UIView()
-        view.backgroundColor = .white
         view.layer.cornerRadius = 20
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOpacity = 0.02
         view.layer.shadowOffset = CGSize(width: 0, height: 4)
         view.layer.shadowRadius = 8
         view.clipsToBounds = true
+        // ВАЖНО: Привязываем фон карточки к нашему динамическому цвету
+        view.backgroundColor = .appCardBackground
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -19,7 +20,8 @@ class ArticleTableViewCell: UITableViewCell {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .semibold)
-        label.textColor = UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1.0)
+        // ИСПРАВЛЕНИЕ: Заменили жесткий RGB-цвет на адаптивный .label (черный/белый)
+        label.textColor = .label
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -28,7 +30,8 @@ class ArticleTableViewCell: UITableViewCell {
     private let subtitleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .regular)
-        label.textColor = UIColor(red: 0.49, green: 0.49, blue: 0.49, alpha: 1.0)
+        // ИСПРАВЛЕНИЕ: Заменили жесткий серый цвет на системный адаптивный .secondaryLabel
+        label.textColor = .secondaryLabel
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -38,7 +41,7 @@ class ArticleTableViewCell: UITableViewCell {
         let iv = UIImageView()
         iv.image = UIImage(systemName: "chevron.right")
         iv.contentMode = .scaleAspectFit
-        iv.tintColor = .systemGray3
+        iv.tintColor = .secondaryLabel
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
     }()
@@ -94,6 +97,9 @@ class ArticleTableViewCell: UITableViewCell {
     // MARK: - Конфигурация данных
     func configure(with item: ArticleItem) {
         titleLabel.text = item.title
+        
+        // Принудительно обновляем фон карточки при каждой прокрутке таблицы
+        cardBackgroundView.backgroundColor = .appCardBackground
         
         // Переключаем констрейнты в зависимости от наличия подзаголовка на карточке
         if let subtitle = item.subtitleText, !subtitle.isEmpty {

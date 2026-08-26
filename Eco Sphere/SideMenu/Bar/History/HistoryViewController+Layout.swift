@@ -20,8 +20,10 @@ class HistoryOrderCell: UITableViewCell {
     
     let cardView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(red: 0.97, green: 0.97, blue: 0.98, alpha: 1.0)
         view.layer.cornerRadius = 14
+        // ВАЖНО: Используем наш единый цвет карточки из UIColor+Theme.swift!
+        // В светлой теме она будет светло-серой, а в тёмной — тёмно-серой (чуть светлее экрана)
+        view.backgroundColor = .appCardBackground
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -36,7 +38,8 @@ class HistoryOrderCell: UITableViewCell {
     let wasteTypeLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 15, weight: .semibold)
-        label.textColor = .black
+        // Текст названия автоматически инвертируется (белый / черный)
+        label.textColor = .label
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -44,7 +47,8 @@ class HistoryOrderCell: UITableViewCell {
     let dateLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 13, weight: .regular)
-        label.textColor = .systemGray
+        // Адаптивный серый цвет для даты
+        label.textColor = .secondaryLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -52,7 +56,8 @@ class HistoryOrderCell: UITableViewCell {
     let addressLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 13, weight: .regular)
-        label.textColor = .darkGray
+        // ИСПРАВЛЕНИЕ: Заменили .darkGray на адаптивный .secondaryLabel, чтобы адрес не сливался с фоном!
+        label.textColor = .secondaryLabel
         label.numberOfLines = 1
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -61,7 +66,8 @@ class HistoryOrderCell: UITableViewCell {
     let weightLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .bold)
-        label.textColor = .black
+        // Текст веса автоматически инвертируется
+        label.textColor = .label
         label.textAlignment = .right
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -84,7 +90,8 @@ class HistoryOrderCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        backgroundColor = .white
+        // ИСПРАВЛЕНИЕ: Очищаем фон всей ячейки, чтобы сквозь неё просвечивал правильный фон таблицы
+        backgroundColor = .clear
         selectionStyle = .none
         setupCellLayout()
     }
@@ -148,15 +155,34 @@ class HistoryOrderCell: UITableViewCell {
         weightLabel.text = order.weight
         
         iconImageView.image = UIImage(systemName: order.iconName)
-        iconImageView.tintColor = order.iconColor
+        
+        // Перепроверяем цвет иконки: если в тёмной теме системный серый сливается — подсветим белым
+        let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1
+        iconImageView.tintColor = (order.iconColor == .systemGray && isDark) ? .white : order.iconColor
+        
         statusLabel.text = order.status
         
+        // Принудительно обновляем фон карточки при конфигурации на всякий случай
+        cardView.backgroundColor = .appCardBackground
+        
+        // Настройка цветных ярлыков статуса заказа под тёмную и светлую темы
         if order.isCompleted {
-            statusContainer.backgroundColor = UIColor(red: 0.90, green: 0.96, blue: 0.90, alpha: 1.0)
-            statusLabel.textColor = UIColor(red: 0.15, green: 0.45, blue: 0.15, alpha: 1.0)
+            if isDark {
+                // В тёмной теме приглушаем цвета плашек, чтобы они не резали глаза
+                statusContainer.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.2)
+                statusLabel.textColor = UIColor.systemGreen
+            } else {
+                statusContainer.backgroundColor = UIColor(red: 0.90, green: 0.96, blue: 0.90, alpha: 1.0)
+                statusLabel.textColor = UIColor(red: 0.15, green: 0.45, blue: 0.15, alpha: 1.0)
+            }
         } else {
-            statusContainer.backgroundColor = UIColor(red: 0.99, green: 0.95, blue: 0.85, alpha: 1.0)
-            statusLabel.textColor = UIColor(red: 0.70, green: 0.45, blue: 0.05, alpha: 1.0)
+            if isDark {
+                statusContainer.backgroundColor = UIColor.systemOrange.withAlphaComponent(0.2)
+                statusLabel.textColor = UIColor.systemOrange
+            } else {
+                statusContainer.backgroundColor = UIColor(red: 0.99, green: 0.95, blue: 0.85, alpha: 1.0)
+                statusLabel.textColor = UIColor(red: 0.70, green: 0.45, blue: 0.05, alpha: 1.0)
+            }
         }
     }
 }

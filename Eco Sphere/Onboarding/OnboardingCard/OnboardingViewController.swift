@@ -9,7 +9,8 @@ class OnboardingViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .appBackground
+        
         setupPages()
         setupPageViewController()
     }
@@ -39,19 +40,35 @@ class OnboardingViewController: UIViewController {
     }
 
     private func setupPageViewController() {
+        // 1. Инициализируем контроллер страниц
         pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
         pageViewController.dataSource = self
         pageViewController.delegate = self
         
+        // 2. СНАЧАЛА добавляем контроллер в родительскую систему и на экран ( addSubview ДО настроек фрейма!)
+        addChild(pageViewController)
+        view.addSubview(pageViewController.view)
+        
+        // Отключаем авто-маску, чтобы фреймы не конфликтовали с Auto Layout расширений
+        pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Жестко привязываем края UIPageViewController к экрану через констрейнты — это на 100% уберет SIGABRT
+        NSLayoutConstraint.activate([
+            pageViewController.view.topAnchor.constraint(equalTo: view.topAnchor),
+            pageViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            pageViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            pageViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        // 3. И только ТЕПЕРЬ, когда иерархия полностью готова, безопасно передаем первый слайд!
         if let firstVC = pages.first {
             pageViewController.setViewControllers([firstVC], direction: .forward, animated: false, completion: nil)
         }
         
-        addChild(pageViewController)
-        view.addSubview(pageViewController.view)
-        pageViewController.view.frame = view.bounds
+        // 4. Завершаем транзакцию добавления
         pageViewController.didMove(toParent: self)
     }
+
     
     func goToPage(_ targetIndex: Int) {
         guard targetIndex >= 0 && targetIndex < pages.count else { return }

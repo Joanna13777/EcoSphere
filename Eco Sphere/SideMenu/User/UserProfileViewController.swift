@@ -19,7 +19,7 @@ class UserProfileViewController: UIViewController {
         let label = UILabel()
         label.text = "Иван Иванов"
         label.font = .systemFont(ofSize: 20, weight: .bold)
-        label.textColor = .black
+        label.textColor = .label
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -28,7 +28,7 @@ class UserProfileViewController: UIViewController {
         let label = UILabel()
         label.text = "+998 90 123 45 67"
         label.font = .systemFont(ofSize: 14, weight: .regular)
-        label.textColor = .systemGray
+        label.textColor = .secondaryLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -36,18 +36,17 @@ class UserProfileViewController: UIViewController {
     // MARK: - Информационные карточки (Адрес и Бонусы)
     let addressCardView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
         view.layer.cornerRadius = 14
         view.translatesAutoresizingMaskIntoConstraints = false
         
         let icon = UIImageView(image: UIImage(systemName: "mappin.circle.fill"))
-        icon.tintColor = .systemGray
+        icon.tintColor = .secondaryLabel
         icon.translatesAutoresizingMaskIntoConstraints = false
         
         let title = UILabel()
         title.text = "Основной адрес доставки"
         title.font = .systemFont(ofSize: 12, weight: .regular)
-        title.textColor = .systemGray
+        title.textColor = .secondaryLabel
         title.translatesAutoresizingMaskIntoConstraints = false
         
         let value = UILabel()
@@ -82,7 +81,6 @@ class UserProfileViewController: UIViewController {
     
     let ecoBonusCardView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 0.96, alpha: 1.0) // Эко-зеленый
         view.layer.cornerRadius = 14
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor(red: 0.85, green: 0.90, blue: 0.85, alpha: 1.0).cgColor

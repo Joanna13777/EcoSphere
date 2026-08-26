@@ -3,11 +3,6 @@ import UIKit
 // MARK: - Действия, Делегаты и Интерактивная Логика Полей
 extension PickupViewController: UITextFieldDelegate {
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
-    }
-    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)

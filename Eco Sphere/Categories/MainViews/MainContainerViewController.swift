@@ -26,7 +26,7 @@ class MainContainerViewController: UIViewController, UICollectionViewDataSource,
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = appBgColor // Меняем стандартный фон на пастельный эко-оттенок
+        view.backgroundColor = .appBackground
         
         title = "Виды"
 
@@ -34,11 +34,47 @@ class MainContainerViewController: UIViewController, UICollectionViewDataSource,
         setupCollectionView()
         setupPageViewController()
         setupLayout()
+        
+        
     }
     
+    // Добавьте этот метод целиком в файл экрана «Виды»
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // 1. Активируем глубокую покраску фона, текстов описаний и адаптивного светлого таб-бара
+        UIColor.applyGlobalTheme(for: self)
+        
+        // 2. НАСТРОЙКА ВЕРХНЕГО БАРА (Делаем стрелочку "Назад" и заголовок светлыми)
+        if let navBar = navigationController?.navigationBar {
+            let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1
+            let themeColor = UIColor.appBackground
+            
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = themeColor
+            
+            // Текст заголовка вверху станет белым в тёмной теме
+            appearance.titleTextAttributes = [.foregroundColor: isDark ? UIColor.white : UIColor.black]
+            
+            navBar.standardAppearance = appearance
+            navBar.scrollEdgeAppearance = appearance
+            
+            // Сама стрелочка "Назад" станет белой в тёмной теме
+            navBar.tintColor = isDark ? UIColor.white : UIColor.black
+        }
+        
+        // 3. Страховка для кастомной UIBarButtonItem кнопки "Назад" (если создавали вручную)
+        if let backButton = navigationItem.leftBarButtonItem {
+            let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1
+            backButton.tintColor = isDark ? .white : .black
+        }
+    }
+
+
     // MARK: - Первичная настройка
     private func setupMainConfiguration() {
-        view.backgroundColor = appBgColor
+        view.backgroundColor = .appBackground
         
         // Создаем кастомную кнопку со стрелкой
             let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"),

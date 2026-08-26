@@ -24,15 +24,20 @@ extension ArticleDetailViewController {
         let fullRange = NSRange(location: 0, length: finalAttributedString.length)
         finalAttributedString.addAttribute(.paragraphStyle, value: paragraphStyle, range: fullRange)
         
+        // === ИСПРАВЛЕНИЕ: Динамически выбираем цвет текста в зависимости от темы ===
+        let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1
+        let finalTextColor = isDark ? UIColor.white : UIColor(red: 0.15, green: 0.15, blue: 0.15, alpha: 1.0)
+        
         finalAttributedString.addAttribute(
             .foregroundColor,
-            value: UIColor(red: 0.15, green: 0.15, blue: 0.15, alpha: 1.0),
+            value: finalTextColor, // Принудительно делаем белым в тёмной теме!
             range: fullRange
         )
         
+        // Назначаем отформатированный текст в ваш лейбл
         textLabel.attributedText = finalAttributedString
         
-        // Умное управление отображением картинки
+        // Умное управление отображением картинки (Ваша оригинальная логика)
         if let imageName = article.detailImageName, let image = UIImage(named: imageName) {
             articleImageView.image = image
             articleImageView.isHidden = false

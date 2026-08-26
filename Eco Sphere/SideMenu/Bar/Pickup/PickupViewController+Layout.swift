@@ -1,9 +1,10 @@
 import UIKit
 
-// MARK: - Чистая Inline-верстка (Auto Layout)
+        // MARK: - Чистая Inline-верстка (Auto Layout)
 extension PickupViewController {
     
     func setupLayout() {
+        // 1. СНАЧАЛА добавляем все базовые элементы на экран в строгом порядке
         view.addSubview(wasteTypeTextField)
         view.addSubview(pickupPointTextField)
         view.addSubview(weightTextField)
@@ -11,14 +12,32 @@ extension PickupViewController {
         view.addSubview(dateBorderView)
         view.addSubview(timeBorderView)
         
-        // Собираем контент внутрь рамки ДАТЫ
+        view.addSubview(sortingReminderView)
+        view.addSubview(descriptionTextView)
+        view.addSubview(orderButton)
+        
+        // Настраиваем рамки карточек под текущую тему (используем наш умный appSeparator)
+        dateBorderView.layer.borderColor = UIColor.appSeparator.cgColor
+        timeBorderView.layer.borderColor = UIColor.appSeparator.cgColor
+        
+        // Делаем фоны карточек даты/времени адаптивными
+        dateBorderView.backgroundColor = .appCardBackground
+        timeBorderView.backgroundColor = .appCardBackground
+        
+        // Переводим фоны текстовых полей на системный цвет (они сами станут темно-серыми в темной теме)
+        let fields = [wasteTypeTextField, pickupPointTextField, weightTextField, nameTextField, phoneTextField, addressTextField]
+        fields.forEach { tf in
+            tf.backgroundColor = .systemGroupedBackground
+        }
+        
+        // 2. Собираем контент внутрь рамки ДАТЫ
         dateBorderView.addSubview(dateTitleLabel)
         dateBorderView.addSubview(inlineDatePicker)
         
-        // Собираем контент внутрь рамки ВРЕМЕНИ
+        // 3. Собираем контент внутрь рамки ВРЕМЕНИ
         timeBorderView.addSubview(timeTitleLabel)
         
-        // Создаем стек для плашек времени
+        // Создаем стек для плашек времени (перенесли сюда, чтобы констрейнты ниже его видели)
         let timePickersStack = UIStackView(arrangedSubviews: [startTimePicker, endTimePicker])
         timePickersStack.axis = .horizontal
         timePickersStack.spacing = 8
@@ -27,13 +46,7 @@ extension PickupViewController {
         timePickersStack.translatesAutoresizingMaskIntoConstraints = false
         timeBorderView.addSubview(timePickersStack)
         
-        view.addSubview(descriptionTextView)
-        
-        // Добавляем только нашу монолитную кнопку orderButton
-        view.addSubview(orderButton)
-        view.addSubview(sortingReminderView)
-        
-        // Базовые констрейнты для верхних полей
+        // 4. Базовые констрейнты для верхних полей
         NSLayoutConstraint.activate([
             wasteTypeTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             wasteTypeTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
@@ -46,7 +59,7 @@ extension PickupViewController {
             pickupPointTextField.heightAnchor.constraint(equalToConstant: 48)
         ])
         
-        // Динамический сдвиг в зависимости от статуса входа
+        // 5. Динамический сдвиг интерфейса в зависимости от статуса авторизации пользователя
         if isLoggedIn {
             NSLayoutConstraint.activate([
                 weightTextField.topAnchor.constraint(equalTo: pickupPointTextField.bottomAnchor, constant: 12),
@@ -57,6 +70,7 @@ extension PickupViewController {
                 dateBorderView.topAnchor.constraint(equalTo: weightTextField.bottomAnchor, constant: 16)
             ])
         } else {
+            // Если гость — сначала добавляем поля ФИО, Телефона и Адреса на вью
             view.addSubview(nameTextField)
             view.addSubview(phoneTextField)
             view.addSubview(addressTextField)
@@ -86,7 +100,7 @@ extension PickupViewController {
             ])
         }
         
-        // Констрейнты для блоков ДАТЫ и ВРЕМЕНИ
+        // 6. Констрейнты для блоков ДАТЫ, ВРЕМЕНИ, НАПОМИНАЛКИ и кнопки ЗАКАЗА
         NSLayoutConstraint.activate([
             dateBorderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             dateBorderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
@@ -110,22 +124,22 @@ extension PickupViewController {
             timePickersStack.trailingAnchor.constraint(equalTo: timeBorderView.trailingAnchor, constant: -12),
             timePickersStack.centerYAnchor.constraint(equalTo: timeBorderView.centerYAnchor),
             
-            // 1. Привязываем карточку-напоминание под блоком времени
-                sortingReminderView.topAnchor.constraint(equalTo: timeBorderView.bottomAnchor, constant: 16),
-                sortingReminderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-                sortingReminderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-                
-                // 2. Поле описания теперь опускается ниже карточки-напоминания
-                descriptionTextView.topAnchor.constraint(equalTo: sortingReminderView.bottomAnchor, constant: 16),
-                descriptionTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-                descriptionTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-                descriptionTextView.heightAnchor.constraint(equalToConstant: 80),
-                
-                // 3. Кнопка заказа привязана к низу как обычно
-                orderButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-                orderButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-                orderButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-                orderButton.heightAnchor.constraint(equalToConstant: 52)
+            // Карточка-напоминание теперь красиво выезжает под блоком времени
+            sortingReminderView.topAnchor.constraint(equalTo: timeBorderView.bottomAnchor, constant: 16),
+            sortingReminderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            sortingReminderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            
+            // Поле описания плавно опускается ниже карточки-напоминания
+            descriptionTextView.topAnchor.constraint(equalTo: sortingReminderView.bottomAnchor, constant: 16),
+            descriptionTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            descriptionTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            descriptionTextView.heightAnchor.constraint(equalToConstant: 80),
+            
+            // Фирменная монолитная кнопка заказа зафиксирована в самом низу
+            orderButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            orderButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            orderButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            orderButton.heightAnchor.constraint(equalToConstant: 52)
         ])
     }
 }

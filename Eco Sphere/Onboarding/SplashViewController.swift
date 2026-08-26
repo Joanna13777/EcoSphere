@@ -13,7 +13,7 @@ class SplashViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // 2. Обязательный фон экрана
-        view.backgroundColor = .white
+        view.backgroundColor = .appBackground
         
         setupLogoLayout()
         determineNextScreen()

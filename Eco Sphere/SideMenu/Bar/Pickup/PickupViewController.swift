@@ -9,7 +9,7 @@ class PickupViewController: UIViewController {
     let wasteTypeTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Вид отхода"
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 15)
         tf.layer.cornerRadius = 12
         tf.setLeftPadding(16)
@@ -21,8 +21,7 @@ class PickupViewController: UIViewController {
     let pickupPointTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Адрес приёмочного пункта"
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
-        tf.font = .systemFont(ofSize: 15)
+        tf.backgroundColor = .systemGroupedBackground
         tf.layer.cornerRadius = 12
         tf.setLeftPadding(16)
         tf.setRightImage(systemName: "chevron.down", tintColor: UIColor.systemGray2)
@@ -33,7 +32,7 @@ class PickupViewController: UIViewController {
     let nameTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Имя, фамилия"
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 15)
         tf.layer.cornerRadius = 12
         tf.setLeftPadding(16)
@@ -45,7 +44,7 @@ class PickupViewController: UIViewController {
     let phoneTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Телефон"
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 15)
         tf.layer.cornerRadius = 12
         tf.keyboardType = .phonePad
@@ -58,7 +57,7 @@ class PickupViewController: UIViewController {
     let addressTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Адрес"
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 15)
         tf.layer.cornerRadius = 12
         tf.setLeftPadding(16)
@@ -70,7 +69,7 @@ class PickupViewController: UIViewController {
     let weightTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Примерный вес (кг)"
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 15)
         tf.layer.cornerRadius = 12
         tf.keyboardType = .decimalPad
@@ -111,7 +110,6 @@ class PickupViewController: UIViewController {
     
     let dateBorderView: UIView = {
         let view = UIView()
-        view.backgroundColor = .white
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor(red: 0.88, green: 0.88, blue: 0.88, alpha: 1.0).cgColor
         view.layer.cornerRadius = 12
@@ -121,7 +119,6 @@ class PickupViewController: UIViewController {
     
     let timeBorderView: UIView = {
         let view = UIView()
-        view.backgroundColor = .white
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor(red: 0.88, green: 0.88, blue: 0.88, alpha: 1.0).cgColor
         view.layer.cornerRadius = 12
@@ -210,7 +207,6 @@ class PickupViewController: UIViewController {
 
     lazy var sortingReminderView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(red: 0.96, green: 0.98, blue: 0.96, alpha: 1.0)
         view.layer.cornerRadius = 12
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor(red: 0.85, green: 0.90, blue: 0.85, alpha: 1.0).cgColor

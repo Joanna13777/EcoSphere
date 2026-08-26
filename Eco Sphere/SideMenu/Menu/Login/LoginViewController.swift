@@ -15,7 +15,7 @@ class LoginViewController: UIViewController {
     let emailTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Email"
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 16)
         tf.layer.cornerRadius = 16
         tf.keyboardType = .emailAddress
@@ -30,7 +30,7 @@ class LoginViewController: UIViewController {
         let tf = UITextField()
         tf.placeholder = "Пароль"
         tf.isSecureTextEntry = true
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 16)
         tf.layer.cornerRadius = 16
         tf.setLeftPadding(16)
@@ -41,7 +41,7 @@ class LoginViewController: UIViewController {
     let eyeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "eye.slash"), for: .normal)
-        button.tintColor = .systemGray
+        button.tintColor = .secondaryLabel
         button.frame = CGRect(x: 0, y: 0, width: 40, height: 24)
         return button
     }()
@@ -69,7 +69,7 @@ class LoginViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .appBackground
         setupNavigationBar()
         setupLayout()
         setupActions()           // Реализован во втором файле

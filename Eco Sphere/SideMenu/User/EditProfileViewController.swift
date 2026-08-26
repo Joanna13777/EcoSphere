@@ -20,7 +20,7 @@ class EditProfileViewController: UIViewController {
         let label = UILabel()
         label.text = "Фото аккаунта"
         label.font = .systemFont(ofSize: 13, weight: .regular)
-        label.textColor = UIColor.systemGray3
+        label.textColor = UIColor.secondaryLabel
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -28,7 +28,7 @@ class EditProfileViewController: UIViewController {
     let editIconImageView: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(systemName: "pencil")
-        iv.tintColor = UIColor.systemGray3
+        iv.tintColor = UIColor.secondaryLabel
         iv.contentMode = .scaleAspectFit
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
@@ -49,21 +49,39 @@ class EditProfileViewController: UIViewController {
         var titleAttr = AttributedString("Сохранить")
         titleAttr.font = .systemFont(ofSize: 15, weight: .semibold)
         config.attributedTitle = titleAttr
-        
-        // В обычном состоянии (до заполнения) — темно-серый цвет как на макете
-        config.baseBackgroundColor = UIColor(red: 0.35, green: 0.35, blue: 0.35, alpha: 1.0)
-        config.baseForegroundColor = .white
         config.background.cornerRadius = 10
         
         let button = UIButton(configuration: config, primaryAction: nil)
         button.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Автоматическое управление цветами при нажатии и изменении состояния
+        button.configurationUpdateHandler = { btn in
+            guard var updatedConfig = btn.configuration else { return }
+            
+            // Проверяем, заполнено ли имя или фамилия (чтобы знать, активна ли кнопка)
+            let isNameFilled = !(btn.superview?.subviews.compactMap { $0 as? UITextField }.first { $0.placeholder == "Имя" }?.text?.isEmpty ?? true)
+            
+            if btn.isHighlighted {
+                // СОСТОЯНИЕ: Кнопка зажата пальцем — делаем её более темной/оранжевой
+                updatedConfig.baseBackgroundColor = UIColor(red: 0.85, green: 0.69, blue: 0.15, alpha: 1.0)
+                updatedConfig.baseForegroundColor = .black
+            } else {
+                // СОСТОЯНИЕ: Кнопка отпущена
+                // Здесь дублируем вашу логику проверки текста из метода textFieldDidChange
+                updatedConfig.baseBackgroundColor = UIColor(red: 0.98, green: 0.82, blue: 0.24, alpha: 1.0) // Желтый
+                updatedConfig.baseForegroundColor = .black
+            }
+            
+            btn.configuration = updatedConfig
+        }
+        
         return button
     }()
+
     
     // MARK: - Кастомный всплывающий Toast "Сохранено"
     let toastView: UIView = {
         let view = UIView()
-        view.backgroundColor = .white
         view.layer.cornerRadius = 10
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOpacity = 0.1
@@ -81,7 +99,7 @@ class EditProfileViewController: UIViewController {
         let messageLabel = UILabel()
         messageLabel.text = "Сохранено"
         messageLabel.font = .systemFont(ofSize: 15, weight: .medium)
-        messageLabel.textColor = .black
+        messageLabel.textColor = .label
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(checkIcon)

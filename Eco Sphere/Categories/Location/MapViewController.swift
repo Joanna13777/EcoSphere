@@ -61,7 +61,6 @@ class MapViewController: UIViewController {
     // 1. Создаем белую подложку строго для зоны поиска
     private let searchBackgroundView: UIView = {
         let view = UIView()
-        view.backgroundColor = .white // Настоящий белый фон, скрывающий карту под поиском
         view.layer.cornerRadius = 24  // Красивое скругление сверху подложки
         view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         
@@ -88,7 +87,9 @@ class MapViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Пункты"
-
+        
+        UIColor.applyGlobalTheme(for: self)
+        
         setupMainConfiguration()
         setupCollectionView()
         setupDelegates()
@@ -100,10 +101,41 @@ class MapViewController: UIViewController {
         updateVisiblePoints(animated: false)
         centerMapOnData()
     }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // 1. Активируем глубокую покраску фона, текстов описаний и адаптивного светлого таб-бара
+        UIColor.applyGlobalTheme(for: self)
+        
+        // 2. НАСТРОЙКА ВЕРХНЕГО БАРА (Делаем стрелочку "Назад" и заголовок светлыми)
+        if let navBar = navigationController?.navigationBar {
+            let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1
+            let themeColor = UIColor.appBackground
+            
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = themeColor
+            
+            // Текст заголовка вверху станет белым в тёмной теме
+            appearance.titleTextAttributes = [.foregroundColor: isDark ? UIColor.white : UIColor.black]
+            
+            navBar.standardAppearance = appearance
+            navBar.scrollEdgeAppearance = appearance
+            
+            // Сама стрелочка "Назад" станет белой в тёмной теме
+            navBar.tintColor = isDark ? UIColor.white : UIColor.black
+        }
+        
+        // 3. Страховка для кастомной UIBarButtonItem кнопки "Назад" (если создавали вручную)
+        if let backButton = navigationItem.leftBarButtonItem {
+            let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1
+            backButton.tintColor = isDark ? .white : .black
+        }
+    }
+
     
     // MARK: - Первичная настройка
     private func setupMainConfiguration() {
-        view.backgroundColor = appBgColor
         
         // Создаем кастомную кнопку со стрелкой
             let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"),
@@ -205,12 +237,6 @@ class MapViewController: UIViewController {
                 ])
     }
     
-    // Добавьте эти методы внутрь класса MapViewController в основном файле
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        // Если нужно скрыть всю верхнюю панель навигации (раскомментируйте строку ниже):
-        // navigationController?.setNavigationBarHidden(true, animated: animated)
-    }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)

@@ -28,7 +28,7 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
         tf.font = .systemFont(ofSize: 32, weight: .bold)
         tf.textAlignment = .center
         tf.keyboardType = .numberPad
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.layer.cornerRadius = 16
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
@@ -49,7 +49,7 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
     private let timerLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .regular)
-        label.textColor = .systemGray
+        label.textColor = .secondaryLabel
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -58,7 +58,7 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .appBackground
         setupNavigationBar()
         setupLayout()
         

@@ -5,7 +5,6 @@ class CustomTrashCell: UITableViewCell {
     // Белая карточка-подложка для эффекта парения
     private let cardBackgroundView: UIView = {
         let view = UIView()
-        view.backgroundColor = .white
         view.layer.cornerRadius = 20
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOpacity = 0.02
@@ -90,6 +89,6 @@ class CustomTrashCell: UITableViewCell {
         statusIconImageView.image = UIImage(systemName: iconName)
         statusIconImageView.tintColor = item.isRecyclable ? UIColor(red: 0.96, green: 0.71, blue: 0.10, alpha: 1.0) : .systemRed
         
-        cardBackgroundView.backgroundColor = item.isRecyclable ? .white : UIColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1.0)
+        cardBackgroundView.backgroundColor = .systemBackground
     }
 }

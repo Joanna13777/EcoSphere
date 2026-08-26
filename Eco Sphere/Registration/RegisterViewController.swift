@@ -15,7 +15,7 @@ class RegisterViewController: UIViewController {
     let nameTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Имя и Фамилия"
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 16)
         tf.layer.cornerRadius = 16
         tf.autocorrectionType = .no
@@ -27,7 +27,7 @@ class RegisterViewController: UIViewController {
     let phoneTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Телефон"
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 16)
         tf.layer.cornerRadius = 16
         tf.keyboardType = .phonePad
@@ -39,7 +39,7 @@ class RegisterViewController: UIViewController {
     let emailTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Email"
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 16)
         tf.layer.cornerRadius = 16
         tf.keyboardType = .emailAddress
@@ -54,7 +54,7 @@ class RegisterViewController: UIViewController {
         let tf = UITextField()
         tf.placeholder = "Пароль"
         tf.isSecureTextEntry = true
-        tf.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.96, alpha: 1.0)
+        tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 16)
         tf.layer.cornerRadius = 16
         tf.setLeftPadding(16)
@@ -84,7 +84,8 @@ class RegisterViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .appBackground
+
         setupNavigationBar()
         setupLayout()            // Реализован в файле +Layout
         setupActions()           // Реализован в файле +Actions
