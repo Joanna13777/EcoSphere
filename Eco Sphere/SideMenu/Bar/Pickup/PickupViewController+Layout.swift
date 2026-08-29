@@ -46,100 +46,134 @@ extension PickupViewController {
         timePickersStack.translatesAutoresizingMaskIntoConstraints = false
         timeBorderView.addSubview(timePickersStack)
         
-        // 4. Базовые констрейнты для верхних полей
-        NSLayoutConstraint.activate([
-            wasteTypeTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            wasteTypeTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            wasteTypeTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            wasteTypeTextField.heightAnchor.constraint(equalToConstant: 48),
-            
-            pickupPointTextField.topAnchor.constraint(equalTo: wasteTypeTextField.bottomAnchor, constant: 12),
-            pickupPointTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            pickupPointTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            pickupPointTextField.heightAnchor.constraint(equalToConstant: 48)
-        ])
         
-        // 5. Динамический сдвиг интерфейса в зависимости от статуса авторизации пользователя
-        if isLoggedIn {
-            NSLayoutConstraint.activate([
-                weightTextField.topAnchor.constraint(equalTo: pickupPointTextField.bottomAnchor, constant: 12),
-                weightTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-                weightTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-                weightTextField.heightAnchor.constraint(equalToConstant: 48),
+        // ВСЕ элементы scrollView добавляем СТРОГО на contentView
+                contentView.addSubview(wasteTypeTextField)
+                contentView.addSubview(pickupPointTextField)
+                contentView.addSubview(weightTextField)
+                contentView.addSubview(dateBorderView)
+                dateBorderView.addSubview(dateTitleLabel)
+                dateBorderView.addSubview(inlineDatePicker)
                 
-                dateBorderView.topAnchor.constraint(equalTo: weightTextField.bottomAnchor, constant: 16)
-            ])
-        } else {
-            // Если гость — сначала добавляем поля ФИО, Телефона и Адреса на вью
-            view.addSubview(nameTextField)
-            view.addSubview(phoneTextField)
-            view.addSubview(addressTextField)
-            
-            NSLayoutConstraint.activate([
-                nameTextField.topAnchor.constraint(equalTo: pickupPointTextField.bottomAnchor, constant: 12),
-                nameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-                nameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-                nameTextField.heightAnchor.constraint(equalToConstant: 48),
+                contentView.addSubview(timeBorderView)
+                timeBorderView.addSubview(timeTitleLabel)
+                timeBorderView.addSubview(timePickersStack)
                 
-                phoneTextField.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 12),
-                phoneTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-                phoneTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-                phoneTextField.heightAnchor.constraint(equalToConstant: 48),
-                
-                addressTextField.topAnchor.constraint(equalTo: phoneTextField.bottomAnchor, constant: 12),
-                addressTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-                addressTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-                addressTextField.heightAnchor.constraint(equalToConstant: 48),
-                
-                weightTextField.topAnchor.constraint(equalTo: addressTextField.bottomAnchor, constant: 12),
-                weightTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-                weightTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-                weightTextField.heightAnchor.constraint(equalToConstant: 48),
-                
-                dateBorderView.topAnchor.constraint(equalTo: weightTextField.bottomAnchor, constant: 16)
-            ])
-        }
+                contentView.addSubview(sortingReminderView)
+                contentView.addSubview(descriptionTextView)
+                contentView.addSubview(orderButton)
         
-        // 6. Констрейнты для блоков ДАТЫ, ВРЕМЕНИ, НАПОМИНАЛКИ и кнопки ЗАКАЗА
-        NSLayoutConstraint.activate([
-            dateBorderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            dateBorderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            dateBorderView.heightAnchor.constraint(equalToConstant: 52),
-            
-            dateTitleLabel.leadingAnchor.constraint(equalTo: dateBorderView.leadingAnchor, constant: 16),
-            dateTitleLabel.centerYAnchor.constraint(equalTo: dateBorderView.centerYAnchor),
-            
-            inlineDatePicker.trailingAnchor.constraint(equalTo: dateBorderView.trailingAnchor, constant: -12),
-            inlineDatePicker.centerYAnchor.constraint(equalTo: dateBorderView.centerYAnchor),
-            
-            timeBorderView.topAnchor.constraint(equalTo: dateBorderView.bottomAnchor, constant: 16),
-            timeBorderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            timeBorderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            timeBorderView.heightAnchor.constraint(equalToConstant: 52),
-            
-            timeTitleLabel.leadingAnchor.constraint(equalTo: timeBorderView.leadingAnchor, constant: 16),
-            timeTitleLabel.centerYAnchor.constraint(equalTo: timeBorderView.centerYAnchor),
-            timeTitleLabel.trailingAnchor.constraint(lessThanOrEqualTo: timePickersStack.leadingAnchor, constant: -8),
-            
-            timePickersStack.trailingAnchor.constraint(equalTo: timeBorderView.trailingAnchor, constant: -12),
-            timePickersStack.centerYAnchor.constraint(equalTo: timeBorderView.centerYAnchor),
-            
-            // Карточка-напоминание теперь красиво выезжает под блоком времени
-            sortingReminderView.topAnchor.constraint(equalTo: timeBorderView.bottomAnchor, constant: 16),
-            sortingReminderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            sortingReminderView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            
-            // Поле описания плавно опускается ниже карточки-напоминания
-            descriptionTextView.topAnchor.constraint(equalTo: sortingReminderView.bottomAnchor, constant: 16),
-            descriptionTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            descriptionTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            descriptionTextView.heightAnchor.constraint(equalToConstant: 80),
-            
-            // Фирменная монолитная кнопка заказа зафиксирована в самом низу
-            orderButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            orderButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            orderButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            orderButton.heightAnchor.constraint(equalToConstant: 52)
-        ])
+        // === 2. КОНСТРЕЙНТЫ ДЛЯ СКРОЛЛА И КОНТЕЙНЕРА ===
+                NSLayoutConstraint.activate([
+                    // Привязываем scrollView к границам главного view
+                    scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                    scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                    scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                    scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                    
+                    // contentView растягивается по границам scrollView и фиксирует его ширину
+                    contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+                    contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+                    contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+                    contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+                    contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+                ])
+
+                // === 3. БАЗОВЫЕ КОНСТРЕЙНТЫ ДЛЯ ВЕРХНИХ ПОЛЕЙ (Привязка к contentView!) ===
+                NSLayoutConstraint.activate([
+                    // Самый верхний элемент привязан к topAnchor нашего contentView
+                    wasteTypeTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+                    wasteTypeTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                    wasteTypeTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                    wasteTypeTextField.heightAnchor.constraint(equalToConstant: 48),
+                    
+                    pickupPointTextField.topAnchor.constraint(equalTo: wasteTypeTextField.bottomAnchor, constant: 12),
+                    pickupPointTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                    pickupPointTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                    pickupPointTextField.heightAnchor.constraint(equalToConstant: 48)
+                ])
+                
+                // === 4. ДИНАМИЧЕСКИЙ СДВИГ ИНТЕРФЕЙСА ДЛЯ ГОСТЯ / АВТОРИЗОВАННОГО ===
+                if isLoggedIn {
+                    NSLayoutConstraint.activate([
+                        weightTextField.topAnchor.constraint(equalTo: pickupPointTextField.bottomAnchor, constant: 12),
+                        weightTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                        weightTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                        weightTextField.heightAnchor.constraint(equalToConstant: 48),
+                        
+                        dateBorderView.topAnchor.constraint(equalTo: weightTextField.bottomAnchor, constant: 16)
+                    ])
+                } else {
+                    // Если гость — добавляем поля ФИО, Телефона и Адреса на contentView
+                    contentView.addSubview(nameTextField)
+                    contentView.addSubview(phoneTextField)
+                    contentView.addSubview(addressTextField)
+                    
+                    NSLayoutConstraint.activate([
+                        nameTextField.topAnchor.constraint(equalTo: pickupPointTextField.bottomAnchor, constant: 12),
+                        nameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                        nameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                        nameTextField.heightAnchor.constraint(equalToConstant: 48),
+                        
+                        phoneTextField.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 12),
+                        phoneTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                        phoneTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                        phoneTextField.heightAnchor.constraint(equalToConstant: 48),
+                        
+                        addressTextField.topAnchor.constraint(equalTo: phoneTextField.bottomAnchor, constant: 12),
+                        addressTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                        addressTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                        addressTextField.heightAnchor.constraint(equalToConstant: 48),
+                        
+                        weightTextField.topAnchor.constraint(equalTo: addressTextField.bottomAnchor, constant: 12),
+                        weightTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                        weightTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                        weightTextField.heightAnchor.constraint(equalToConstant: 48),
+                        
+                        dateBorderView.topAnchor.constraint(equalTo: weightTextField.bottomAnchor, constant: 16)
+                    ])
+                }
+                
+                // === 5. КОНСТРЕЙНТЫ ДЛЯ ОСТАЛЬНЫХ БЛОКОВ (Привязка к contentView!) ===
+                NSLayoutConstraint.activate([
+                    dateBorderView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                    dateBorderView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                    dateBorderView.heightAnchor.constraint(equalToConstant: 52),
+                    
+                    dateTitleLabel.leadingAnchor.constraint(equalTo: dateBorderView.leadingAnchor, constant: 16),
+                    dateTitleLabel.centerYAnchor.constraint(equalTo: dateBorderView.centerYAnchor),
+                    
+                    inlineDatePicker.trailingAnchor.constraint(equalTo: dateBorderView.trailingAnchor, constant: -12),
+                    inlineDatePicker.centerYAnchor.constraint(equalTo: dateBorderView.centerYAnchor),
+                    
+                    timeBorderView.topAnchor.constraint(equalTo: dateBorderView.bottomAnchor, constant: 16),
+                    timeBorderView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                    timeBorderView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                    timeBorderView.heightAnchor.constraint(equalToConstant: 52),
+                    
+                    timeTitleLabel.leadingAnchor.constraint(equalTo: timeBorderView.leadingAnchor, constant: 16),
+                    timeTitleLabel.centerYAnchor.constraint(equalTo: timeBorderView.centerYAnchor),
+                    timeTitleLabel.trailingAnchor.constraint(lessThanOrEqualTo: timePickersStack.leadingAnchor, constant: -8),
+                    
+                    timePickersStack.trailingAnchor.constraint(equalTo: timeBorderView.trailingAnchor, constant: -12),
+                    timePickersStack.centerYAnchor.constraint(equalTo: timeBorderView.centerYAnchor),
+                    
+                    sortingReminderView.topAnchor.constraint(equalTo: timeBorderView.bottomAnchor, constant: 16),
+                    sortingReminderView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                    sortingReminderView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                    
+                    descriptionTextView.topAnchor.constraint(equalTo: sortingReminderView.bottomAnchor, constant: 16),
+                    descriptionTextView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                    descriptionTextView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                    descriptionTextView.heightAnchor.constraint(equalToConstant: 80),
+                    
+                    orderButton.topAnchor.constraint(equalTo: descriptionTextView.bottomAnchor, constant: 24),
+                    orderButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                    orderButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                    orderButton.heightAnchor.constraint(equalToConstant: 52),
+                    
+                    // ВАЖНО: Замыкаем нижний констрейнт на contentView, чтобы активировать скролл!
+                    orderButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24)
+                ])
     }
 }

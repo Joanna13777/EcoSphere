@@ -111,17 +111,7 @@ class MenuViewController: UIViewController {
         themeSwitch.addTarget(self, action: #selector(themeChanged), for: .valueChanged)
     }
     
-    // MARK: - Управление цветами экрана и Нижнего Бара (Tab Bar)
-    func applyThemeColors(isDark: Bool) {
-        let backgroundColor = ThemeManager.shared.appBackgroundColor
-        
-        view.backgroundColor = backgroundColor
-        tableView.backgroundColor = backgroundColor
-        tableView.separatorColor = ThemeManager.shared.appSeparatorColor
-        themeLabel.textColor = .label
-    }
 
-    
     @objc func menuRegisterButtonTapped() {
         let loginVC = LoginViewController()
         navigationController?.setNavigationBarHidden(false, animated: true)

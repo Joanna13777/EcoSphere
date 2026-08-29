@@ -8,10 +8,13 @@ extension PickupViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        UIColor.applyGlobalTheme(for: self)
+        // UIColor.applyGlobalTheme(for: self)
         
         // 1. Сразу задаем адаптивный цвет фона экрана
         view.backgroundColor = .appBackground
+        // добавляем скролл и его контейнер на главный view
+                view.addSubview(scrollView)
+                scrollView.addSubview(contentView)
         
         setupNavigationBar()
         
@@ -24,12 +27,30 @@ extension PickupViewController {
         // 4. В последнюю очередь вешаем клики, жесты и делегаты
         setupActions()
         setupDelegates()
+        setupKeyboardObservers() // при открытии клавиатуры экран автоматически поднимался
         
         // изменения текста в полях ввода
         let allTextFields = [
             wasteTypeTextField, pickupPointTextField, weightTextField,
             nameTextField, phoneTextField, addressTextField
         ]
+        
+        // Находим все текстовые поля и область текста на экране и добавляем им кнопку "Готово"
+        let allInputFields: [UIResponder] = [
+            wasteTypeTextField,
+            pickupPointTextField,
+            nameTextField,
+            phoneTextField,
+            addressTextField,
+            weightTextField,
+            descriptionTextView
+        ]
+        
+        // Применяем расширение к каждому элементу
+        allInputFields.forEach { $0.addDoneButtonOnKeyboard() }
+        
+        
+        
         
         allTextFields.forEach { textField in
             textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
@@ -41,49 +62,31 @@ extension PickupViewController {
         wasteTypeTextField.inputView = UIView()
         pickupPointTextField.inputView = UIView()
     }
-
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        // 1. Перекрашиваем фон экрана вывоза в наш умный цвет
-        view.backgroundColor = .appBackground
+        // Сканер сам пробежится по экрану, найдет кастомную кнопку возврата и перекрасит её!
+        //UIColor.applyGlobalTheme(for: self)
         
-        // 2. Обновляем цвета внутренних рамок карточек даты и времени под тёмную тему
+        view.backgroundColor = .appBackground
         dateBorderView.layer.borderColor = UIColor.appSeparator.cgColor
         timeBorderView.layer.borderColor = UIColor.appSeparator.cgColor
         dateBorderView.backgroundColor = .appCardBackground
         timeBorderView.backgroundColor = .appCardBackground
-        
-        // 3. Включаем отображение навигационной панели
         navigationController?.setNavigationBarHidden(false, animated: animated)
-        
-        // ФИКС СТРЕЛОЧКИ НАЗАД ЧЕРЕЗ APPEARANCE
-        if let navBar = navigationController?.navigationBar {
-            let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1
-            
-            let appearance = UINavigationBarAppearance()
-            appearance.configureWithOpaqueBackground()
-            appearance.backgroundColor = .appBackground // Фон панели сливается с темой экрана
-            
-            // Настройка цвета текста заголовка ("Вывоз вторсырья")
-            appearance.titleTextAttributes = [.foregroundColor: isDark ? UIColor.white : UIColor.black]
-            
-            // НАСТРОЙКА КНОПОК И СТРЕЛОЧКИ НАЗАД ВНУТРИ БАРА
-            let buttonAppearance = UIBarButtonItemAppearance()
-            buttonAppearance.normal.titleTextAttributes = [.foregroundColor: isDark ? UIColor.white : UIColor.black]
-            appearance.buttonAppearance = buttonAppearance
-            appearance.backButtonAppearance = buttonAppearance
-            
-            // Применяем настройки к навигационному бару
-            navBar.standardAppearance = appearance
-            navBar.scrollEdgeAppearance = appearance
-            
-            // Перекрашиваем саму стрелочку на системном уровне во время отображения
-            navBar.tintColor = isDark ? UIColor.white : UIColor.black
-        }
     }
-
-
+    
+    private func setupDismissKeyboardGesture() {
+        // Изменили dismissKeyboard на dismissKeyboardFromLifecycle
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboardFromLifecycle))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func dismissKeyboardFromLifecycle() { // Переименовали метод тут
+        view.endEditing(true)
+    }
     
     @objc private func textFieldDidChange() {
         validateFields()
@@ -94,7 +97,10 @@ extension PickupViewController {
         
         let backButton = UIButton(type: .system)
         backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        backButton.tintColor = .black
+        
+        // ИСПРАВЛЕНО: Используем наш глобальный адаптивный цвет текста вместо проверки isDark
+        backButton.tintColor = UIColor.appText
+        
         backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
         backButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -104,7 +110,6 @@ extension PickupViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backButton)
     }
 }
-
 // MARK: - Canvas Preview
 #Preview("Не зарегистрирован") {
     UserDefaults.standard.set(false, forKey: "menu_user_logged_in")

@@ -1,6 +1,21 @@
 import UIKit
 
 class PickupViewController: UIViewController {
+    
+    // скол для клавиатуры
+        let scrollView: UIScrollView = {
+            let scroll = UIScrollView()
+            scroll.showsVerticalScrollIndicator = false
+            scroll.alwaysBounceVertical = true
+            scroll.translatesAutoresizingMaskIntoConstraints = false
+            return scroll
+        }()
+        
+        let contentView: UIView = {
+            let view = UIView()
+            view.translatesAutoresizingMaskIntoConstraints = false
+            return view
+        }()
 
     // Проверяем, залогинен ли пользователь через меню
     let isLoggedIn = UserDefaults.standard.bool(forKey: "menu_user_logged_in")
@@ -111,7 +126,7 @@ class PickupViewController: UIViewController {
     let dateBorderView: UIView = {
         let view = UIView()
         view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor(red: 0.88, green: 0.88, blue: 0.88, alpha: 1.0).cgColor
+        view.layer.borderColor = UIColor.appSeparator.cgColor // Адаптивный цвет
         view.layer.cornerRadius = 12
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -120,7 +135,7 @@ class PickupViewController: UIViewController {
     let timeBorderView: UIView = {
         let view = UIView()
         view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor(red: 0.88, green: 0.88, blue: 0.88, alpha: 1.0).cgColor
+        view.layer.borderColor = UIColor.appSeparator.cgColor // Адаптивный цвет
         view.layer.cornerRadius = 12
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -151,7 +166,7 @@ class PickupViewController: UIViewController {
         tv.font = .systemFont(ofSize: 15)
         tv.backgroundColor = .white
         tv.layer.borderWidth = 1
-        tv.layer.borderColor = UIColor(red: 0.88, green: 0.88, blue: 0.88, alpha: 1.0).cgColor
+        tv.layer.borderColor = UIColor.appSeparator.cgColor // Адаптивный цвет
         tv.layer.cornerRadius = 12
         tv.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
         tv.translatesAutoresizingMaskIntoConstraints = false
@@ -209,7 +224,7 @@ class PickupViewController: UIViewController {
         let view = UIView()
         view.layer.cornerRadius = 12
         view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor(red: 0.85, green: 0.90, blue: 0.85, alpha: 1.0).cgColor
+        view.layer.borderColor = UIColor.appSeparator.cgColor // Адаптивный цвет
         view.translatesAutoresizingMaskIntoConstraints = false
         
         let iconImageView = UIImageView()
@@ -235,4 +250,57 @@ class PickupViewController: UIViewController {
         view.alpha = 0.0
         return view
     }()
+    
+    // MARK: - Keyboard Avoidance (Сдвиг экрана при появлении клавиатуры)
+    func setupKeyboardObservers() {
+        // Слушаем появление клавиатуры
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        
+        // Слушаем скрытие клавиатуры
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+    }
+
+    @objc private func keyboardWillShow(notification: NSNotification) {
+        // 1. Получаем размер клавиатуры из параметров уведомления
+        guard let userInfo = notification.userInfo,
+              let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
+        
+        let keyboardHeight = keyboardFrame.cgRectValue.height
+        
+        // 2. Увеличиваем нижний отступ у UIScrollView на высоту клавиатуры (+ запас для красоты)
+        let contentInsets = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight + 16, right: 0)
+        scrollView.contentInset = contentInsets
+        scrollView.scrollIndicatorInsets = contentInsets
+        
+        // 3. Если активно поле описания, плавно прокручиваем скролл прямо к нему
+        if descriptionTextView.isFirstResponder {
+            let rect = contentView.convert(descriptionTextView.frame, to: scrollView)
+            scrollView.scrollRectToVisible(rect, animated: true)
+        }
+    }
+
+    @objc private func keyboardWillHide(notification: NSNotification) {
+        // При закрытии клавиатуры сбрасываем отступы скролла в исходное нулевое состояние
+        let contentInsets = UIEdgeInsets.zero
+        UIView.animate(withDuration: 0.25) {
+            self.scrollView.contentInset = contentInsets
+            self.scrollView.scrollIndicatorInsets = contentInsets
+        }
+    }
+
+    // Обязательно освобождаем память от наблюдателей при уничтожении контроллера
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
 }

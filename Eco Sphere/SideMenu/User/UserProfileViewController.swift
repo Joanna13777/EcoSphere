@@ -83,7 +83,7 @@ class UserProfileViewController: UIViewController {
         let view = UIView()
         view.layer.cornerRadius = 14
         view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor(red: 0.85, green: 0.90, blue: 0.85, alpha: 1.0).cgColor
+        view.layer.borderColor = UIColor.appSeparator.cgColor
         view.translatesAutoresizingMaskIntoConstraints = false
         
         let icon = UIImageView(image: UIImage(systemName: "leaf.circle.fill"))
