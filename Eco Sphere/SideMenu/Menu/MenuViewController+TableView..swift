@@ -162,10 +162,16 @@ extension MenuViewController: UITableViewDataSource, UITableViewDelegate {
             navigationController?.pushViewController(vc, animated: true)
             
         case 2:
-            navigationController?.setNavigationBarHidden(false, animated: true)
-            let vc = SavedAddressesViewController()
-            vc.title = menuItems[indexPath.row]
-            navigationController?.pushViewController(vc, animated: true)
+//            navigationController?.setNavigationBarHidden(false, animated: true)
+//            let vc = FavoriteAddressesViewController()
+//            vc.title = menuItems[indexPath.row]
+//            navigationController?.pushViewController(vc, animated: true)
+            
+            if indexPath.row == 2 { // "Избранные адреса"
+                    let favoriteVC = FavoriteAddressesViewController()
+                    navigationController?.setNavigationBarHidden(false, animated: true)
+                    navigationController?.pushViewController(favoriteVC, animated: true)
+                }
             
         case 3:
             navigationController?.setNavigationBarHidden(false, animated: true)
