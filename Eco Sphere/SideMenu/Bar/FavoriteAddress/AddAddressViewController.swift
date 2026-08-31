@@ -1,15 +1,18 @@
-//  новый аккуратный экран формы ввода
-
 import UIKit
 
-// Протокол для передачи созданного адреса обратно на экран списка
+// Обновленный протокол: теперь умеет не только добавлять, но и обновлять
 protocol AddAddressDelegate: AnyObject {
     func didAddAddress(_ address: FavoriteAddress)
+    func didUpdateAddress(_ address: FavoriteAddress, at index: Int)
 }
 
 class AddAddressViewController: UIViewController {
     
     weak var delegate: AddAddressDelegate?
+    
+    // Свойства для режима редактирования
+    private var editingIndex: Int?
+    private var addressToEdit: FavoriteAddress?
     
     // MARK: - UI Elements
     private let titleTextField: UITextField = {
@@ -18,7 +21,7 @@ class AddAddressViewController: UIViewController {
         tf.backgroundColor = .systemGroupedBackground
         tf.font = .systemFont(ofSize: 15)
         tf.layer.cornerRadius = 12
-        tf.setLeftPadding(16) // Расширение, которое мы использовали ранее
+        tf.setLeftPadding(16)
         tf.clearButtonMode = .whileEditing
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
@@ -59,9 +62,19 @@ class AddAddressViewController: UIViewController {
         setupLayout()
         setupActions()
         
-        // Применяем кнопку "Готово" над клавиатурой к полям
         titleTextField.addDoneButtonOnKeyboard()
         addressTextField.addDoneButtonOnKeyboard()
+        
+        // Если передан адрес для редактирования, заполняем поля
+        if let address = addressToEdit {
+            titleTextField.text = address.title
+            addressTextField.text = address.address
+            title = "Редактировать"
+            
+            var config = saveButton.configuration
+            config?.attributedTitle = AttributedString("Сохранить изменения")
+            saveButton.configuration = config
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -69,9 +82,15 @@ class AddAddressViewController: UIViewController {
         UIColor.applyGlobalTheme(for: self)
     }
     
-    // MARK: - Setup
+    // MARK: - Public Setup Method (Входная точка для редактирования)
+    func configureForEditing(address: FavoriteAddress, at index: Int) {
+        self.addressToEdit = address
+        self.editingIndex = index
+    }
+    
+    // MARK: - Setup UI
     private func setupNavigationBar() {
-        title = "Новый адрес"
+        if addressToEdit == nil { title = "Новый адрес" }
         
         let backButton = UIButton(type: .system)
         backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
@@ -120,22 +139,23 @@ class AddAddressViewController: UIViewController {
     
     @objc private func saveTapped() {
         guard let name = titleTextField.text, !name.isEmpty,
-              let fullAddress = addressTextField.text, !fullAddress.isEmpty else {
-            // Простая валидация: если поля пустые, ничего не делаем
-            return
-        }
+              let fullAddress = addressTextField.text, !fullAddress.isEmpty else { return }
         
-        // В зависимости от названия подставляем системную иконку
         let lowercasedName = name.lowercased()
         var icon = "mappin.circle.fill"
         if lowercasedName.contains("дом") { icon = "house.fill" }
         else if lowercasedName.contains("раб") || lowercasedName.contains("офис") { icon = "briefcase.fill" }
         else if lowercasedName.contains("дач") { icon = "leaf.fill" }
         
-        let newAddress = FavoriteAddress(title: name, address: fullAddress, iconName: icon)
+        let resultAddress = FavoriteAddress(title: name, address: fullAddress, iconName: icon)
         
-        // Передаем объект через делегат и закрываем экран
-        delegate?.didAddAddress(newAddress)
+        // Разделяем логику: обновление старого или добавление нового
+        if let index = editingIndex {
+            delegate?.didUpdateAddress(resultAddress, at: index)
+        } else {
+            delegate?.didAddAddress(resultAddress)
+        }
+        
         navigationController?.popViewController(animated: true)
     }
 }

@@ -135,8 +135,14 @@ extension FavoriteAddressesViewController: UITableViewDataSource, UITableViewDel
     
     // Обработка нажатия на адрес
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedAddress = addresses[indexPath.row]
-        print("Выбран адрес: \(selectedAddress.title)")
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        // Открываем экран в режиме редактирования, передавая текущие данные и индекс строки
+        let editAddressVC = AddAddressViewController()
+        editAddressVC.delegate = self
+        editAddressVC.configureForEditing(address: addresses[indexPath.row], at: indexPath.row)
+        
+        navigationController?.pushViewController(editAddressVC, animated: true)
     }
     
     // Добавляем возможность удалять адреса свайпом влево (бонус для удобства)
@@ -151,12 +157,21 @@ extension FavoriteAddressesViewController: UITableViewDataSource, UITableViewDel
 // расширение для обработки данных кнопки "Добавить новый адрес"
 // MARK: - AddAddressDelegate
 extension FavoriteAddressesViewController: AddAddressDelegate {
+    
     func didAddAddress(_ address: FavoriteAddress) {
-        // Добавляем новый адрес в наш массив данных
         addresses.append(address)
-        
-        // Плавно обновляем таблицу со вставкой новой строки в конец списка
         let indexPath = IndexPath(row: addresses.count - 1, section: 0)
         tableView.insertRows(at: [indexPath], with: .automatic)
     }
+    
+    // НОВЫЙ МЕТОД: Принимает отредактированный адрес и обновляет конкретную строку таблицы
+    func didUpdateAddress(_ address: FavoriteAddress, at index: Int) {
+        // Обновляем данные в массиве
+        addresses[index] = address
+        
+        // Плавно перезагружаем только измененную ячейку
+        let indexPath = IndexPath(row: index, section: 0)
+        tableView.reloadRows(at: [indexPath], with: .automatic)
+    }
 }
+
