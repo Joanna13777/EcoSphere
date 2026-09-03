@@ -270,22 +270,36 @@ class PickupViewController: UIViewController {
         )
     }
 
-    @objc private func keyboardWillShow(notification: NSNotification) {
-        // 1. Получаем размер клавиатуры из параметров уведомления
+    @objc func keyboardWillShow(notification: NSNotification) {
+        // На этом экране нет выпадающих списков, строчку скрытия меню вызывать не нужно
+        
         guard let userInfo = notification.userInfo,
               let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
-        
         let keyboardHeight = keyboardFrame.cgRectValue.height
         
-        // 2. Увеличиваем нижний отступ у UIScrollView на высоту клавиатуры (+ запас для красоты)
-        let contentInsets = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight + 16, right: 0)
+        // 1. Обновляем инсеты скролла
+        let contentInsets = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight + 20, right: 0)
         scrollView.contentInset = contentInsets
         scrollView.scrollIndicatorInsets = contentInsets
         
-        // 3. Если активно поле описания, плавно прокручиваем скролл прямо к нему
-        if descriptionTextView.isFirstResponder {
-            let rect = contentView.convert(descriptionTextView.frame, to: scrollView)
-            scrollView.scrollRectToVisible(rect, animated: true)
+        // 2. БЕЗОПАСНЫЙ АВТОПОДЪЕМ: проверяем, какое из полей заказа активно
+        let allFields: [UIView] = [wasteTypeTextField, pickupPointTextField, weightTextField, descriptionTextView]
+        
+        // Ищем активное поле (для TextView проверяем через isFirstResponder)
+        if let activeField = allFields.first(where: { $0.isFirstResponder }) {
+            let rect = contentView.convert(activeField.frame, to: scrollView)
+            
+            // Защита CoreGraphics от NaN
+            let isRectValid = !rect.origin.x.isNaN && !rect.origin.x.isInfinite &&
+                              !rect.origin.y.isNaN && !rect.origin.y.isInfinite &&
+                              !rect.size.width.isNaN && !rect.size.width.isInfinite &&
+                              !rect.size.height.isNaN && !rect.size.height.isInfinite
+            
+            if isRectValid {
+                scrollView.scrollRectToVisible(rect, animated: true)
+            } else {
+                print("⚠️ Предотвращен сбой CoreGraphics в Заказе: rect содержал NaN координаты.")
+            }
         }
     }
 

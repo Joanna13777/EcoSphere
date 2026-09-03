@@ -31,8 +31,8 @@ class SortingViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        // 1. Активируем глубокую покраску фона, текстов описаний и адаптивного светлого таб-бара
-        UIColor.applyGlobalTheme(for: self)
+        // Красим фон, поля, навигационный бар
+            UIColor.applyGlobalTheme(for: self)
         
         // 2. НАСТРОЙКА ВЕРХНЕГО БАРА (Делаем стрелочку "Назад" и заголовок светлыми)
         if let navBar = navigationController?.navigationBar {

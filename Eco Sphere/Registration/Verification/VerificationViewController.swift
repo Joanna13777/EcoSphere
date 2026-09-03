@@ -71,6 +71,8 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // Красим фон, поля, навигационный бар
+            UIColor.applyGlobalTheme(for: self)
         codeTextField.becomeFirstResponder()
         // Включаем видимость бара навигации, чтобы кнопка Назад отображалась
         navigationController?.setNavigationBarHidden(false, animated: animated)

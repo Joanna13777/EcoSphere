@@ -1,84 +1,89 @@
-// Файл логики и констрейнтов — для сборки и обработки нажатий
-
 import UIKit
 
-// MARK: - Верстка и Логика экрана профиля
 extension UserProfileViewController {
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .appBackground
-        title = "Профиль"
-        
-        setupLayout()
-        setupActions()
-    }
+    // Создаем скролл-контейнеры прямо в расширении
+    private static let scrollView: UIScrollView = {
+        let scroll = UIScrollView()
+        scroll.showsVerticalScrollIndicator = false
+        scroll.alwaysBounceVertical = true
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        return scroll
+    }()
     
-    private func setupLayout() {
-        view.addSubview(avatarImageView)
-        view.addSubview(userNameLabel)
-        view.addSubview(userPhoneLabel)
-        view.addSubview(addressCardView)
-        view.addSubview(ecoBonusCardView)
-        view.addSubview(logoutButton)
+    private static let contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    /// Основной метод для сборки интерфейса профиля
+    func setupLayout() {
+        let scrollView = Self.scrollView
+        let contentView = Self.contentView
         
+        // 1. Иерархия добавления элементов
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        
+        contentView.addSubview(avatarImageView)
+        contentView.addSubview(userNameLabel)
+        contentView.addSubview(userPhoneLabel)
+        contentView.addSubview(addressCardView)
+        contentView.addSubview(ecoBonusCardView)
+        contentView.addSubview(logoutButton)
+        
+        // Настройка скругления аватара (100x100 / 2 = 50 для идеального круга)
+        avatarImageView.layer.cornerRadius = 50
+        
+        // 2. Констрейнты для ScrollView и ContentView
         NSLayoutConstraint.activate([
-            // Блок аватара
-            avatarImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            avatarImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            avatarImageView.widthAnchor.constraint(equalToConstant: 90),
-            avatarImageView.heightAnchor.constraint(equalToConstant: 90),
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+        ])
+        
+        // 3. Констрейнты для элементов профиля (привязка к contentView)
+        NSLayoutConstraint.activate([
+            // Аватар по центру сверху
+            avatarImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 32),
+            avatarImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            avatarImageView.widthAnchor.constraint(equalToConstant: 100),
+            avatarImageView.heightAnchor.constraint(equalToConstant: 100),
             
             // Имя пользователя
-            userNameLabel.topAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: 12),
-            userNameLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            userNameLabel.topAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: 16),
+            userNameLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
             // Телефон пользователя
-            userPhoneLabel.topAnchor.constraint(equalTo: userNameLabel.bottomAnchor, constant: 4),
-            userPhoneLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            userPhoneLabel.topAnchor.constraint(equalTo: userNameLabel.bottomAnchor, constant: 6),
+            userPhoneLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
             // Карточка адреса
             addressCardView.topAnchor.constraint(equalTo: userPhoneLabel.bottomAnchor, constant: 32),
-            addressCardView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            addressCardView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            addressCardView.heightAnchor.constraint(equalToConstant: 72),
+            addressCardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            addressCardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
             // Карточка эко-бонусов
             ecoBonusCardView.topAnchor.constraint(equalTo: addressCardView.bottomAnchor, constant: 16),
-            ecoBonusCardView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            ecoBonusCardView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            ecoBonusCardView.heightAnchor.constraint(equalToConstant: 56),
+            ecoBonusCardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            ecoBonusCardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            ecoBonusCardView.heightAnchor.constraint(equalToConstant: 72), // Фиксированная высота для баланса
             
-            // Кнопка выхода привязана к низу экрана
-            logoutButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-            logoutButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            logoutButton.heightAnchor.constraint(equalToConstant: 44)
+            // Кнопка выхода (В самом низу с отступом)
+            logoutButton.topAnchor.constraint(equalTo: ecoBonusCardView.bottomAnchor, constant: 40),
+            logoutButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            logoutButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            // Замыкаем нижний констрейнт на контейнер для активации скролла
+            logoutButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32)
         ])
     }
-    
-    private func setupActions() {
-        logoutButton.addTarget(self, action: #selector(logoutTapped), for: .touchUpInside)
-    }
-    
-    @objc private func logoutTapped() {
-        let alert = UIAlertController(title: "Выйти из профиля?", message: "Вам придется заново вводить данные при оформлении заказа.", preferredStyle: .alert)
-        
-        alert.addAction(UIAlertAction(title: "Отмена", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "Выйти", style: .destructive) { _ in
-            // Меняем статус авторизации в UserDefaults
-            UserDefaults.standard.set(false, forKey: "menu_user_logged_in")
-            
-            // Закрываем экран или возвращаемся на главный
-            self.navigationController?.popViewController(animated: true)
-        })
-        
-        present(alert, animated: true)
-    }
 }
-
-// MARK: - Canvas Preview для экрана профиля
-#Preview {
-    let profileVC = UserProfileViewController()
-    return UINavigationController(rootViewController: profileVC)
-}
-

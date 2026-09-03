@@ -4,9 +4,9 @@ class FavoriteAddressesViewController: UIViewController {
     
     // Тестовый массив данных
     private var addresses: [FavoriteAddress] = [
-        FavoriteAddress(title: "Дом", address: "г. Москва, ул. Ленина, д. 12, кв. 45", iconName: "house.fill"),
-        FavoriteAddress(title: "Работа", address: "г. Москва, Новинский бульвар, д. 31, офис 402", iconName: "briefcase.fill"),
-        FavoriteAddress(title: "Дача", address: "Московская область, поселок Светлый, ул. Садовая, д. 7", iconName: "leaf.fill")
+        FavoriteAddress(title: "Дом", address: "г. Ташкент, Мирзо-Улугбекский район, ул. Мустакиллик, д. 86", iconName: "house.fill"),
+        FavoriteAddress(title: "Работа", address: "г. Ташкент, Юнусабадский район, пр-т Амира Темура, д. 107B", iconName: "briefcase.fill"),
+        FavoriteAddress(title: "Дача", address: "Ташкентская область, Бостанлыкский район, Чарвак", iconName: "leaf.fill")
     ]
     
     // MARK: - UI Elements

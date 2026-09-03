@@ -48,10 +48,11 @@ class ArticleDetailViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: animated)
         
-        // Считываем и обновляем тему экрана при каждом открытии статьи
-        UIColor.applyGlobalTheme(for: self)
+        // Красим фон, поля, навигационный бар
+            UIColor.applyGlobalTheme(for: self)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+
         configureData() // Вызовется из +Logic.swift
     }
     

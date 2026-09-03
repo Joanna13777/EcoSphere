@@ -78,6 +78,8 @@ class LoginViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // Красим фон, поля, навигационный бар
+            UIColor.applyGlobalTheme(for: self)
         emailTextField.becomeFirstResponder()
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }

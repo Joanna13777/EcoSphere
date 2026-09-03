@@ -94,6 +94,8 @@ class RegisterViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // Красим фон, поля, навигационный бар
+            UIColor.applyGlobalTheme(for: self)
         nameTextField.becomeFirstResponder()
     }
     

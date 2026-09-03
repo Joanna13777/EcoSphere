@@ -27,6 +27,10 @@ class HistoryViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        // Красим фон, поля, навигационный бар
+            UIColor.applyGlobalTheme(for: self)
+        
         // Глобальный перехватчик Swizzling сам настроит цвета баров и стрелочек,
         // поэтому просто активируем отображение панели:
         navigationController?.setNavigationBarHidden(false, animated: animated)

@@ -1,4 +1,4 @@
-// Экран рарегистрипрованного пользователя только с объявлением UI-элементов
+// Экран зарегистрированного пользователя с объявлением UI-элементов и адаптивной темой
 
 import UIKit
 
@@ -8,7 +8,8 @@ class UserProfileViewController: UIViewController {
     let avatarImageView: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(systemName: "person.crop.circle.fill")
-        iv.tintColor = UIColor(red: 0.18, green: 0.18, blue: 0.18, alpha: 1.0)
+        // Заменили жесткий темно-серый на адаптивный системный цвет
+        iv.tintColor = .systemGray3
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
         iv.translatesAutoresizingMaskIntoConstraints = false
@@ -19,7 +20,7 @@ class UserProfileViewController: UIViewController {
         let label = UILabel()
         label.text = "Иван Иванов"
         label.font = .systemFont(ofSize: 20, weight: .bold)
-        label.textColor = .label
+        label.textColor = .appText // Наш адаптивный цвет текста
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -28,7 +29,7 @@ class UserProfileViewController: UIViewController {
         let label = UILabel()
         label.text = "+998 90 123 45 67"
         label.font = .systemFont(ofSize: 14, weight: .regular)
-        label.textColor = .secondaryLabel
+        label.textColor = .appSecondaryText // Наш адаптивный серый текст
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -36,23 +37,26 @@ class UserProfileViewController: UIViewController {
     // MARK: - Информационные карточки (Адрес и Бонусы)
     let addressCardView: UIView = {
         let view = UIView()
+        view.backgroundColor = .appCardBackground // Адаптивный фон для карточек
         view.layer.cornerRadius = 14
+        view.layer.borderWidth = 1
+        view.layer.borderColor = UIColor.appSeparator.cgColor // Адаптивная рамка
         view.translatesAutoresizingMaskIntoConstraints = false
         
         let icon = UIImageView(image: UIImage(systemName: "mappin.circle.fill"))
-        icon.tintColor = .secondaryLabel
+        icon.tintColor = .appSecondaryText
         icon.translatesAutoresizingMaskIntoConstraints = false
         
         let title = UILabel()
         title.text = "Основной адрес доставки"
         title.font = .systemFont(ofSize: 12, weight: .regular)
-        title.textColor = .secondaryLabel
+        title.textColor = .appSecondaryText
         title.translatesAutoresizingMaskIntoConstraints = false
         
         let value = UILabel()
         value.text = "ул. Амира Темура, дом 14, кв. 25"
         value.font = .systemFont(ofSize: 15, weight: .medium)
-        value.textColor = .black
+        value.textColor = .appText // ИСПРАВЛЕНО: Заменили .black на адаптивный текст, чтобы он не пропадал в темной теме
         value.numberOfLines = 2
         value.translatesAutoresizingMaskIntoConstraints = false
         
@@ -81,25 +85,26 @@ class UserProfileViewController: UIViewController {
     
     let ecoBonusCardView: UIView = {
         let view = UIView()
+        view.backgroundColor = .systemGreen.withAlphaComponent(0.08) // Мягкий адаптивный зеленый фон
         view.layer.cornerRadius = 14
         view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor.appSeparator.cgColor
+        view.layer.borderColor = UIColor.customReminderBorder.cgColor // Наша адаптивная зеленая рамка
         view.translatesAutoresizingMaskIntoConstraints = false
         
         let icon = UIImageView(image: UIImage(systemName: "leaf.circle.fill"))
-        icon.tintColor = UIColor(red: 0.27, green: 0.54, blue: 0.35, alpha: 1.0)
+        icon.tintColor = .systemGreen
         icon.translatesAutoresizingMaskIntoConstraints = false
         
         let title = UILabel()
         title.text = "Эко-бонусы"
         title.font = .systemFont(ofSize: 13, weight: .medium)
-        title.textColor = UIColor(red: 0.15, green: 0.25, blue: 0.18, alpha: 1.0)
+        title.textColor = .customReminderText // Адаптивный темно-зеленый текст
         title.translatesAutoresizingMaskIntoConstraints = false
         
         let score = UILabel()
         score.text = "1,250 Б"
         score.font = .systemFont(ofSize: 22, weight: .bold)
-        score.textColor = UIColor(red: 0.27, green: 0.54, blue: 0.35, alpha: 1.0)
+        score.textColor = .customReminderText // Адаптивный зеленый счет
         score.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(icon)
@@ -139,4 +144,40 @@ class UserProfileViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
+    
+    // MARK: - Lifecycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupThemeObserver() // Запуск автоматического отслеживания темы для CGColor рамок
+        setupLayout()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Красим системный навигационный бар и подложку экрана под текущую тему приложения
+        UIColor.applyGlobalTheme(for: self)
+    }
+    
+    // MARK: - Логика динамического изменения темы (iOS 17+)
+    private func setupThemeObserver() {
+        if #available(iOS 17.0, *) {
+            registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (vc: UserProfileViewController, _) in
+                vc.refreshLayers()
+            }
+        }
+    }
+    
+    private func refreshLayers() {
+        addressCardView.layer.borderColor = UIColor.appSeparator.cgColor
+        ecoBonusCardView.layer.borderColor = UIColor.customReminderBorder.cgColor
+    }
+    
+    @available(iOS, deprecated: 17.0, message: "Use registerForTraitChanges instead")
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 17.0, *) { return }
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            refreshLayers()
+        }
+    }
 }

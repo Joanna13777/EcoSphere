@@ -1,143 +1,170 @@
+// Здесь остаются только UI-компоненты, фабричный метод и методы жизненного цикла (viewDidLoad, viewWillAppear).
+
 import UIKit
+import MapKit
 
-class EditProfileViewController: UIViewController {
-    
-    // MARK: - UI Элементы (Аватар)
-    let avatarImageView: UIImageView = {
-        let iv = UIImageView()
-        iv.image = UIImage(systemName: "person.crop.circle.fill") // По умолчанию пустой серый круг
-        iv.tintColor = UIColor(red: 0.82, green: 0.82, blue: 0.84, alpha: 1.0)
-        let imageConfig = UIImage.SymbolConfiguration(weight: .ultraLight)
-        iv.preferredSymbolConfiguration = imageConfig
-        iv.contentMode = .scaleAspectFill
-        iv.layer.cornerRadius = 55
-        iv.clipsToBounds = true
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        return iv
-    }()
-    
-    let editPhotoLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Фото аккаунта"
-        label.font = .systemFont(ofSize: 13, weight: .regular)
-        label.textColor = UIColor.secondaryLabel
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    let editIconImageView: UIImageView = {
-        let iv = UIImageView()
-        iv.image = UIImage(systemName: "pencil")
-        iv.tintColor = UIColor.secondaryLabel
-        iv.contentMode = .scaleAspectFit
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        return iv
-    }()
-    
-    // MARK: - Поля ввода (Текстовые поля с разделителями)
-    let nameTextField = createProfileTextField(placeholder: "Имя")
-    let surnameTextField = createProfileTextField(placeholder: "Фамилия")
-    let cityTextField = createProfileTextField(placeholder: "Город")
-    let addressTextField = createProfileTextField(placeholder: "Адрес")
-    let phoneTextField = createProfileTextField(placeholder: "Телефон")
-    let emailTextField = createProfileTextField(placeholder: "Эл. почта")
-    
-    // MARK: - Нижняя кнопка действия
-    let saveButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        
-        var titleAttr = AttributedString("Сохранить")
-        titleAttr.font = .systemFont(ofSize: 15, weight: .semibold)
-        config.attributedTitle = titleAttr
-        config.background.cornerRadius = 10
-        
-        let button = UIButton(configuration: config, primaryAction: nil)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Автоматическое управление цветами при нажатии и изменении состояния
-        button.configurationUpdateHandler = { btn in
-            guard var updatedConfig = btn.configuration else { return }
-            
-            // Проверяем, заполнено ли имя или фамилия (чтобы знать, активна ли кнопка)
-            let isNameFilled = !(btn.superview?.subviews.compactMap { $0 as? UITextField }.first { $0.placeholder == "Имя" }?.text?.isEmpty ?? true)
-            
-            if btn.isHighlighted {
-                // СОСТОЯНИЕ: Кнопка зажата пальцем — делаем её более темной/оранжевой
-                updatedConfig.baseBackgroundColor = UIColor(red: 0.85, green: 0.69, blue: 0.15, alpha: 1.0)
-                updatedConfig.baseForegroundColor = .black
-            } else {
-                // СОСТОЯНИЕ: Кнопка отпущена
-                // Здесь дублируем вашу логику проверки текста из метода textFieldDidChange
-                updatedConfig.baseBackgroundColor = UIColor(red: 0.98, green: 0.82, blue: 0.24, alpha: 1.0) // Желтый
-                updatedConfig.baseForegroundColor = .black
-            }
-            
-            btn.configuration = updatedConfig
-        }
-        
-        return button
-    }()
+protocol EditProfileDelegate: AnyObject {
+    func didUpdateProfileData()
+}
 
+class EditProfileViewController: UIViewController, UINavigationControllerDelegate {
     
-    // MARK: - Кастомный всплывающий Toast "Сохранено"
-    let toastView: UIView = {
+    // MARK: - Properties
+    weak var delegate: EditProfileDelegate?
+    var citiesDropDownView: SortingDropDownView?
+    var isDropDownVisible = false
+    let geocoder = CLGeocoder()
+    
+    // MARK: - UI Elements (Containers)
+    let scrollView: UIScrollView = {
+        let scroll = UIScrollView()
+        scroll.showsVerticalScrollIndicator = false
+        scroll.alwaysBounceVertical = true
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        return scroll
+    }()
+    
+    let contentView: UIView = {
         let view = UIView()
-        view.layer.cornerRadius = 10
-        view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOpacity = 0.1
-        view.layer.shadowOffset = CGSize(width: 0, height: 4)
-        view.layer.shadowRadius = 8
-        view.alpha = 0.0 // Скрыт по умолчанию
         view.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Иконка зеленой галочки
-        let checkIcon = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
-        checkIcon.tintColor = UIColor(red: 0.22, green: 0.69, blue: 0.39, alpha: 1.0)
-        checkIcon.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Текст сообщения
-        let messageLabel = UILabel()
-        messageLabel.text = "Сохранено"
-        messageLabel.font = .systemFont(ofSize: 15, weight: .medium)
-        messageLabel.textColor = .label
-        messageLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(checkIcon)
-        view.addSubview(messageLabel)
-        
-        NSLayoutConstraint.activate([
-            checkIcon.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            checkIcon.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            checkIcon.widthAnchor.constraint(equalToConstant: 24),
-            checkIcon.heightAnchor.constraint(equalToConstant: 24),
-            
-            messageLabel.leadingAnchor.constraint(equalTo: checkIcon.trailingAnchor, constant: 12),
-            messageLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            messageLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
-        
         return view
     }()
     
-    // MARK: - Вспомогательный статический метод для чистой генерации полей
-    private static func createProfileTextField(placeholder: String) -> UITextField {
+    // MARK: - UI Elements (Profile Views)
+    let avatarImageView: UIImageView = {
+        let iv = UIImageView()
+        iv.image = UIImage(systemName: "person.crop.circle.fill")
+        iv.tintColor = .systemGray4
+        iv.contentMode = .scaleAspectFill
+        iv.clipsToBounds = true
+        iv.isUserInteractionEnabled = true
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+    
+    let changeAvatarButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        var titleAttr = AttributedString("Изменить фото")
+        titleAttr.font = .systemFont(ofSize: 14, weight: .medium)
+        config.attributedTitle = titleAttr
+        config.image = UIImage(systemName: "pencil")
+        config.imagePlacement = .trailing
+        config.imagePadding = 6
+        config.baseForegroundColor = .systemGray
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    let nameTextField = EditProfileViewController.createProfileTextField(placeholder: "Имя")
+    let surnameTextField = EditProfileViewController.createProfileTextField(placeholder: "Фамилия")
+    let cityTextField = EditProfileViewController.createProfileTextField(placeholder: "Город", hasChevron: true)
+    let addressTextField = EditProfileViewController.createProfileTextField(placeholder: "Адрес", hasMapIcon: true)
+    let phoneTextField = EditProfileViewController.createProfileTextField(placeholder: "Телефон", keyboardType: .phonePad)
+    let emailTextField = EditProfileViewController.createProfileTextField(placeholder: "Эл. почта", keyboardType: .emailAddress)
+    
+    let saveButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.baseBackgroundColor = .label
+        config.background.cornerRadius = 14
+        config.attributedTitle = AttributedString("Сохранить")
+        config.baseForegroundColor = .systemBackground
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    // MARK: - Lifecycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupNavigationBar()
+        setupLayout() // Вызов из файла +Layout.swift
+        setupKeyboardInteractions()
+        setupDelegatesAndActions()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // 1. Применяем глобальную тему оформления (светлая/темная)
+        UIColor.applyGlobalTheme(for: self)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+        
+        // 2. ЗАГРУЖАЕМ ДАННЫЕ ИЗ ПАМЯТИ ОБРАТНО В ТЕКСТОВЫЕ ПОЛЯ
+        let defaults = UserDefaults.standard
+        
+        // Разделяем сохраненную строку полного имени обратно на Имя и Фамилию
+        if let fullName = defaults.string(forKey: "user_profile_name"), !fullName.isEmpty {
+            let components = fullName.components(separatedBy: " ")
+            nameTextField.text = components.first
+            if components.count > 1 {
+                surnameTextField.text = components.dropFirst().joined(separator: " ")
+            }
+        }
+        
+        // Загружаем остальные поля
+        cityTextField.text = defaults.string(forKey: "user_profile_city") ?? "Ташкент"
+        
+        // --- НАЧАЛО ИСПРАВЛЕНИЯ: АВТО-ОЧИСТКА АДРЕСА ПРИ ЗАГРУЗКЕ ЭКРАНА ---
+        let rawAddress = defaults.string(forKey: "user_profile_address") ?? ""
+        let pattern = "(?i)(г\\.?\\s*)?ташкент\\s*,?\\s*"
+        
+        // Стираем слово "Ташкент" и "г."
+        var cleanLoadedAddress = rawAddress.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+        cleanLoadedAddress = cleanLoadedAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Убираем случайную запятую в начале, если она осталась
+        if cleanLoadedAddress.hasPrefix(",") { cleanLoadedAddress.removeFirst() }
+        
+        // Записываем финальный чистый адрес в поле
+        addressTextField.text = cleanLoadedAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+        
+        phoneTextField.text = defaults.string(forKey: "user_profile_phone") ?? "+"
+        emailTextField.text = defaults.string(forKey: "user_profile_email") ?? ""
+        
+        // Загружаем и устанавливаем сохраненное фото аватара
+        if let avatarData = defaults.data(forKey: "user_profile_avatar_data"),
+           let savedImage = UIImage(data: avatarData) {
+            avatarImageView.image = savedImage
+        } else {
+            avatarImageView.image = UIImage(systemName: "person.crop.circle.fill")
+        }
+    }
+
+
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    // MARK: - Factory Method
+    private static func createProfileTextField(placeholder: String, keyboardType: UIKeyboardType = .default, hasMapIcon: Bool = false, hasChevron: Bool = false) -> UITextField {
         let tf = UITextField()
         tf.placeholder = placeholder
-        tf.font = .systemFont(ofSize: 14)
-        tf.textColor = .black
+        tf.backgroundColor = .systemGroupedBackground
+        tf.font = .systemFont(ofSize: 15)
+        tf.layer.cornerRadius = 12
+        tf.keyboardType = keyboardType
+        tf.clearButtonMode = (hasMapIcon || hasChevron) ? .never : .whileEditing
+        tf.setLeftPadding(16)
         
-        // Добавляем кастомную линию разделителя вниз каждого поля
-        let bottomLine = UIView()
-        bottomLine.backgroundColor = UIColor(red: 0.90, green: 0.90, blue: 0.92, alpha: 1.0)
-        bottomLine.translatesAutoresizingMaskIntoConstraints = false
-        tf.addSubview(bottomLine)
+        if hasMapIcon {
+            let mapButton = UIButton(type: .system)
+            mapButton.setImage(UIImage(systemName: "map.fill"), for: .normal)
+            mapButton.tintColor = .systemGray
+            mapButton.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+            tf.rightView = mapButton
+            tf.rightViewMode = .always
+        }
         
-        NSLayoutConstraint.activate([
-            bottomLine.leadingAnchor.constraint(equalTo: tf.leadingAnchor),
-            bottomLine.trailingAnchor.constraint(equalTo: tf.trailingAnchor),
-            bottomLine.bottomAnchor.constraint(equalTo: tf.bottomAnchor),
-            bottomLine.heightAnchor.constraint(equalToConstant: 1)
-        ])
+        if hasChevron {
+            let chevronImageView = UIImageView(image: UIImage(systemName: "chevron.down"))
+            chevronImageView.tintColor = .systemGray2
+            chevronImageView.contentMode = .center
+            chevronImageView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+            tf.rightView = chevronImageView
+            tf.rightViewMode = .always
+        }
         
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf

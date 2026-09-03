@@ -9,14 +9,14 @@ class AboutViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        // Красим фон, поля, навигационный бар
+            UIColor.applyGlobalTheme(for: self)
         // 1. Показываем навигационную панель
         navigationController?.setNavigationBarHidden(false, animated: animated)
         
         // 2. Смываем текст "Back" с кнопки "Назад", оставляя только чистую стрелочку
         navigationItem.backButtonTitle = ""
-        
-        // 3. Принудительно запускаем покраску фона, текстов и верхнего бара под актуальную тему!
-        UIColor.applyGlobalTheme(for: self)
     }
     
     // MARK: - Настройка разметки

@@ -31,6 +31,37 @@ class MenuViewController: UIViewController {
         return toggle
     }()
     
+    // MARK: - Элементы шапки профиля (Вставьте под themeSwitch)
+    let headerAvatarImageView: UIImageView = {
+        let iv = UIImageView()
+        iv.image = UIImage(systemName: "person.crop.circle.fill")
+        iv.tintColor = .systemGray3
+        iv.contentMode = .scaleAspectFill
+        iv.layer.cornerRadius = 30 // Круг радиусом 60x60
+        iv.clipsToBounds = true
+        iv.isUserInteractionEnabled = true
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+    
+    let headerNameLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Имя не указано"
+        label.font = .systemFont(ofSize: 18, weight: .bold)
+        label.textColor = .label // Адаптивный цвет (черный/белый)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    let headerPhoneLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Номер не указан"
+        label.font = .systemFont(ofSize: 13, weight: .regular)
+        label.textColor = .secondaryLabel
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -105,7 +136,47 @@ class MenuViewController: UIViewController {
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "MenuCell")
         tableView.tableFooterView = UIView()
+        
+        // СОЗДАЕМ КОНТЕЙНЕР ШАПКИ С ЖЕСТКИМИ БЕЗОПАСНЫМИ ТЕКУЩИМИ РАЗМЕРАМИ ---
+        // Используем ширину экрана view.bounds.width вместо нуля, чтобы исключить NaN ошибки
+        let headerContainer = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 100))
+        headerContainer.backgroundColor = .clear
+        
+        // Включаем авторезирование, чтобы UIKit правильно считывал размеры контейнера внутри таблицы
+        headerContainer.autoresizingMask = [.flexibleWidth]
+        
+        headerContainer.addSubview(headerAvatarImageView)
+        headerContainer.addSubview(headerNameLabel)
+        headerContainer.addSubview(headerPhoneLabel)
+        
+        NSLayoutConstraint.activate([
+            // Привязываем аватар к левому краю контейнера
+            headerAvatarImageView.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor, constant: 20),
+            headerAvatarImageView.centerYAnchor.constraint(equalTo: headerContainer.centerYAnchor),
+            headerAvatarImageView.widthAnchor.constraint(equalToConstant: 60),
+            headerAvatarImageView.heightAnchor.constraint(equalToConstant: 60),
+            
+            // Привязываем лейбл имени
+            headerNameLabel.leadingAnchor.constraint(equalTo: headerAvatarImageView.trailingAnchor, constant: 16),
+            // Привязываем строго к краям CONTAINER, а не абстрактных вьюх
+            headerNameLabel.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -20),
+            headerNameLabel.topAnchor.constraint(equalTo: headerAvatarImageView.topAnchor, constant: 4),
+            
+            // Привязываем телефон
+            headerPhoneLabel.leadingAnchor.constraint(equalTo: headerNameLabel.leadingAnchor),
+            headerPhoneLabel.trailingAnchor.constraint(equalTo: headerNameLabel.trailingAnchor),
+            headerPhoneLabel.topAnchor.constraint(equalTo: headerNameLabel.bottomAnchor, constant: 4)
+        ])
+        
+        // Назначаем контейнер в таблицу
+        tableView.tableHeaderView = headerContainer
+        
+        // Делаем шапку кликабельной для перехода в профиль
+        let tap = UITapGestureRecognizer(target: self, action: #selector(openProfileDetails))
+        headerContainer.addGestureRecognizer(tap)
     }
+
+
     
     private func setupActions() {
         themeSwitch.addTarget(self, action: #selector(themeChanged), for: .valueChanged)

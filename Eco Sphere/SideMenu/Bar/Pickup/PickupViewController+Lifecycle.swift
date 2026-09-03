@@ -65,9 +65,8 @@ extension PickupViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        // Сканер сам пробежится по экрану, найдет кастомную кнопку возврата и перекрасит её!
-        //UIColor.applyGlobalTheme(for: self)
+        // Красим фон, поля, навигационный бар
+           UIColor.applyGlobalTheme(for: self)
         
         view.backgroundColor = .appBackground
         dateBorderView.layer.borderColor = UIColor.appSeparator.cgColor
