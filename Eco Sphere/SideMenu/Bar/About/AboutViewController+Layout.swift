@@ -6,20 +6,19 @@ extension AboutViewController {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         
-        contentView.addSubview(logoImageView)
-        contentView.addSubview(appNameLabel)
-        contentView.addSubview(versionLabel)
+        contentView.addSubview(infoImageView)
+        contentView.addSubview(mainTitleLabel)
+        contentView.addSubview(introBody)
         
-        contentView.addSubview(missionCardView)
-        missionCardView.addSubview(missionTitleLabel)
-        missionCardView.addSubview(missionDescriptionLabel)
+        contentView.addSubview(userTitle)
+        contentView.addSubview(userBody)
         
-        contentView.addSubview(contactsTitleLabel)
-        contentView.addSubview(phoneButton)
-        contentView.addSubview(telegramButton)
-        contentView.addSubview(emailButton)
+        contentView.addSubview(companyTitle)
+        contentView.addSubview(companyBody)
         
-        // 1. Констрейнты для контейнеров скролла
+        contentView.addSubview(AgreementCardView)
+        
+        // 1. Констрейнты скролл-контейнеров
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -33,56 +32,48 @@ extension AboutViewController {
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
         ])
         
-        // 2. Констрейнты элементов интерфейса (привязка к contentView)
+        // 2. Последовательный спуск контента договора сверху вниз
         NSLayoutConstraint.activate([
-            // Блок бренда (Логотип, Название, Версия)
-            logoImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 28),
-            logoImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            logoImageView.widthAnchor.constraint(equalToConstant: 72),
-            logoImageView.heightAnchor.constraint(equalToConstant: 72),
+            // верхний отступ иконки
+            infoImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
+            infoImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            infoImageView.widthAnchor.constraint(equalToConstant: 44),
+            infoImageView.heightAnchor.constraint(equalToConstant: 44),
             
-            appNameLabel.topAnchor.constraint(equalTo: logoImageView.bottomAnchor, constant: 12),
-            appNameLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            // Подтягиваем главный заголовок
+            mainTitleLabel.topAnchor.constraint(equalTo: infoImageView.bottomAnchor, constant: 8),
+            mainTitleLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             
-            versionLabel.topAnchor.constraint(equalTo: appNameLabel.bottomAnchor, constant: 4),
-            versionLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            // Подтягиваем вводный текст ближе к заголовку
+            introBody.topAnchor.constraint(equalTo: mainTitleLabel.bottomAnchor, constant: 12),
+            introBody.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            introBody.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
-            // Карточка миссии
-            missionCardView.topAnchor.constraint(equalTo: versionLabel.bottomAnchor, constant: 32),
-            missionCardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            missionCardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            // Раздел 1 (Пользователь)
+            userTitle.topAnchor.constraint(equalTo: introBody.bottomAnchor, constant: 20), // уменьшено с 24
+            userTitle.leadingAnchor.constraint(equalTo: introBody.leadingAnchor),
+            userTitle.trailingAnchor.constraint(equalTo: introBody.trailingAnchor),
             
-            missionTitleLabel.topAnchor.constraint(equalTo: missionCardView.topAnchor, constant: 16),
-            missionTitleLabel.leadingAnchor.constraint(equalTo: missionCardView.leadingAnchor, constant: 16),
-            missionTitleLabel.trailingAnchor.constraint(equalTo: missionCardView.trailingAnchor, constant: -16),
+            userBody.topAnchor.constraint(equalTo: userTitle.bottomAnchor, constant: 8),
+            userBody.leadingAnchor.constraint(equalTo: introBody.leadingAnchor),
+            userBody.trailingAnchor.constraint(equalTo: introBody.trailingAnchor),
             
-            missionDescriptionLabel.topAnchor.constraint(equalTo: missionTitleLabel.bottomAnchor, constant: 10),
-            missionDescriptionLabel.leadingAnchor.constraint(equalTo: missionCardView.leadingAnchor, constant: 16),
-            missionDescriptionLabel.trailingAnchor.constraint(equalTo: missionCardView.trailingAnchor, constant: -16),
-            missionDescriptionLabel.bottomAnchor.constraint(equalTo: missionCardView.bottomAnchor, constant: -16),
+            // Раздел 2 (Компания)
+            companyTitle.topAnchor.constraint(equalTo: userBody.bottomAnchor, constant: 24),
+            companyTitle.leadingAnchor.constraint(equalTo: introBody.leadingAnchor),
+            companyTitle.trailingAnchor.constraint(equalTo: introBody.trailingAnchor),
             
-            // Секция контактов
-            contactsTitleLabel.topAnchor.constraint(equalTo: missionCardView.bottomAnchor, constant: 28),
-            contactsTitleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 18),
-            contactsTitleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            companyBody.topAnchor.constraint(equalTo: companyTitle.bottomAnchor, constant: 8),
+            companyBody.leadingAnchor.constraint(equalTo: introBody.leadingAnchor),
+            companyBody.trailingAnchor.constraint(equalTo: introBody.trailingAnchor),
             
-            phoneButton.topAnchor.constraint(equalTo: contactsTitleLabel.bottomAnchor, constant: 14),
-            phoneButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            phoneButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            phoneButton.heightAnchor.constraint(equalToConstant: 50),
+            // Карточка-резюме соглашения
+            AgreementCardView.topAnchor.constraint(equalTo: companyBody.bottomAnchor, constant: 28),
+            AgreementCardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            AgreementCardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             
-            telegramButton.topAnchor.constraint(equalTo: phoneButton.bottomAnchor, constant: 10),
-            telegramButton.leadingAnchor.constraint(equalTo: phoneButton.leadingAnchor),
-            telegramButton.trailingAnchor.constraint(equalTo: phoneButton.trailingAnchor),
-            telegramButton.heightAnchor.constraint(equalToConstant: 50),
-            
-            emailButton.topAnchor.constraint(equalTo: telegramButton.bottomAnchor, constant: 10),
-            emailButton.leadingAnchor.constraint(equalTo: phoneButton.leadingAnchor),
-            emailButton.trailingAnchor.constraint(equalTo: phoneButton.trailingAnchor),
-            emailButton.heightAnchor.constraint(equalToConstant: 50),
-            
-            // ВАЖНО: Замыкаем на низ contentView для корректной работы вертикальной прокрутки
-            emailButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32)
+            // Замыкаем на низ contentView, чтобы договор можно было плавно прокручивать пальцем
+            AgreementCardView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32)
         ])
     }
 }

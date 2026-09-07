@@ -2,8 +2,8 @@ import UIKit
 
 class MenuViewController: UIViewController {
     
-    let menuItems = ["Вывоз вторсырья", "История", "Избранные адреса", "Обратная связь", "О приложении", "Выход"]
-    let menuIcons = ["truck.box", "clock.arrow.circlepath", "star", "bubble.left.and.bubble.right", "info.circle", "power"]
+    let menuItems = ["Вывоз вторсырья", "История", "Избранные адреса", "Обратная связь", "Связаться с нами", "О приложении", "Выход"]
+    let menuIcons = ["truck.box", "clock.arrow.circlepath", "star", "bubble.left.and.bubble.right", "phone.circle", "info.circle", "power"]
     
     // Кастомный красивый тёмно-серый цвет (как в iOS)
     let customDarkGray = UIColor(red: 0.12, green: 0.12, blue: 0.13, alpha: 1.0)

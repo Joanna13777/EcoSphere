@@ -1,3 +1,5 @@
+// экран «О приложении» (AboutViewController.swift)Этот экран будет содержать официальную информацию, Правила использования сервиса, обязанности сторон (пользователя и компании) и встроенный блок соглашения (публичную оферту)
+
 import UIKit
 
 class AboutViewController: UIViewController {
@@ -5,7 +7,7 @@ class AboutViewController: UIViewController {
     // MARK: - UI Elements (Containers)
     let scrollView: UIScrollView = {
         let scroll = UIScrollView()
-        scroll.showsVerticalScrollIndicator = false
+        scroll.showsVerticalScrollIndicator = true
         scroll.alwaysBounceVertical = true
         scroll.translatesAutoresizingMaskIntoConstraints = false
         return scroll
@@ -17,106 +19,130 @@ class AboutViewController: UIViewController {
         return view
     }()
     
-    // MARK: - Logo & Brand
-    let logoImageView: UIImageView = {
+    // MARK: - Header
+    let infoImageView: UIImageView = {
         let iv = UIImageView()
-        // Фирменная адаптивная иконка (зеленый листок в круге)
-        iv.image = UIImage(systemName: "leaf.circle.fill")
-        iv.tintColor = .systemGreen
+        iv.image = UIImage(systemName: "checkmark.shield.fill")
+        iv.tintColor = .secondaryLabel
         iv.contentMode = .scaleAspectFit
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
     }()
     
-    let appNameLabel: UILabel = {
+    let mainTitleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Eco Sphere"
-        label.font = .systemFont(ofSize: 24, weight: .bold)
+        label.text = "Условия и правила"
+        label.font = .systemFont(ofSize: 22, weight: .bold)
         label.textColor = .appText
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    let versionLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Версия 1.0.0"
-        label.font = .systemFont(ofSize: 13, weight: .regular)
-        label.textColor = .appSecondaryText
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
+    // MARK: - Legal Text Blocks (Clean Lazy Implementation)
     
-    // MARK: - Mission Card
-    let missionCardView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .systemGreen.withAlphaComponent(0.06)
-        view.layer.cornerRadius = 16
-        view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor.customReminderBorder.cgColor
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    
-    let missionTitleLabel: UILabel = {
+    lazy var introBody: UILabel = {
         let label = UILabel()
-        label.text = "Наша эко-миссия в Ташкенте"
-        label.font = .systemFont(ofSize: 16, weight: .semibold)
-        label.textColor = .customReminderText
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    let missionDescriptionLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Мы стремимся сделать Ташкент чище и зеленее, превращая процесс сдачи вторсырья в простую и приятную привычку. Eco Sphere объединяет жителей города и пункты переработки, помогая сократить количество отходов и заботиться о будущем нашей столицы шаг за шагом."
+        let text = "Настоящее Пользовательское соглашение регулирует отношения между эко-сервисом Eco Sphere (далее — Компания) и физическим лицом (далее — Пользователь), использующим приложение для заказа вывоза вторичного сырья в городе Ташкенте."
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textColor = .appText
         label.numberOfLines = 0
         
-        // Настройка межстрочного интервала для красивого чтения текста
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = 4
-        let attributedString = NSMutableAttributedString(string: label.text ?? "")
+        paragraphStyle.lineSpacing = 5
+        let attributedString = NSMutableAttributedString(string: text)
         attributedString.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: attributedString.length))
         label.attributedText = attributedString
-        
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    // MARK: - Contacts Section
-    let contactsTitleLabel: UILabel = {
+    lazy var userTitle: UILabel = {
         let label = UILabel()
-        label.text = "Связаться с нами"
+        label.text = "1. Обязанности Пользователя"
         label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.textColor = .appText
+        label.textColor = .label
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    // Интерактивные кнопки связи
-    lazy var phoneButton = AboutViewController.createContactButton(title: "+998 90 345 37 26", iconName: "phone.fill", color: .systemGreen)
-    lazy var telegramButton = AboutViewController.createContactButton(title: "@tashkent_recycle", iconName: "paperplane.fill", color: .systemBlue)
-    lazy var emailButton = AboutViewController.createContactButton(title: "info@ecosphere@list.ru", iconName: "envelope.fill", color: .systemOrange)
+    lazy var userBody: UILabel = {
+        let label = UILabel()
+        let text = "• Осуществлять предварительную сортировку отходов согласно правилам приложения (очищать пластик от остатков пищи, разделять макулатуру и стекло).\n• Указывать достоверный адрес и контактный номер телефона в профиле.\n• Обеспечить доступ курьера или спецтранспорта к указанному месту сбора в согласованный временной интервал.\n• Не передавать к вывозу опасные, токсичные или медицинские отходы."
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.textColor = .appText
+        label.numberOfLines = 0
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 5
+        let attributedString = NSMutableAttributedString(string: text)
+        attributedString.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: attributedString.length))
+        label.attributedText = attributedString
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    lazy var companyTitle: UILabel = {
+        let label = UILabel()
+        label.text = "2. Обязанности Компании"
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.textColor = .label
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    lazy var companyBody: UILabel = {
+        let label = UILabel()
+        let text = "• Своевременно обрабатывать заявки на вывоз вторсырья и направлять транспорт в выбранный пользователем интервал.\n• Начислять Эко-бонусы в полном объеме сразу после успешной проверки и взвешивания сданного сырья.\n• Гарантировать, что все собранные отходы будут направлены исключительно на сертифицированные заводы по переработке в Узбекистане.\n• Обеспечивать конфиденциальность и защиту персональных данных профиля."
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.textColor = .appText
+        label.numberOfLines = 0
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 5
+        let attributedString = NSMutableAttributedString(string: text)
+        attributedString.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: attributedString.length))
+        label.attributedText = attributedString
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    let AgreementCardView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemGroupedBackground
+        view.layer.cornerRadius = 14
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        let label = UILabel()
+        label.text = "🤝 Используя приложение Eco Sphere и отправляя заявки на вывоз, обе стороны автоматически соглашаются с данными правилами и обязуются соблюдать их ради чистой экологии нашей столицы."
+        label.font = .systemFont(ofSize: 13, weight: .medium)
+        label.textColor = .secondaryLabel
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: view.topAnchor, constant: 14),
+            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 14),
+            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -14),
+            label.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -14)
+        ])
+        
+        return view
+    }()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavigationBar()
-        setupLayout() // Вызов из файла +Layout.swift
-        setupActions()
+        setupLayout() // Вызовется из файла +Layout.swift
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         UIColor.applyGlobalTheme(for: self)
         navigationController?.setNavigationBarHidden(false, animated: animated)
-        
-        // Обновляем CGColor зеленой рамки карточки принудительно для темной/светлой темы
-        missionCardView.layer.borderColor = UIColor.customReminderBorder.cgColor
     }
     
-    // MARK: - Setups
     private func setupNavigationBar() {
         title = "О приложении"
         
@@ -130,71 +156,7 @@ class AboutViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backButton)
     }
     
-    private func setupActions() {
-        phoneButton.addTarget(self, action: #selector(phoneTapped), for: .touchUpInside)
-        telegramButton.addTarget(self, action: #selector(telegramTapped), for: .touchUpInside)
-        emailButton.addTarget(self, action: #selector(emailTapped), for: .touchUpInside)
-        
-        if #available(iOS 17.0, *) {
-            registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (vc: AboutViewController, _) in
-                vc.missionCardView.layer.borderColor = UIColor.customReminderBorder.cgColor
-            }
-        }
-    }
-    
-    // MARK: - Interactive Contact Handlers (Реальное открытие внешних приложений)
     @objc private func backTapped() {
         navigationController?.popViewController(animated: true)
-    }
-    
-    @objc private func phoneTapped() {
-        // Системный вызов звонилки iPhone
-        if let url = URL(string: "tel://+998903453726"), UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        }
-    }
-    
-    @objc private func telegramTapped() {
-        // Открытие Telegram-профиля или канала компании
-        if let url = URL(string: "https://t.me/+IShmNAlNsOQ2MDEy") {
-            if UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url, options: [:], completionHandler: nil)
-            } else {
-                // Если Telegram не установлен, открываем его через обычный веб-браузер
-                if let webUrl = URL(string: "https://t.me/+IShmNAlNsOQ2MDEy") {
-                    UIApplication.shared.open(webUrl, options: [:], completionHandler: nil)
-                }
-            }
-        }
-    }
-    
-    @objc private func emailTapped() {
-        // Системное открытие почтового клиента
-        if let url = URL(string: "mailto:info@ecosphere@list.ru"), UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        }
-    }
-    
-    // MARK: - Factory Method (Кнопки контактов)
-    private static func createContactButton(title: String, iconName: String, color: UIColor) -> UIButton {
-        var config = UIButton.Configuration.plain()
-        config.background.backgroundColor = .systemGroupedBackground
-        config.background.cornerRadius = 12
-        
-        var titleAttr = AttributedString(title)
-        titleAttr.font = .systemFont(ofSize: 15, weight: .medium)
-        titleAttr.foregroundColor = .appText
-        config.attributedTitle = titleAttr
-        
-        config.image = UIImage(systemName: iconName)
-        config.imagePadding = 12
-        config.imagePlacement = .leading
-        config.baseForegroundColor = color
-        config.contentInsets = NSDirectionalEdgeInsets(top: 14, leading: 16, bottom: 14, trailing: 16)
-        
-        let button = UIButton(configuration: config)
-        button.contentHorizontalAlignment = .leading // Выравнивание иконки и текста по левому краю
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
     }
 }

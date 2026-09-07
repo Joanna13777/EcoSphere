@@ -28,6 +28,7 @@ extension MenuViewController: UITableViewDataSource, UITableViewDelegate {
         return menuItems.count
     }
     
+    // иконки экрана Меню
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "MenuCell", for: indexPath)
         
@@ -39,7 +40,7 @@ extension MenuViewController: UITableViewDataSource, UITableViewDelegate {
         cell.textLabel?.textColor = .label
         
         cell.imageView?.image = UIImage(systemName: menuIcons[indexPath.row])
-        cell.imageView?.tintColor = indexPath.row == 5 ? .systemRed : .label
+        cell.imageView?.tintColor = .label
         
         cell.selectionStyle = .none
         return cell
@@ -52,37 +53,41 @@ extension MenuViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        // Названия элементов в массиве:
-        // 0: Вывоз вторсырья, 1: История, 2: Избранные адреса, 3: Обратная связь, 4: О приложении, 5: Выход
+        // Названия элементов в массиве: индексы под 7 пунктов меню:
         switch indexPath.row {
-        case 0:
+        case 0: // Вывоз вторсырья
             let vc = PickupViewController()
             navigationController?.setNavigationBarHidden(false, animated: true)
             navigationController?.pushViewController(vc, animated: true)
             
-        case 1:
+        case 1: // История
             let vc = HistoryViewController()
             vc.title = menuItems[indexPath.row]
             navigationController?.setNavigationBarHidden(false, animated: true)
             navigationController?.pushViewController(vc, animated: true)
             
-        case 2:
+        case 2: // Избранные адреса
             let favoriteVC = FavoriteAddressesViewController()
             navigationController?.setNavigationBarHidden(false, animated: true)
             navigationController?.pushViewController(favoriteVC, animated: true)
             
-        case 3: // Строка "Обратная связь"
-            let feedbackVC = FeedbackViewController()
-            navigationController?.setNavigationBarHidden(false, animated: true)
-            navigationController?.pushViewController(feedbackVC, animated: true)
-            
-        case 4:
-            let vc = AboutViewController()
+        case 3: // Обратная связь
+            let vc = FeedbackViewController()
             vc.title = menuItems[indexPath.row]
             navigationController?.setNavigationBarHidden(false, animated: true)
             navigationController?.pushViewController(vc, animated: true)
             
-        case 5:
+        case 4: // Связаться с нами (Кнопки телефона, ТГ и почты)
+            let vc = ContactsViewController()
+            navigationController?.setNavigationBarHidden(false, animated: true)
+            navigationController?.pushViewController(vc, animated: true)
+            
+        case 5: // О приложении (Условия и правила договора)
+            let vc = AboutViewController()
+            navigationController?.setNavigationBarHidden(false, animated: true)
+            navigationController?.pushViewController(vc, animated: true)
+  
+        case 6: // Выход
             let alert = UIAlertController(title: "Выйти из аккаунта?", message: "Вы точно хотите выйти из аккаунта?", preferredStyle: .alert)
             let logoutAction = UIAlertAction(title: "Выйти", style: .destructive) { [weak self] _ in
                 guard let self = self else { return }
@@ -104,6 +109,7 @@ extension MenuViewController: UITableViewDataSource, UITableViewDelegate {
         default:
             break
         }
+
     }
     
     // Переход в профиль по клику на шапку
