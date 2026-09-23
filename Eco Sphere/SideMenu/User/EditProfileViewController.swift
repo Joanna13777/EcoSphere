@@ -1,4 +1,4 @@
-// Здесь остаются только UI-компоненты, фабричный метод и методы жизненного цикла (viewDidLoad, viewWillAppear).
+// основной файл профиля. Здесь остаются только UI-компоненты, фабричный метод и методы жизненного цикла (viewDidLoad, viewWillAppear).
 
 import UIKit
 import MapKit
@@ -74,6 +74,27 @@ class EditProfileViewController: UIViewController, UINavigationControllerDelegat
         return button
     }()
     
+   // кнопка-ссылка «Вход в аккаунт»
+    let navigateToLoginButton: UIButton = {
+        let button = UIButton(type: .system)
+        
+        // Создаем красивый текст ссылки с подчеркиванием
+        let title = "Уже зарегистрированы? Вход в аккаунт"
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 14, weight: .medium),
+            .foregroundColor: UIColor.systemGray, // Нейтральный цвет, как на хлебных крошках
+            .underlineStyle: NSUnderlineStyle.single.rawValue // Включаем нативное подчеркивание текста
+        ]
+        let attributedTitle = NSAttributedString(string: title, attributes: attributes)
+        button.setAttributedTitle(attributedTitle, for: .normal)
+        
+        //  Принудительно включаем жесты для элемента
+                button.isUserInteractionEnabled = true
+        
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -81,6 +102,8 @@ class EditProfileViewController: UIViewController, UINavigationControllerDelegat
         setupLayout() // Вызов из файла +Layout.swift
         setupKeyboardInteractions()
         setupDelegatesAndActions()
+        navigateToLoginButton.addTarget(self, action: #selector(navigateToLoginTapped), for: .touchUpInside)
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -168,5 +191,10 @@ class EditProfileViewController: UIViewController, UINavigationControllerDelegat
         
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
+    }
+    // метод-обработчик перехода
+    @objc private func navigateToLoginTapped() {
+        let loginVC = AuthSignInViewController()
+        navigationController?.pushViewController(loginVC, animated: true)
     }
 }

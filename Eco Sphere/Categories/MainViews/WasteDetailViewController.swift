@@ -90,6 +90,8 @@ class WasteDetailViewController: UIViewController {
         
         setupLayout()
         updateUI()
+        setupNotificationNavigationButton()
+
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)

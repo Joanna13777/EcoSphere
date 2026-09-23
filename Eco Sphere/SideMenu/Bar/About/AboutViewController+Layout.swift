@@ -16,7 +16,12 @@ extension AboutViewController {
         contentView.addSubview(companyTitle)
         contentView.addSubview(companyBody)
         
-        contentView.addSubview(AgreementCardView)
+        // Встраиваем карточку-резюме и элементы подтверждения
+                contentView.addSubview(agreementCardView)
+                contentView.addSubview(agreementLabel)
+                contentView.addSubview(agreementSwitch)
+                contentView.addSubview(acceptButton)
+        contentView.addSubview(alreadyAcceptedLabel)
         
         // 1. Констрейнты скролл-контейнеров
         NSLayoutConstraint.activate([
@@ -67,13 +72,43 @@ extension AboutViewController {
             companyBody.leadingAnchor.constraint(equalTo: introBody.leadingAnchor),
             companyBody.trailingAnchor.constraint(equalTo: introBody.trailingAnchor),
             
-            // Карточка-резюме соглашения
-            AgreementCardView.topAnchor.constraint(equalTo: companyBody.bottomAnchor, constant: 28),
-            AgreementCardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            AgreementCardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            // КАРТОЧКА-РЕЗЮМЕ ИЗ СКРИНШОТА: Размещается строго под текстом правил
+                        agreementCardView.topAnchor.constraint(equalTo: companyBody.bottomAnchor, constant: 24),
+                        agreementCardView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+                        agreementCardView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+                        
+                        // СТРОКА ТУМБЛЕРА СОГЛАСИЯ: Размещается под карточкой-резюме
+                        agreementSwitch.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+                        agreementSwitch.topAnchor.constraint(equalTo: agreementCardView.bottomAnchor, constant: 24),
+                        agreementSwitch.widthAnchor.constraint(equalToConstant: 51),
+                        
+                        agreementLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+                        agreementLabel.trailingAnchor.constraint(equalTo: agreementSwitch.leadingAnchor, constant: -12),
+                        agreementLabel.centerYAnchor.constraint(equalTo: agreementSwitch.centerYAnchor),
+                        
+                        // КНОПКА ПОДТВЕРЖДЕНИЯ
+                        acceptButton.topAnchor.constraint(equalTo: agreementLabel.bottomAnchor, constant: 24),
+                        acceptButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+                        acceptButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+                        acceptButton.heightAnchor.constraint(equalToConstant: 52),
             
-            // Замыкаем на низ contentView, чтобы договор можно было плавно прокручивать пальцем
-            AgreementCardView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32)
+            // СТАТИЧНЫЙ БЛОК: Размещение новой надписи под карточкой-резюме
+                        alreadyAcceptedLabel.topAnchor.constraint(equalTo: agreementCardView.bottomAnchor, constant: 28),
+                        alreadyAcceptedLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                        alreadyAcceptedLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                        
+                        // ГЛАВНОЕ УСЛОВИЕ СКРОЛЛА: Привязываем к низу contentView оба элемента с разным приоритетом!
+                        // Это позволит скроллу работать правильно независимо от того, какой элемент скрыт на экране
+                        acceptButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32).withPriority(.defaultHigh),
+                        alreadyAcceptedLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -32).withPriority(.defaultLow)
         ])
+    }
+}
+
+// Вспомогательное расширение для удобной смены приоритетов констрейнтов в коде
+extension NSLayoutConstraint {
+    func withPriority(_ priority: UILayoutPriority) -> NSLayoutConstraint {
+        self.priority = priority
+        return self
     }
 }

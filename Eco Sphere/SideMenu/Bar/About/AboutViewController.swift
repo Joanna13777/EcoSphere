@@ -1,10 +1,10 @@
-// экран «О приложении» (AboutViewController.swift)Этот экран будет содержать официальную информацию, Правила использования сервиса, обязанности сторон (пользователя и компании) и встроенный блок соглашения (публичную оферту)
+// экран «О приложении» объявлены только UI-компоненты и методы жизненного цикла.
 
 import UIKit
 
 class AboutViewController: UIViewController {
     
-    // MARK: - UI Elements (Containers)
+    // MARK: - UI Containers
     let scrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.showsVerticalScrollIndicator = true
@@ -19,7 +19,7 @@ class AboutViewController: UIViewController {
         return view
     }()
     
-    // MARK: - Header
+    // MARK: - Legal Header
     let infoImageView: UIImageView = {
         let iv = UIImageView()
         iv.image = UIImage(systemName: "checkmark.shield.fill")
@@ -38,75 +38,15 @@ class AboutViewController: UIViewController {
         return label
     }()
     
-    // MARK: - Legal Text Blocks (Clean Lazy Implementation)
+    // MARK: - Legal Sections
+    lazy var introBody = AboutViewController.createSectionLabel(text: "Настоящее Пользовательское соглашение регулирует отношения между эко-сервисом Eco Sphere (далее — Компания) и физическим лицом (далее — Пользователь), использующим приложение для заказа вывоза вторичного сырья в городе Ташкенте.")
+    lazy var userTitle = AboutViewController.createSectionLabel(text: "1. Обязанности Пользователя", isTitle: true)
+    lazy var userBody = AboutViewController.createSectionLabel(text: "• Осуществлять предварительную сортировку отходов согласно правилам приложения (очищать пластик от остатков пищи, разделять макулатуру и стекло).\n• Указывать достоверный адрес и контактный номер телефона в профиле.\n• Обеспечить доступ курьера или спецтранспорта к указанному месту сбора в согласованный временной интервал.\n• Не передавать к вывозу опасные, токсичные или медицинские отходы.")
+    lazy var companyTitle = AboutViewController.createSectionLabel(text: "2. Обязанности Компании", isTitle: true)
+    lazy var companyBody = AboutViewController.createSectionLabel(text: "• Своевременно обрабатывать заявки на вывоз вторсырья и направлять транспорт в выбранный пользователем интервал.\n• Начислять Эко-бонусы в полном объеме сразу после успешной проверки и взвешивания сданного сырья.\n• Гарантировать, что все собранные отходы будут направлены исключительно на сертифицированные заводы по переработке в Узбекистане.\n• Обеспечивать конфиденциальность и защиту персональных данных профиля.")
     
-    lazy var introBody: UILabel = {
-        let label = UILabel()
-        let text = "Настоящее Пользовательское соглашение регулирует отношения между эко-сервисом Eco Sphere (далее — Компания) и физическим лицом (далее — Пользователь), использующим приложение для заказа вывоза вторичного сырья в городе Ташкенте."
-        label.font = .systemFont(ofSize: 14, weight: .regular)
-        label.textColor = .appText
-        label.numberOfLines = 0
-        
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = 5
-        let attributedString = NSMutableAttributedString(string: text)
-        attributedString.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: attributedString.length))
-        label.attributedText = attributedString
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    lazy var userTitle: UILabel = {
-        let label = UILabel()
-        label.text = "1. Обязанности Пользователя"
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.textColor = .label
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    lazy var userBody: UILabel = {
-        let label = UILabel()
-        let text = "• Осуществлять предварительную сортировку отходов согласно правилам приложения (очищать пластик от остатков пищи, разделять макулатуру и стекло).\n• Указывать достоверный адрес и контактный номер телефона в профиле.\n• Обеспечить доступ курьера или спецтранспорта к указанному месту сбора в согласованный временной интервал.\n• Не передавать к вывозу опасные, токсичные или медицинские отходы."
-        label.font = .systemFont(ofSize: 14, weight: .regular)
-        label.textColor = .appText
-        label.numberOfLines = 0
-        
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = 5
-        let attributedString = NSMutableAttributedString(string: text)
-        attributedString.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: attributedString.length))
-        label.attributedText = attributedString
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    lazy var companyTitle: UILabel = {
-        let label = UILabel()
-        label.text = "2. Обязанности Компании"
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.textColor = .label
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    lazy var companyBody: UILabel = {
-        let label = UILabel()
-        let text = "• Своевременно обрабатывать заявки на вывоз вторсырья и направлять транспорт в выбранный пользователем интервал.\n• Начислять Эко-бонусы в полном объеме сразу после успешной проверки и взвешивания сданного сырья.\n• Гарантировать, что все собранные отходы будут направлены исключительно на сертифицированные заводы по переработке в Узбекистане.\n• Обеспечивать конфиденциальность и защиту персональных данных профиля."
-        label.font = .systemFont(ofSize: 14, weight: .regular)
-        label.textColor = .appText
-        label.numberOfLines = 0
-        
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineSpacing = 5
-        let attributedString = NSMutableAttributedString(string: text)
-        attributedString.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: attributedString.length))
-        label.attributedText = attributedString
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
-    let AgreementCardView: UIView = {
+    // MARK: - Карточка-резюме
+    let agreementCardView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemGroupedBackground
         view.layer.cornerRadius = 14
@@ -130,33 +70,95 @@ class AboutViewController: UIViewController {
         return view
     }()
     
+    // MARK: - Interactive Agreement Elements
+    let agreementLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Я подтверждаю, что ознакомлен и полностью согласен с условиями оферты"
+        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.textColor = .appText
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    let agreementSwitch: UISwitch = {
+        let toggle = UISwitch()
+        toggle.onTintColor = .systemGreen
+        toggle.translatesAutoresizingMaskIntoConstraints = false
+        return toggle
+    }()
+    
+    let acceptButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.background.cornerRadius = 14
+        var titleAttr = AttributedString("Подтвердить согласие")
+        titleAttr.font = .systemFont(ofSize: 15, weight: .semibold)
+        config.attributedTitle = titleAttr
+        
+        let button = UIButton(configuration: config)
+        button.configurationUpdateHandler = { btn in
+            var updatedConfig = btn.configuration
+            if !btn.isEnabled {
+                updatedConfig?.baseBackgroundColor = .systemGray5
+                updatedConfig?.baseForegroundColor = .systemGray2
+            } else {
+                updatedConfig?.baseBackgroundColor = .label
+                updatedConfig?.baseForegroundColor = .systemBackground
+            }
+            btn.configuration = updatedConfig
+        }
+        
+        button.isEnabled = false
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    let alreadyAcceptedLabel: UILabel = {
+        let label = UILabel()
+        label.text = "✅ Вы дали согласие с подтверждением условий оферты"
+        label.font = .systemFont(ofSize: 14, weight: .semibold)
+        label.textColor = .systemGreen
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.isHidden = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavigationBar()
-        setupLayout() // Вызовется из файла +Layout.swift
+        setupLayout() // Вызов из файла +Layout.swift
+        setupActions()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         UIColor.applyGlobalTheme(for: self)
         navigationController?.setNavigationBarHidden(false, animated: animated)
+        checkAgreementStatus()
     }
     
-    private func setupNavigationBar() {
-        title = "О приложении"
+    // MARK: - Helpers (Factory Method)
+    static func createSectionLabel(text: String, isTitle: Bool = false) -> UILabel {
+        let label = UILabel()
+        label.text = text
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
         
-        let backButton = UIButton(type: .system)
-        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        backButton.tintColor = .appText
-        backButton.addTarget(self, action: #selector(backTapped), for: .touchUpInside)
-        backButton.translatesAutoresizingMaskIntoConstraints = false
-        backButton.widthAnchor.constraint(equalToConstant: 24).isActive = true
-        backButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backButton)
-    }
-    
-    @objc private func backTapped() {
-        navigationController?.popViewController(animated: true)
+        if isTitle {
+            label.font = .systemFont(ofSize: 16, weight: .bold)
+            label.textColor = .label
+        } else {
+            label.font = .systemFont(ofSize: 14, weight: .regular)
+            label.textColor = .appText
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.lineSpacing = 5
+            let attributedString = NSMutableAttributedString(string: text)
+            attributedString.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: attributedString.length))
+            label.attributedText = attributedString
+        }
+        return label
     }
 }

@@ -34,7 +34,8 @@ class MainContainerViewController: UIViewController, UICollectionViewDataSource,
         setupCollectionView()
         setupPageViewController()
         setupLayout()
-        
+        setupNotificationNavigationButton()
+
         
     }
     
@@ -69,6 +70,8 @@ class MainContainerViewController: UIViewController, UICollectionViewDataSource,
             let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1
             backButton.tintColor = isDark ? .white : .black
         }
+        setupNotificationNavigationButton()
+
     }
 
 

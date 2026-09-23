@@ -11,6 +11,8 @@ class MainTabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTabBar()
+        setupNotificationNavigationButton()
+
     }
     
     private func setupTabBar() {

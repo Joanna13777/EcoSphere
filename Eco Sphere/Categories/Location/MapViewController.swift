@@ -2,6 +2,9 @@ import UIKit
 import MapKit
 
 class MapViewController: UIViewController {
+    
+    // ДОБАВЛЕНО: Замыкание для передачи адреса обратно в профиль
+        var onAddressSelected: ((String) -> Void)?
 
     // MARK: - Палитра цветов
     let appBgColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.0) // #F5F5F5 (Светло-серый фон приложения)

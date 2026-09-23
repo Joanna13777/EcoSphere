@@ -62,6 +62,8 @@ class PageViewController: UIPageViewController, UIPageViewControllerDataSource, 
         if let firstVC = orderedViewControllers.first {
             setViewControllers([firstVC], direction: .forward, animated: true, completion: nil)
         }
+        setupNotificationNavigationButton()
+
     }
         
     func moveToPage(at index: Int) {

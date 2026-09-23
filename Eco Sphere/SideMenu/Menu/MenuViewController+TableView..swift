@@ -34,17 +34,40 @@ extension MenuViewController: UITableViewDataSource, UITableViewDelegate {
         
         cell.backgroundColor = .clear
         cell.contentView.backgroundColor = .clear
-        
-        cell.textLabel?.text = menuItems[indexPath.row]
-        cell.textLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-        cell.textLabel?.textColor = .label
-        
-        cell.imageView?.image = UIImage(systemName: menuIcons[indexPath.row])
-        cell.imageView?.tintColor = .label
-        
         cell.selectionStyle = .none
+        
+        // Проверяем статус авторизации пользователя
+        let isUserLoggedIn = UserDefaults.standard.bool(forKey: "menu_user_logged_in")
+        
+        // Настройка стандартных строк (от 0 до 5)
+        if indexPath.row < 6 {
+            cell.textLabel?.text = menuItems[indexPath.row]
+            cell.textLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+            cell.textLabel?.textColor = .label
+            cell.imageView?.image = UIImage(systemName: menuIcons[indexPath.row])
+            cell.imageView?.tintColor = .label
+        } else {
+            // --- ДИНАМИЧЕСКАЯ 6-я СТРОКА (ВЫХОД / ВХОД) ---
+            cell.textLabel?.font = .systemFont(ofSize: 16, weight: .semibold) // Сделаем чуть акцентнее
+            
+            if isUserLoggedIn {
+                // Если вошел: показываем "Выход" (строгий стиль, цвет темы)
+                cell.textLabel?.text = "Выход"
+                cell.textLabel?.textColor = .label
+                cell.imageView?.image = UIImage(systemName: "arrow.left.to.line.compact")
+                cell.imageView?.tintColor = .label
+            } else {
+                // Если НЕ вошел (гость): меняем на "Вход в аккаунт" зеленым эко-цветом!
+                cell.textLabel?.text = "Вход в аккаунт"
+                cell.textLabel?.textColor = .label
+                cell.imageView?.image = UIImage(systemName: "arrow.right.to.line.compact")
+                cell.imageView?.tintColor = .label
+            }
+        }
+        
         return cell
     }
+
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 56
@@ -87,24 +110,38 @@ extension MenuViewController: UITableViewDataSource, UITableViewDelegate {
             navigationController?.setNavigationBarHidden(false, animated: true)
             navigationController?.pushViewController(vc, animated: true)
   
-        case 6: // Выход
-            let alert = UIAlertController(title: "Выйти из аккаунта?", message: "Вы точно хотите выйти из аккаунта?", preferredStyle: .alert)
-            let logoutAction = UIAlertAction(title: "Выйти", style: .destructive) { [weak self] _ in
-                guard let self = self else { return }
-                UserDefaults.standard.set(false, forKey: "menu_user_logged_in")
-                UserDefaults.standard.removeObject(forKey: "user_profile_name")
-                UserDefaults.standard.removeObject(forKey: "user_profile_phone")
-                UserDefaults.standard.removeObject(forKey: "user_profile_avatar_data")
-                self.updateHeaderView()
+        case 6: // Динамическая строка (Выход / Вход)
+            let isUserLoggedIn = UserDefaults.standard.bool(forKey: "menu_user_logged_in")
+            
+            if isUserLoggedIn {
+                // СЦЕНАРИЙ А: Пользователь авторизован -> Показываем алерт ВЫХОДА
+                let alert = UIAlertController(title: "Выйти из аккаунта?", message: "Вы точно хотите выйти из аккаунта?", preferredStyle: .alert)
                 
-                let loginVC = LoginViewController()
-                self.navigationController?.setNavigationBarHidden(false, animated: true)
-                self.navigationController?.pushViewController(loginVC, animated: true)
+                let logoutAction = UIAlertAction(title: "Выйти", style: .destructive) { [weak self] _ in
+                    guard let self = self else { return }
+                    
+                    UserDefaults.standard.set(false, forKey: "menu_user_logged_in")
+                    UserDefaults.standard.removeObject(forKey: "user_profile_name")
+                    UserDefaults.standard.removeObject(forKey: "user_profile_phone")
+                    UserDefaults.standard.removeObject(forKey: "user_profile_avatar_data")
+                    UserDefaults.standard.removeObject(forKey: "is_agreement_accepted")
+                                    
+                    self.updateHeaderView()
+                    
+                    // Мгновенно перезагружаем таблицу меню, чтобы "Выход" поменялся на "Вход" на лету!
+                    self.tableView.reloadData()
+                }
+                let cancelAction = UIAlertAction(title: "Остаться", style: .cancel, handler: nil)
+                alert.addAction(cancelAction)
+                alert.addAction(logoutAction)
+                present(alert, animated: true, completion: nil)
+                
+            } else {
+                // СЦЕНАРИЙ Б: Пользователь НЕ авторизован -> Открываем экран ВХОДА
+                let signInVC = AuthSignInViewController()
+                navigationController?.setNavigationBarHidden(false, animated: true)
+                navigationController?.pushViewController(signInVC, animated: true)
             }
-            let cancelAction = UIAlertAction(title: "Остаться", style: .cancel, handler: nil)
-            alert.addAction(cancelAction)
-            alert.addAction(logoutAction)
-            present(alert, animated: true, completion: nil)
             
         default:
             break

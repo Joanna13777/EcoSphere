@@ -23,7 +23,7 @@ class FullMapViewController: UIViewController {
         config.baseForegroundColor = UIColor.appBackground // Цвет текста инвертируется
         config.background.cornerRadius = 14
         
-        var titleAttr = AttributedString("Выбрать этот адрес")
+        var titleAttr = AttributedString("Выбрать адрес")
         titleAttr.font = .systemFont(ofSize: 15, weight: .semibold)
         config.attributedTitle = titleAttr
         
@@ -50,6 +50,8 @@ class FullMapViewController: UIViewController {
         setupHierarchy()
         setupLayout()
         setupMap()
+        selectButton.addTarget(self, action: #selector(selectAddressButtonTapped), for: .touchUpInside)
+
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -148,22 +150,44 @@ class FullMapViewController: UIViewController {
             if !street.isEmpty { fullAddress += ", ул. \(street)" }
             if !house.isEmpty { fullAddress += ", д. \(house)" }
             
-            self.selectedAddressString = fullAddress
-            self.selectButton.isEnabled = true
-            
-            var config = self.selectButton.configuration
-            config?.subtitle = fullAddress
-            
-            // Настройка цвета подзаголовка внутри кнопки (серая подпись)
-            var subtitleAttributes = AttributeContainer()
-            subtitleAttributes.font = .systemFont(ofSize: 12, weight: .regular)
-            subtitleAttributes.foregroundColor = traitCollection.userInterfaceStyle == .dark ? .systemGray2 : .darkGray
-            config?.attributedSubtitle = AttributedString(fullAddress, attributes: subtitleAttributes)
-            
-            self.selectButton.configuration = config
+            // --- ИСПРАВЛЕНО: ВСЕ ОБНОВЛЕНИЯ ИНТЕРФЕЙСА ПЕРЕНОСИМ В ГЛАВНЫЙ ПОТОК ---
+            DispatchQueue.main.async {
+                self.selectedAddressString = fullAddress
+                self.selectButton.isEnabled = true // Кнопка станет активной и сменит цвет
+                
+                var config = self.selectButton.configuration
+                
+                // Переносим чистый адрес в главный заголовок кнопки для идеальной видимости
+                var titleAttributes = AttributeContainer()
+                titleAttributes.font = .systemFont(ofSize: 15, weight: .semibold)
+                titleAttributes.foregroundColor = self.traitCollection.userInterfaceStyle == .dark ? .systemBackground : .systemBackground
+                
+                config?.attributedTitle = AttributedString("Выбрать: \(fullAddress)", attributes: titleAttributes)
+                
+                // Сбрасываем подзаголовок, чтобы он не дублировал текст
+                config?.attributedSubtitle = nil
+                
+                // Возвращаем готовую конфигурацию кнопке
+                self.selectButton.configuration = config
+            }
         }
     }
+
     
+    @objc private func selectAddressButtonTapped() {
+        // ИСПРАВЛЕНО: Так как это обычная String, просто проверяем, что она не пустая
+        let selectedAddress = self.selectedAddressString
+        
+        guard !selectedAddress.isEmpty else {
+            print("⚠️ Ошибка: Адрес на карте еще не выбран или пуст.")
+            return
+        }
+        
+        // Передаем адрес обратно через замыкание на экран Профиля
+        onAddressSelected?(selectedAddress)
+    }
+
+
     @objc private func selectTapped() {
         onAddressSelected?(selectedAddressString)
         dismiss(animated: true, completion: nil)

@@ -152,7 +152,7 @@ extension EditProfileViewController {
         guard citiesDropDownView == nil else { return }
         view.endEditing(true)
         
-        let tashkentItem = DropDownItem(title: "Ташкент", subtitle: "Столица Узбекистана", iconName: "building.2.crop.left", iconColor: .appAccent)
+        let tashkentItem = DropDownItem(title: "Ташкент", subtitle: "Узбекистан", iconName: "building.2.crop.left", iconColor: .appAccent)
         let dropDown = SortingDropDownView(items: [tashkentItem])
         dropDown.translatesAutoresizingMaskIntoConstraints = false
         dropDown.alpha = 0.0
@@ -203,47 +203,48 @@ extension EditProfileViewController {
         let fullMapVC = FullMapViewController(initialRegion: region)
                 
         fullMapVC.onAddressSelected = { [weak self] selectedAddress in
-            guard let self = self else { return }
-            
-            // 1. Создаем регулярное выражение, которое находит "Ташкент", "г. Ташкент", "город Ташкент" в любом регистре
-            let pattern = "(?i)(г(ород)?\\.?\\s*)?ташкент\\s*,?\\s*"
-            
-            // И еще один шаблон, на случай если карта возвращает страну "Узбекистан"
-            let countryPattern = "(?i)узбекистан\\s*,?\\s*"
-            
-            // 2. Применяем гибкое удаление через регулярные выражения
-            var cleanAddress = selectedAddress.replacingOccurrences(
-                of: pattern,
-                with: "",
-                options: .regularExpression
-            )
-            
-            cleanAddress = cleanAddress.replacingOccurrences(
-                of: countryPattern,
-                with: "",
-                options: .regularExpression
-            )
-            
-            // 3. Финальная чистка: убираем случайные пробелы и запятые по краям строки
-            var finalAddress = cleanAddress.trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            if finalAddress.hasPrefix(",") { finalAddress.removeFirst() }
-            finalAddress = finalAddress.trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            // Защита от дублирования "ул. ул."
-            if finalAddress.lowercased().hasPrefix("ул. ул. ") {
-                finalAddress = finalAddress.replacingOccurrences(of: "ул. ул. ", with: "ул. ")
+            // ГЛАВНОЕ ИСПРАВЛЕНИЕ: Переносим обработку UI строго в главный поток
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                
+                let pattern = "(?i)(г(ород)?\\.?\\s*)?ташкент\\s*,?\\s*"
+                let countryPattern = "(?i)узбекистан\\s*,?\\s*"
+                
+                var cleanAddress = selectedAddress.replacingOccurrences(
+                    of: pattern,
+                    with: "",
+                    options: .regularExpression
+                )
+                
+                cleanAddress = cleanAddress.replacingOccurrences(
+                    of: countryPattern,
+                    with: "",
+                    options: .regularExpression
+                )
+                
+                var finalAddress = cleanAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+                if finalAddress.hasPrefix(",") { finalAddress.removeFirst() }
+                finalAddress = finalAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                if finalAddress.lowercased().hasPrefix("ул. ул. ") {
+                    finalAddress = finalAddress.replacingOccurrences(of: "ул. ул. ", with: "ул. ")
+                }
+                
+                // 1. Записываем чистый адрес в текстовое поле Профиля
+                self.addressTextField.text = finalAddress
+                
+                // 2. ИСПРАВЛЕНО: Закрываем модальный UINavigationController, так как он открывался через present
+                self.presentedViewController?.dismiss(animated: true, completion: nil)
+                
+                print("🗺️ Адрес успешно возвращен в профиль: \(finalAddress)")
             }
-            
-            // Записываем гарантированно чистый адрес (например: "ул. Лабзак проезд, д. 14")
-            self.addressTextField.text = finalAddress
         }
 
         let navController = UINavigationController(rootViewController: fullMapVC)
         navController.modalPresentationStyle = .fullScreen
         present(navController, animated: true)
-
     }
+
 
 }
 
