@@ -4,7 +4,13 @@ import UIKit
 extension PickupViewController {
     
     func setupLayout() {
-        // 1. СНАЧАЛА добавляем все базовые элементы на экран в строгом порядке
+        
+        // СНАЧАЛА ОБЯЗАТЕЛЬНО ДОБАВЛЯЕМ БАЗОВЫЕ КОНТЕЙНЕРЫ ДЛЯ СКРОЛЛА
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        
+        // все базовые элементы на экран в строгом порядке
+        view.addSubview(pickupAddressTextField)
         view.addSubview(wasteTypeTextField)
         view.addSubview(pickupPointTextField)
         view.addSubview(weightTextField)
@@ -48,6 +54,7 @@ extension PickupViewController {
         
         
         // ВСЕ элементы scrollView добавляем СТРОГО на contentView
+                contentView.addSubview(pickupAddressTextField)
                 contentView.addSubview(wasteTypeTextField)
                 contentView.addSubview(pickupPointTextField)
                 contentView.addSubview(weightTextField)
@@ -81,11 +88,17 @@ extension PickupViewController {
 
                 // === 3. БАЗОВЫЕ КОНСТРЕЙНТЫ ДЛЯ ВЕРХНИХ ПОЛЕЙ (Привязка к contentView!) ===
                 NSLayoutConstraint.activate([
-                    // Самый верхний элемент привязан к topAnchor нашего contentView
-                    wasteTypeTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16),
-                    wasteTypeTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-                    wasteTypeTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-                    wasteTypeTextField.heightAnchor.constraint(equalToConstant: 48),
+                    // САМОЕ ВЕРХНЕЕ ПОЛЕ: Адрес вывоза (привязываем к верху contentView)
+                               pickupAddressTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
+                               pickupAddressTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+                               pickupAddressTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+                               pickupAddressTextField.heightAnchor.constraint(equalToConstant: 48),
+                               
+                               //  ВТОРОЕ ПОЛЕ: Вид отхода (теперь привязываем его верх к низу адреса вывоза)
+                               wasteTypeTextField.topAnchor.constraint(equalTo: pickupAddressTextField.bottomAnchor, constant: 12),
+                               wasteTypeTextField.leadingAnchor.constraint(equalTo: pickupAddressTextField.leadingAnchor),
+                               wasteTypeTextField.trailingAnchor.constraint(equalTo: pickupAddressTextField.trailingAnchor),
+                               wasteTypeTextField.heightAnchor.constraint(equalToConstant: 48),
                     
                     pickupPointTextField.topAnchor.constraint(equalTo: wasteTypeTextField.bottomAnchor, constant: 12),
                     pickupPointTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),

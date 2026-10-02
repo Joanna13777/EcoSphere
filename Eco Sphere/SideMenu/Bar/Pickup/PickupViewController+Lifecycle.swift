@@ -28,10 +28,14 @@ extension PickupViewController {
         setupActions()
         setupDelegates()
         setupKeyboardObservers() // при открытии клавиатуры экран автоматически поднимался
+        setupPickupAddressChevronMenu() // Переопределяем правый шеврон поля адреса на полноценную кнопку
+        
+        pickupAddressTextField.delegate = self
+        pickupAddressTextField.addTarget(self, action: #selector(pickupAddressFieldTapped), for: .editingDidBegin)
         
         // изменения текста в полях ввода
         let allTextFields = [
-            wasteTypeTextField, pickupPointTextField, weightTextField,
+            pickupPointTextField, wasteTypeTextField, weightTextField,
             nameTextField, phoneTextField, addressTextField
         ]
         
@@ -48,9 +52,6 @@ extension PickupViewController {
         
         // Применяем расширение к каждому элементу
         allInputFields.forEach { $0.addDoneButtonOnKeyboard() }
-        
-        
-        
         
         allTextFields.forEach { textField in
             textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)

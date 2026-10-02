@@ -21,6 +21,18 @@ class PickupViewController: UIViewController {
     let isLoggedIn = UserDefaults.standard.bool(forKey: "menu_user_logged_in")
 
     // MARK: - UI Элементы (Поля ввода)
+    let pickupAddressTextField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Адрес вывоза"
+        tf.backgroundColor = .systemGroupedBackground
+        tf.font = .systemFont(ofSize: 15)
+        tf.layer.cornerRadius = 12
+        tf.setLeftPadding(16)
+        tf.setRightImage(systemName: "chevron.down", tintColor: UIColor.systemGray2)
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        return tf
+    }()
+
     let wasteTypeTextField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Вид отхода"
@@ -37,6 +49,7 @@ class PickupViewController: UIViewController {
         let tf = UITextField()
         tf.placeholder = "Адрес приёмочного пункта"
         tf.backgroundColor = .systemGroupedBackground
+        tf.font = .systemFont(ofSize: 15)
         tf.layer.cornerRadius = 12
         tf.setLeftPadding(16)
         tf.setRightImage(systemName: "chevron.down", tintColor: UIColor.systemGray2)
@@ -283,7 +296,7 @@ class PickupViewController: UIViewController {
         scrollView.scrollIndicatorInsets = contentInsets
         
         // 2. БЕЗОПАСНЫЙ АВТОПОДЪЕМ: проверяем, какое из полей заказа активно
-        let allFields: [UIView] = [wasteTypeTextField, pickupPointTextField, weightTextField, descriptionTextView]
+        let allFields: [UIView] = [pickupAddressTextField, wasteTypeTextField, pickupPointTextField, weightTextField, descriptionTextView]
         
         // Ищем активное поле (для TextView проверяем через isFirstResponder)
         if let activeField = allFields.first(where: { $0.isFirstResponder }) {

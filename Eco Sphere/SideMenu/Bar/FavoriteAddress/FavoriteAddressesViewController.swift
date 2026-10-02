@@ -3,11 +3,7 @@ import UIKit
 class FavoriteAddressesViewController: UIViewController {
     
     // Тестовый массив данных
-    private var addresses: [FavoriteAddress] = [
-        FavoriteAddress(title: "Дом", address: "г. Ташкент, Мирзо-Улугбекский район, ул. Мустакиллик, д. 86", iconName: "house.fill"),
-        FavoriteAddress(title: "Работа", address: "г. Ташкент, Юнусабадский район, пр-т Амира Темура, д. 107B", iconName: "briefcase.fill"),
-        FavoriteAddress(title: "Дача", address: "Ташкентская область, Бостанлыкский район, Чарвак", iconName: "leaf.fill")
-    ]
+    private var addresses: [FavoriteAddress] = FavoriteAddressesManager.shared.loadAddresses()
     
     // MARK: - UI Elements
     private let tableView: UITableView = {
@@ -53,6 +49,10 @@ class FavoriteAddressesViewController: UIViewController {
         setupLayout()
         setupTableView()
         setupActions()
+        
+        // СИНХРОНИЗАЦИЯ: Записываем дефолтные адреса в память симулятора, чтобы экран заказа их сразу увидел
+                let stringAddresses = addresses.map { $0.address }
+                UserDefaults.standard.set(stringAddresses, forKey: "user_favorite_addresses")
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -149,27 +149,37 @@ extension FavoriteAddressesViewController: UITableViewDataSource, UITableViewDel
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             addresses.remove(at: indexPath.row)
+            
+            // --- ДОБАВЛЕНО: Обновляем память после удаления адреса ---
+            let stringAddresses = addresses.map { $0.address }
+            UserDefaults.standard.set(stringAddresses, forKey: "user_favorite_addresses")
+            
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
     }
 }
-
-// расширение для обработки данных кнопки "Добавить новый адрес"
-// MARK: - AddAddressDelegate
+    
+    // AddAddressDelegate` к расширению класса
 extension FavoriteAddressesViewController: AddAddressDelegate {
     
     func didAddAddress(_ address: FavoriteAddress) {
         addresses.append(address)
+        
+        // Принудительно сохраняем массив текстов адресов для экрана заказа ---
+        let stringAddresses = addresses.map { $0.address }
+        UserDefaults.standard.set(stringAddresses, forKey: "user_favorite_addresses")
+        
         let indexPath = IndexPath(row: addresses.count - 1, section: 0)
         tableView.insertRows(at: [indexPath], with: .automatic)
     }
     
-    // НОВЫЙ МЕТОД: Принимает отредактированный адрес и обновляет конкретную строку таблицы
     func didUpdateAddress(_ address: FavoriteAddress, at index: Int) {
-        // Обновляем данные в массиве
         addresses[index] = address
         
-        // Плавно перезагружаем только измененную ячейку
+        // Принудительно обновляем массив текстов адресов при редактировании ---
+        let stringAddresses = addresses.map { $0.address }
+        UserDefaults.standard.set(stringAddresses, forKey: "user_favorite_addresses")
+        
         let indexPath = IndexPath(row: index, section: 0)
         tableView.reloadRows(at: [indexPath], with: .automatic)
     }

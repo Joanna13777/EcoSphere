@@ -1,13 +1,7 @@
-//
-//  FavoriteAddressesModel.swift
-//  Eco Sphere
-//
-//  Created by Жанна Сергеевна  on 30/08/26.
-//
 
 import UIKit
 
-struct FavoriteAddress {
+struct FavoriteAddress: Codable { // протокол Codable для сохранения в память телефона
     let title: String
     let address: String
     let iconName: String

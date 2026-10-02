@@ -96,7 +96,7 @@ class FavoriteAddressCell: UITableViewCell {
         iconImageView.image = UIImage(systemName: iconName)
     }
     
-    // MARK: - Theme Observer (iOS 17+)
+
     // MARK: - Theme Observer (iOS 17+)
     private func setupThemeObserver() {
         if #available(iOS 17.0, *) {

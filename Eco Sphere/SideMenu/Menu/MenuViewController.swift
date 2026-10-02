@@ -172,28 +172,31 @@ class MenuViewController: UIViewController {
         headerContainer.addSubview(bellButton) // <-- Добавили колокольчик в шапку
         
         NSLayoutConstraint.activate([
-            // Аватар
-            headerAvatarImageView.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor, constant: 20),
-            headerAvatarImageView.centerYAnchor.constraint(equalTo: headerContainer.centerYAnchor),
-            headerAvatarImageView.widthAnchor.constraint(equalToConstant: 60),
-            headerAvatarImageView.heightAnchor.constraint(equalToConstant: 60),
-            
-            // КНОПКА КОЛОКОЛЬЧИКА: Прижимаем к правому верхнему углу шапки профиля
-            bellButton.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -24),
-            bellButton.topAnchor.constraint(equalTo: headerContainer.topAnchor, constant: 16),
-            bellButton.widthAnchor.constraint(equalToConstant: 32),
-            bellButton.heightAnchor.constraint(equalToConstant: 32),
-            
-            // Лейбл имени (ограничиваем его правый край до колокольчика, чтобы текст не налезал на иконку)
-            headerNameLabel.leadingAnchor.constraint(equalTo: headerAvatarImageView.trailingAnchor, constant: 16),
-            headerNameLabel.trailingAnchor.constraint(equalTo: bellButton.leadingAnchor, constant: -12),
-            headerNameLabel.topAnchor.constraint(equalTo: headerAvatarImageView.topAnchor, constant: 4),
-            
-            // Телефон
-            headerPhoneLabel.leadingAnchor.constraint(equalTo: headerNameLabel.leadingAnchor),
-            headerPhoneLabel.trailingAnchor.constraint(equalTo: headerNameLabel.trailingAnchor),
-            headerPhoneLabel.topAnchor.constraint(equalTo: headerNameLabel.bottomAnchor, constant: 4)
-        ])
+                    // Аватар
+                    headerAvatarImageView.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor, constant: 20),
+                    headerAvatarImageView.centerYAnchor.constraint(equalTo: headerContainer.centerYAnchor),
+                    headerAvatarImageView.widthAnchor.constraint(equalToConstant: 60),
+                    headerAvatarImageView.heightAnchor.constraint(equalToConstant: 60),
+                    
+                    // КНОПКА КОЛОКОЛЬЧИКА: Прижимаем к правому краю
+                    bellButton.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -24),
+                    bellButton.topAnchor.constraint(equalTo: headerContainer.topAnchor, constant: 16),
+                    bellButton.widthAnchor.constraint(equalToConstant: 32),
+                    bellButton.heightAnchor.constraint(equalToConstant: 32),
+                    
+                    // Лейбл имени
+                    headerNameLabel.leadingAnchor.constraint(equalTo: headerAvatarImageView.trailingAnchor, constant: 16),
+                    headerNameLabel.topAnchor.constraint(equalTo: headerAvatarImageView.topAnchor, constant: 4),
+                    
+                    // ИСПРАВЛЕНО: Заменяем жесткое '==' на '<=' (меньше или равно).
+                    // Это разрывает жесткую цепочку и полностью убирает конфликт Auto Layout при ширине 0!
+                    headerNameLabel.trailingAnchor.constraint(lessThanOrEqualTo: bellButton.leadingAnchor, constant: -12),
+                    
+                    // Телефон
+                    headerPhoneLabel.leadingAnchor.constraint(equalTo: headerNameLabel.leadingAnchor),
+                    headerPhoneLabel.trailingAnchor.constraint(equalTo: headerNameLabel.trailingAnchor),
+                    headerPhoneLabel.topAnchor.constraint(equalTo: headerNameLabel.bottomAnchor, constant: 4)
+                ])
         
         // Назначаем готовую шапку в таблицу
         tableView.tableHeaderView = headerContainer

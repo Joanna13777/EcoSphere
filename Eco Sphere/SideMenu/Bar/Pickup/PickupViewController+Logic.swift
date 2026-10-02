@@ -37,30 +37,109 @@ extension PickupViewController: UITextFieldDelegate {
         updateSortingReminder()
     }
     
-    @objc private func wasteTypeFieldTapped() {
+    @objc func pickupAddressFieldTapped() {
+        // 1. Сразу закрываем клавиатуру
+        view.endEditing(true)
+        
+        // 2. Читаем массив строк из памяти симулятора напрямую
+        let savedAddresses = UserDefaults.standard.stringArray(forKey: "user_favorite_addresses") ?? []
+        
+        let addressItems: [DropDownItem]
+        
+        if savedAddresses.isEmpty {
+            // Если гость ещё не заходил в Избранное, выводим красивую подсказку-заглушку
+            addressItems = [DropDownItem(
+                title: "Добавить адрес в профиле",
+                subtitle: "У вас пока нет сохраненных адресов",
+                iconName: "mappin.and.ellipse",
+                iconColor: .systemGray
+            )]
+        } else {
+            // Преобразуем строки сохраненных адресов в элементы выпадающей таблицы со значком домика
+            addressItems = savedAddresses.map { addressText in
+                return DropDownItem(
+                    title: addressText,
+                    subtitle: "Ваш избранный адрес",
+                    iconName: "house.fill", // Нативная иконка домика
+                    iconColor: .systemGreen // Наш красивый эко-зеленый цвет
+                )
+            }
+        }
+        
+        // 3. Создаем выпадающее окно, передавая готовые данные адресов
+        let dropDownView = SortingDropDownView(items: addressItems)
+        dropDownView.translatesAutoresizingMaskIntoConstraints = false
+        dropDownView.tag = 999
+        
+        // Удаляем старое окно, если оно уже было открыто на экране
+        removeExistingDropDown()
+        
+        // Добавляем новое окно строго внутрь contentView
+        contentView.addSubview(dropDownView)
+        
+        // Настраиваем логику выбора элемента
+        dropDownView.onItemSelected = { [weak self] (selectedItem: DropDownItem) in
+            if selectedItem.title == "Добавить адрес в профиле" { return }
+            
+            // Подставляем выбранную улицу в текстовое поле адреса вывоза
+            self?.pickupAddressTextField.text = selectedItem.title
+            
+            // Ставим красивую левую эко-иконку домика в поле ввода
+            if let field = self?.pickupAddressTextField {
+                self?.setFieldLeftIcon(field, systemName: "house.fill", color: .systemGreen)
+            }
+            
+            self?.validateFields()           // Проверяем активность кнопки заказа
+            self?.removeExistingDropDown()  // Закрываем окно
+        }
+        
+        // Меняем стрелочку поля на "вверх" при открытии списка
+        pickupAddressTextField.setRightImage(systemName: "chevron.up", tintColor: .systemGray2)
+        
+        // Динамический расчет высоты окна под количество адресов
+        let itemHeight: CGFloat = 64
+        let padding: CGFloat = 8
+        let calculatedHeight = CGFloat(addressItems.count) * itemHeight + padding
+        let finalHeight = min(calculatedHeight, 250) // Ограничиваем максимальный размер
+        
+        // Активируем констрейнты выпадающего списка под полем "Адрес вывоза"
+        NSLayoutConstraint.activate([
+            dropDownView.topAnchor.constraint(equalTo: pickupAddressTextField.bottomAnchor, constant: 4),
+            dropDownView.leadingAnchor.constraint(equalTo: pickupAddressTextField.leadingAnchor),
+            dropDownView.trailingAnchor.constraint(equalTo: pickupAddressTextField.trailingAnchor),
+            dropDownView.heightAnchor.constraint(equalToConstant: finalHeight)
+        ])
+        
+        // Добавляем жест закрытия по тапу мимо окна
+        let closeTap = UITapGestureRecognizer(target: self, action: #selector(closeDropDownByTap))
+        closeTap.cancelsTouchesInView = false
+        view.addGestureRecognizer(closeTap)
+    }
+
+    // MARK: - Вызов списков (Устраняет оставшиеся 4 ошибки)
+    
+    @objc func wasteTypeFieldTapped() {
+        view.endEditing(true)
         showCustomDropDown(anchorField: wasteTypeTextField, type: PickupViewController.DropDownType.wasteType)
         
-        // Искусственный пинг через 0.15 секунды, когда таблица дропдауна уже отдала текст полю
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
             self?.validateFields()
             self?.updateSortingReminder()
         }
     }
 
-
-    @objc private func pickupPointFieldTapped() {
+    @objc func pickupPointFieldTapped() {
+        view.endEditing(true)
         showCustomDropDown(anchorField: pickupPointTextField, type: PickupViewController.DropDownType.pickupPoint)
         
-        // Запускаем небольшую задержку для адреса
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
             self?.validateFields()
         }
     }
 
-    
     // --- ИНТЕЛЛЕКТУАЛЬНЫЙ МАСОЧНЫЙ ВВОД ВЕСА ("... кг") ---
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        // Внутри метода textField(shouldChangeCharactersIn...) замените обработку веса:
+        // обработкa веса:
         
         if string.isEmpty {
             if textField == weightTextField {
@@ -81,9 +160,11 @@ extension PickupViewController: UITextFieldDelegate {
             return true
         }
         
-        if textField == wasteTypeTextField || textField == pickupPointTextField {
+        // Запрещаем ручной ввод букв и в поле адреса вывоза
+        if textField == wasteTypeTextField || textField == pickupPointTextField || textField == pickupAddressTextField {
             return false
         }
+
         
         if textField == weightTextField {
             let currentText = textField.text ?? ""
@@ -147,7 +228,9 @@ extension PickupViewController: UITextFieldDelegate {
     
     private func showSuccessAlert() {
         let selectedWaste = wasteTypeTextField.text ?? "Вторсырье"
-        let selectedAddress = pickupPointTextField.text ?? "Адрес не указан"
+        // Берём адрес из нового поля адреса вывоза
+        let selectedAddress = pickupAddressTextField.text?.isEmpty ?? true ? (pickupPointTextField.text ?? "Адрес не указан") : (pickupAddressTextField.text ?? "")
+
         let selectedWeight = weightTextField.text?.isEmpty ?? true ? "0 кг" : (weightTextField.text ?? "0 кг")
         
         // Формируем красивую дату из встроенного календаря для экрана истории
@@ -196,7 +279,7 @@ extension PickupViewController: UITextViewDelegate {
         }
     }
     
-
+    
     
     var sortingReminders: [String: String] {
         return [
@@ -208,7 +291,7 @@ extension PickupViewController: UITextViewDelegate {
             "Электро": "Убедитесь, что из устройств извлечены съемные батарейки и аккумуляторы — их нужно сдавать отдельно."
         ]
     }
-
+    
     func updateSortingReminder() {
         let selectedWaste = wasteTypeTextField.text ?? ""
         
@@ -227,29 +310,35 @@ extension PickupViewController: UITextViewDelegate {
             })
         }
     }
-
+    
     func validateFields() {
         let isWasteTypeFilled = !(wasteTypeTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
         let isPickupPointFilled = !(pickupPointTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
         let isWeightFilled = !(weightTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
         
         let isFormValid: Bool
+        let isPickupAddressFilled = !(pickupAddressTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
         
         if isLoggedIn {
-            // Если пользователь авторизован — проверяем только эти 3 поля
-            isFormValid = isWasteTypeFilled && isPickupPointFilled && isWeightFilled
+            isFormValid = isWasteTypeFilled && isPickupPointFilled && isWeightFilled && isPickupAddressFilled
         } else {
-            // Если НЕ авторизован — проверяем еще имя, телефон и адрес
-            let isNameFilled = !(nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-            let isPhoneFilled = !(phoneTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
-            let isAddressFilled = !(addressTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
             
-            isFormValid = isWasteTypeFilled && isPickupPointFilled && isWeightFilled &&
-                          isNameFilled && isPhoneFilled && isAddressFilled
+            if isLoggedIn {
+                // Если пользователь авторизован — проверяем только эти 3 поля
+                isFormValid = isWasteTypeFilled && isPickupPointFilled && isWeightFilled
+            } else {
+                // Если НЕ авторизован — проверяем еще имя, телефон и адрес
+                let isNameFilled = !(nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+                let isPhoneFilled = !(phoneTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+                let isAddressFilled = !(addressTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+                
+                isFormValid = isWasteTypeFilled && isPickupPointFilled && isWeightFilled &&
+                isNameFilled && isPhoneFilled && isAddressFilled
+            }
+            
+            // Включаем или выключаем кнопку заказа
+            orderButton.isEnabled = isFormValid
         }
         
-        // Включаем или выключаем кнопку заказа
-        orderButton.isEnabled = isFormValid
     }
-
 }
