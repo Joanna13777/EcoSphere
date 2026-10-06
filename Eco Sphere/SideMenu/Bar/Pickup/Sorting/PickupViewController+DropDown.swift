@@ -10,14 +10,15 @@ extension PickupViewController {
     }
     
     // MARK: - UITextFieldDelegate
+    // MARK: - UITextFieldDelegate
     public func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        // УСЛОВИЕ 1: Если кликнули на поле адреса — РАЗРЕШАЕМ ввод руками (возвращаем true)
         if textField == pickupAddressTextField {
-            removeExistingDropDown() // Закрываем другие списки, если они открыты
-            return true
+            // Мягко закрываем другие списки, если они были открыты, но НЕ трогаем клавиатуру
+            removeExistingDropDown()
+            return true // Полностью разрешаем нативное редактирование и ввод текста
         }
         
-        // Для остальных двух полей (вид отхода и приемочный пункт) по-прежнему блокируем клавиатуру:
+        // Для остальных полей блокируем клавиатуру и открываем списки
         if textField == wasteTypeTextField || textField == pickupPointTextField {
             view.endEditing(true)
             if textField == wasteTypeTextField { wasteTypeFieldTapped() }
@@ -26,6 +27,7 @@ extension PickupViewController {
         }
         return true
     }
+    
     
     // MARK: - Настройка кнопки Шеврона для Адреса
     /// Настраивает шеврон как отдельную кнопку, чтобы клик по нему вызывал выпадающий список
@@ -63,7 +65,6 @@ extension PickupViewController {
     }
     
     // MARK: - Отображение кастомного DropDown
-    // MARK: - Отображение кастомного DropDown
     func showCustomDropDown(anchorField: UITextField, type: DropDownType) {
         removeExistingDropDown()
         
@@ -77,7 +78,7 @@ extension PickupViewController {
             let selectedWasteType = wasteTypeTextField.text ?? ""
             currentItems = PickupModelManager.shared.getAddresses(for: selectedWasteType)
         } else if type == .pickupAddress {
-            // 🌟 ТЯНЕМ СВЕЖИЕ АДРЕСА С ЭКРАНА ИЗБРАННОГО ПРЯМО ИЗ ПАМЯТИ
+            //  ТЯНЕМ СВЕЖИЕ АДРЕСА С ЭКРАНА ИЗБРАННОГО ПРЯМО ИЗ ПАМЯТИ
             let savedAddresses = FavoriteAddressesManager.shared.loadAddresses()
             
             // Фирменный насыщенный желтый цвет как на вашем макете (#FBC02D)
@@ -88,7 +89,7 @@ extension PickupViewController {
                     title: favAddress.title,
                     subtitle: favAddress.address,
                     iconName: favAddress.iconName,    // Передаем "house.fill", "briefcase.fill", "leaf.fill"
-                    iconColor: favoriteYellowColor    // 🌟 Передаем ЖЕЛТЫЙ цвет в каждую ячейку списка!
+                    iconColor: favoriteYellowColor    // Передаем ЖЕЛТЫЙ цвет в каждую ячейку списка!
                 )
             }
         }
@@ -163,9 +164,9 @@ extension PickupViewController {
         closeTap.cancelsTouchesInView = false
         view.addGestureRecognizer(closeTap)
     }
-
-
-
+    
+    
+    
     
     // ПУНКТ 1: Метод установки иконки с увеличенным дочерним отступом для текста
     func setFieldLeftIcon(_ textField: UITextField, systemName: String, color: UIColor) {
@@ -186,16 +187,19 @@ extension PickupViewController {
         if let existingView = view.viewWithTag(999), existingView.frame.contains(touchPoint) {
             return
         }
+        // Если тапнули в любое другое место (включая пустое пространство) — закрываем меню
         removeExistingDropDown()
+        
+        // Удаляем сам жест с главного экрана, чтобы он больше не перехватывал нажатия
+        view.removeGestureRecognizer(gesture)
     }
     
     func removeExistingDropDown() {
-        // Сбрасываем стрелочки у кнопок обратно вниз
-        // Для pickupAddressTextField делаем безопасное приведение к UIButton, так как мы изменили rightView
+        // Возвращаем стрелочку шеврона обратно в положение "вниз"
         if let chevronButton = pickupAddressTextField.rightView as? UIButton {
-                    var updatedConfig = chevronButton.configuration
-                    updatedConfig?.image = UIImage(systemName: "chevron.down")
-                    chevronButton.configuration = updatedConfig
+            var updatedConfig = chevronButton.configuration
+            updatedConfig?.image = UIImage(systemName: "chevron.down")
+            chevronButton.configuration = updatedConfig
         } else {
             pickupAddressTextField.setRightImage(systemName: "chevron.down", tintColor: .systemGray2)
         }
@@ -203,8 +207,13 @@ extension PickupViewController {
         wasteTypeTextField.setRightImage(systemName: "chevron.down", tintColor: .systemGray2)
         pickupPointTextField.setRightImage(systemName: "chevron.down", tintColor: .systemGray2)
         
+        // Находим меню по тегу
         if let existingView = view.viewWithTag(999) {
-            UIView.animate(withDuration: 0.15, animations: { existingView.alpha = 0 }) { _ in existingView.removeFromSuperview() }
+            UIView.animate(withDuration: 0.15, animations: {
+                existingView.alpha = 0
+            }) { _ in
+                existingView.removeFromSuperview()
+            }
         }
     }
 }

@@ -31,7 +31,8 @@ extension PickupViewController {
         setupPickupAddressChevronMenu() // Переопределяем правый шеврон поля адреса на полноценную кнопку
         
         pickupAddressTextField.delegate = self
-        pickupAddressTextField.addTarget(self, action: #selector(pickupAddressFieldTapped), for: .editingDidBegin)
+        pickupAddressTextField.addTarget(self, action: #selector(pickupAddressChanged), for: .editingChanged)
+
         
         // изменения текста в полях ввода
         let allTextFields = [

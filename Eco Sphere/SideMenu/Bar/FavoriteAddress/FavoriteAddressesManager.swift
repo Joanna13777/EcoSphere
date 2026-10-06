@@ -2,7 +2,7 @@ import Foundation
 
 class FavoriteAddressesManager {
     static let shared = FavoriteAddressesManager()
-    private let storageKey = "user_saved_favorite_addresses"
+    private let storageKey = "user_favorite_addresses"
     
     // Загрузить адреса из памяти устройства
     func loadAddresses() -> [FavoriteAddress] {

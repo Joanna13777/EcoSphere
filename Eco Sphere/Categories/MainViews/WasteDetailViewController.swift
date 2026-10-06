@@ -224,7 +224,7 @@ class WasteDetailViewController: UIViewController {
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         
-        // === МАГИЯ АВТО-ПЕРЕКЛЮЧЕНИЯ ЦВЕТА ТЕКСТА ===
+        // АВТО-ПЕРЕКЛЮЧЕНИЯ ЦВЕТА ТЕКСТА
         // Создаем динамический цвет для текста внутри карточки
         label.textColor = UIColor { traitCollection in
             let isDark = UserDefaults.standard.integer(forKey: "selected_app_theme") == 1

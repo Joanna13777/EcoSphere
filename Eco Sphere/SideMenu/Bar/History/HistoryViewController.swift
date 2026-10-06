@@ -1,3 +1,4 @@
+
 import UIKit
 
 class HistoryViewController: UIViewController {
@@ -13,19 +14,24 @@ class HistoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavigationBar()
-        setupLayout()
+        setupLayout() 
         setupTableView()
+        
+        navigationItem.backButtonDisplayMode = .minimal
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         UIColor.applyGlobalTheme(for: self, withTableView: tableView)
         navigationController?.setNavigationBarHidden(false, animated: animated)
+        
+        // Перезагружаем таблицу, чтобы увидеть свежие изменения и новые заказы
+        self.tableView.reloadData()
     }
     
     // MARK: - Setups
     private func setupNavigationBar() {
-        title = "История вывозов"
+        title = "История"
         
         let backButton = UIButton(type: .system)
         backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
@@ -37,32 +43,28 @@ class HistoryViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backButton)
     }
     
- 
+    private func setupLayout() {
+           view.addSubview(tableView)
+           NSLayoutConstraint.activate([
+               tableView.topAnchor.constraint(equalTo: view.topAnchor),
+               tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+               tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+               tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+           ])
+       }
     
     private func setupTableView() {
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "HistoryCell")
-    }
+            tableView.delegate = self
+            tableView.dataSource = self
+            // Регистрируем ПРАВИЛЬНЫЙ класс ячейки (HistoryOrderCell)
+            tableView.register(HistoryOrderCell.self, forCellReuseIdentifier: "HistoryCell")
+        }
+ 
     
     @objc private func backTapped() {
         navigationController?.popViewController(animated: true)
     }
 }
-
-// MARK: - UITableView DataSource & Delegate (Временная заглушка)
-extension HistoryViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 0 // Пока список пуст, расширим его в следующем шаге
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "HistoryCell", for: indexPath)
-        return cell
-    }
-}
-
-
 
 // MARK: - Canvas Preview
 #Preview {

@@ -12,13 +12,12 @@ class MainContainerViewController: UIViewController, UICollectionViewDataSource,
     
     // массив системных иконок, строго совпадающий по порядку с категориями
     private let tabIcons = [
-        "shippingbox.fill",              // Макулатура
-        "wineglass.fill",                // Стекло
-        "takeoutbag.and.cup.and.straw.fill",              // Пластик
-        "cylinder.split.1x2.fill",       // Металл wrench.and.screwdriver.fill
-        "leaf.fill",                     // Органика
-        "iphone.gen1"                    // Электро (или "iphone")
-        
+        "doc.text.fill",              // Макулатура
+        "wineglass.fill",             // Стекло
+        "takeoutbag.and.cup.and.straw.fill",                 // Пластик
+        "wrench.adjustable.fill",                     // Металл
+        "leaf.fill",                  // Органика
+        "tv.fill"                 // Электро (или "iphone")
     ]
     
     // Палитра для главного контейнера
@@ -34,9 +33,7 @@ class MainContainerViewController: UIViewController, UICollectionViewDataSource,
         setupCollectionView()
         setupPageViewController()
         setupLayout()
-        setupNotificationNavigationButton()
-
-        
+        setupNotificationNavigationButton()   
     }
     
     // Добавьте этот метод целиком в файл экрана «Виды»

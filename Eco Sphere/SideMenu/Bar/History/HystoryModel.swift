@@ -1,40 +1,42 @@
 import UIKit
 
-// MARK: - Структура данных заказа
-struct HistoryOrder {
+// MARK: - Структура данных заказа с поддержкой сохранения
+struct HistoryOrder: Codable {
+    let id: UUID // Уникальный ID для точного поиска заказа при изменении/удалении
     let wasteType: String
     let iconName: String
-    let iconColor: UIColor
-    let date: String
-    let weight: String
-    let address: String
-    let status: String
-    let isCompleted: Bool
+    let iconColorHex: String
+    var date: String      // Сделали var, чтобы можно было редактировать
+    var weight: String    // Сделали var, чтобы можно было редактировать
+    var address: String   // Сделали var, чтобы можно было редактировать
+    var status: String    // Сделали var, чтобы менять на "Отменен"
+    var isCompleted: Bool
+    
+    var iconColor: UIColor {
+        return UIColor(hex: iconColorHex) ?? .systemGreen
+    }
 }
 
-// MARK: - Глобальный менеджер заказов (Склад данных)
-class OrderManager {
-    
-    // Единый источник правды для всего приложения
-    static let shared = OrderManager()
-    
-    // Массив, в который будут динамически добавляться новые заказы
-    var orders: [HistoryOrder] = []
-    
-    private init() {
-        // Заполняем базу начальными тестовыми данными, чтобы экраны не были пустыми
-        setupMockData()
+// MARK: - Вспомогательное расширение для работы с HEX-цветами
+extension UIColor {
+    convenience init?(hex: String) {
+        var cString: String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if cString.hasPrefix("#") { cString.remove(at: cString.startIndex) }
+        if cString.count != 6 { return nil }
+        var rgbValue: UInt64 = 0
+        Scanner(string: cString).scanHexInt64(&rgbValue)
+        self.init(
+            red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
+            green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
+            blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
+            alpha: 1.0
+        )
     }
     
-    private func setupMockData() {
-        orders = [
-            HistoryOrder(wasteType: "Макулатура (бумага)", iconName: "doc.text.fill", iconColor: .systemBlue, date: "21 сентября, 18:30", weight: "12 кг", address: "ул. Амира Темура, 14", status: "Выполнено", isCompleted: true),
-            HistoryOrder(wasteType: "Пластик", iconName: "capsule.fill", iconColor: UIColor(red: 0.96, green: 0.71, blue: 0.10, alpha: 1.0), date: "14 сентября, 12:00", weight: "5 кг", address: "проспект Навои, 89", status: "Выполнено", isCompleted: true)
-        ]
-    }
-    
-    // Метод для добавления нового заказа с любого экрана
-    func addNewOrder(_ order: HistoryOrder) {
-        orders.insert(order, at: 0) // Добавляем в самое начало списка, чтобы новый заказ был сверху
+    var toHexString: String {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        getRed(&r, green: &g, blue: &b, alpha: &a)
+        let rgb: Int = (Int)(r*255)<<16 | (Int)(g*255)<<8 | (Int)(b*255)<<0
+        return String(format: "#%06x", rgb)
     }
 }

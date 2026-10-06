@@ -70,7 +70,7 @@ extension PickupViewController {
                 contentView.addSubview(descriptionTextView)
                 contentView.addSubview(orderButton)
         
-        // === 2. КОНСТРЕЙНТЫ ДЛЯ СКРОЛЛА И КОНТЕЙНЕРА ===
+        // КОНСТРЕЙНТЫ ДЛЯ СКРОЛЛА И КОНТЕЙНЕРА
                 NSLayoutConstraint.activate([
                     // Привязываем scrollView к границам главного view
                     scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -86,7 +86,7 @@ extension PickupViewController {
                     contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
                 ])
 
-                // === 3. БАЗОВЫЕ КОНСТРЕЙНТЫ ДЛЯ ВЕРХНИХ ПОЛЕЙ (Привязка к contentView!) ===
+                //  БАЗОВЫЕ КОНСТРЕЙНТЫ ДЛЯ ВЕРХНИХ ПОЛЕЙ (Привязка к contentView!)
                 NSLayoutConstraint.activate([
                     // САМОЕ ВЕРХНЕЕ ПОЛЕ: Адрес вывоза (привязываем к верху contentView)
                                pickupAddressTextField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
@@ -106,7 +106,7 @@ extension PickupViewController {
                     pickupPointTextField.heightAnchor.constraint(equalToConstant: 48)
                 ])
                 
-                // === 4. ДИНАМИЧЕСКИЙ СДВИГ ИНТЕРФЕЙСА ДЛЯ ГОСТЯ / АВТОРИЗОВАННОГО ===
+                //  ДИНАМИЧЕСКИЙ СДВИГ ИНТЕРФЕЙСА ДЛЯ ГОСТЯ / АВТОРИЗОВАННОГО
                 if isLoggedIn {
                     NSLayoutConstraint.activate([
                         weightTextField.topAnchor.constraint(equalTo: pickupPointTextField.bottomAnchor, constant: 12),
@@ -147,7 +147,7 @@ extension PickupViewController {
                     ])
                 }
                 
-                // === 5. КОНСТРЕЙНТЫ ДЛЯ ОСТАЛЬНЫХ БЛОКОВ (Привязка к contentView!) ===
+                // КОНСТРЕЙНТЫ ДЛЯ ОСТАЛЬНЫХ БЛОКОВ (Привязка к contentView!)
                 NSLayoutConstraint.activate([
                     dateBorderView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
                     dateBorderView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),

@@ -17,8 +17,8 @@ class PickupModelManager {
         return [
             DropDownItem(title: "Макулатура (бумага)", subtitle: "картон, втулки, яичные кассеты, книги, тетради, газеты", iconName: "doc.text.fill", iconColor: .systemBlue),
             DropDownItem(title: "Стекло", subtitle: "бутылки, банки для консервации, флаконы от духов", iconName: "wineglass.fill", iconColor: .systemGreen),
-            DropDownItem(title: "Пластик", subtitle: "бутылки, крышки, банки, пакеты, посуда, контейнеры", iconName: "capsule.fill", iconColor: UIColor(red: 0.96, green: 0.71, blue: 0.10, alpha: 1.0)),
-            DropDownItem(title: "Металл", subtitle: "консервные банки, гвозди, проволока, мет. лом", iconName: "hammer.fill", iconColor: .systemPurple),
+            DropDownItem(title: "Пластик", subtitle: "бутылки, крышки, банки, пакеты, посуда, контейнеры", iconName: "takeoutbag.and.cup.and.straw.fill", iconColor: UIColor(red: 0.96, green: 0.71, blue: 0.10, alpha: 1.0)),
+            DropDownItem(title: "Металл", subtitle: "консервные банки, гвозди, проволока, мет. лом", iconName: "wrench.adjustable.fill", iconColor: .systemPurple),
             DropDownItem(title: "Органические отходы", subtitle: "Пищевые отходы", iconName: "leaf.fill", iconColor: opacityGrayColor),
             DropDownItem(title: "Электро", subtitle: "Сломанные телефоны, бытовая техника, провода", iconName: "tv.fill", iconColor: .systemGray)
         ]
