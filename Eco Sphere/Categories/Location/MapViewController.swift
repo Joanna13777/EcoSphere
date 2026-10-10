@@ -165,20 +165,7 @@ class MapViewController: UIViewController {
                         dismiss(animated: true, completion: nil)
                     }
                 }
-//            // Если это Push-переход:
-//            navigationController?.popViewController(animated: true)
-//            
-//            // Или если это Modal-переход:
-//             dismiss(animated: true, completion: nil)
-//        
-//        
-//        // Прячет текст кнопки назад для всех экранов, открываемых из этого контроллера
-//            let backButton = UIBarButtonItem()
-//            backButton.title = ""
-//            navigationItem.backBarButtonItem = backButton
-//    }
-    
-    
+
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal

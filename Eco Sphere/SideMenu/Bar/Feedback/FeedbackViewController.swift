@@ -50,7 +50,7 @@ class FeedbackViewController: UIViewController {
         return tv
     }()
     
-        // кнопка читает поля categoryTextField и messageTextView напрямую из класса
+    // кнопка читает поля categoryTextField и messageTextView напрямую из класса
     let sendButton: UIButton = {
         var config = UIButton.Configuration.filled()
         config.background.cornerRadius = 14
@@ -64,7 +64,7 @@ class FeedbackViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -98,11 +98,21 @@ class FeedbackViewController: UIViewController {
         tf.setLeftPadding(16)
         
         if hasChevron {
+            // 🌟 ИСПРАВЛЕНИЕ: Создаем прозрачный контейнер-подложку фиксированной ширины
+            let chevronContainer = UIView(frame: CGRect(x: 0, y: 0, width: 44, height: 48))
+            
             let chevronImageView = UIImageView(image: UIImage(systemName: "chevron.down"))
             chevronImageView.tintColor = .systemGray2
-            chevronImageView.contentMode = .center
-            chevronImageView.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
-            tf.rightView = chevronImageView
+            chevronImageView.contentMode = .scaleAspectFit
+            
+            // Сдвигаем иконку влево (x: 4), оставляя справа красивый пустой отступ в 16 поинтов
+            chevronImageView.frame = CGRect(x: 4, y: 12, width: 24, height: 24)
+            
+            // Собираем иерархию вью
+            chevronContainer.addSubview(chevronImageView)
+            
+            // Назначаем контейнер в качестве правой части поля
+            tf.rightView = chevronContainer
             tf.rightViewMode = .always
         }
         
@@ -110,19 +120,9 @@ class FeedbackViewController: UIViewController {
         return tf
     }
 }
-
-// Вспомогательное расширение для безопасного поиска текущего экрана из замыкания кнопки
-extension UIViewController {
-    func topMostViewController() -> UIViewController {
-        if let navigation = self as? UINavigationController {
-            return navigation.visibleViewController?.topMostViewController() ?? navigation
+    // Старый неактуальный код topMostViewController полностью удален!
+    extension UIViewController {
+        var currentNavigationController: UINavigationController? {
+            return self.navigationController ?? self.tabBarController?.navigationController
         }
-        if let tab = self as? UITabBarController {
-            return tab.selectedViewController?.topMostViewController() ?? tab
-        }
-        if let presented = presentedViewController {
-            return presented.topMostViewController()
-        }
-        return self
     }
-}

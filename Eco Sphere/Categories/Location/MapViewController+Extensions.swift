@@ -198,7 +198,19 @@ extension MapViewController {
             RecyclingPoint(title: "Пункт Сбора Юнусабад",
                            subtitle: "Юнусабадский р-н, Квартал-4, к.2",
                            coordinate: CLLocationCoordinate2D(latitude: 41.3530, longitude: 69.2880),
-                           acceptedWasteTypes: ["Металл", "Пластик"])
+                           acceptedWasteTypes: ["Металл", "Пластик"]),
+            
+            RecyclingPoint(
+                title: "Пункт Сбора Одежды, ветоши (Головной офис)",
+                subtitle: "Яккасарайский р-н, ул. Бабура, 83",
+                coordinate: CLLocationCoordinate2D(latitude: 41.2721, longitude: 69.2553),
+                acceptedWasteTypes: ["Одежда"]),
+
+            RecyclingPoint(
+                title: "Пункт Сбора Одежды, ветоши",
+                subtitle: "Мирабадский р-н, ул. Ойбек, 49",
+                coordinate: CLLocationCoordinate2D(latitude: 41.2942, longitude: 69.2785),
+                acceptedWasteTypes: ["Одежда"])
         ]
         filteredPoints = allPoints
     }

@@ -128,29 +128,21 @@ class MenuViewController: UIViewController {
 
     
     private func setupLayout() {
+        // 🌟 ОСТАВЛЯЕМ НА ЭКРАНЕ ТОЛЬКО ТАБЛИЦУ (Тумблер и текст уйдут внутрь неё)
         view.addSubview(tableView)
-        view.addSubview(themeLabel)
-        view.addSubview(themeSwitch)
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: themeSwitch.topAnchor, constant: -16),
-            
-            themeSwitch.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            themeSwitch.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            
-            themeLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            themeLabel.centerYAnchor.constraint(equalTo: themeSwitch.centerYAnchor)
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
-    
+
     private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "MenuCell")
-        tableView.tableFooterView = UIView()
         
         // --- СОЗДАЕМ КОНТЕЙНЕР ШАПКИ С УЧЕТОМ КОЛОКОЛЬЧИКА ---
         let headerContainer = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 100))
@@ -161,7 +153,6 @@ class MenuViewController: UIViewController {
         let bellButton = UIButton(type: .system)
         bellButton.setImage(UIImage(systemName: "bell.fill"), for: .normal)
         bellButton.tintColor = .label // Адаптивный цвет (черный/белый)
-        // Привязываем нажатие к методу перехода, который мы написали в расширении
         bellButton.addTarget(self, action: #selector(menuNotificationTapped), for: .touchUpInside)
         bellButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -169,42 +160,63 @@ class MenuViewController: UIViewController {
         headerContainer.addSubview(headerAvatarImageView)
         headerContainer.addSubview(headerNameLabel)
         headerContainer.addSubview(headerPhoneLabel)
-        headerContainer.addSubview(bellButton) // <-- Добавили колокольчик в шапку
+        headerContainer.addSubview(bellButton)
         
         NSLayoutConstraint.activate([
-                    // Аватар
-                    headerAvatarImageView.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor, constant: 20),
-                    headerAvatarImageView.centerYAnchor.constraint(equalTo: headerContainer.centerYAnchor),
-                    headerAvatarImageView.widthAnchor.constraint(equalToConstant: 60),
-                    headerAvatarImageView.heightAnchor.constraint(equalToConstant: 60),
-                    
-                    // КНОПКА КОЛОКОЛЬЧИКА: Прижимаем к правому краю
-                    bellButton.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -24),
-                    bellButton.topAnchor.constraint(equalTo: headerContainer.topAnchor, constant: 16),
-                    bellButton.widthAnchor.constraint(equalToConstant: 32),
-                    bellButton.heightAnchor.constraint(equalToConstant: 32),
-                    
-                    // Лейбл имени
-                    headerNameLabel.leadingAnchor.constraint(equalTo: headerAvatarImageView.trailingAnchor, constant: 16),
-                    headerNameLabel.topAnchor.constraint(equalTo: headerAvatarImageView.topAnchor, constant: 4),
-                    
-                    // ИСПРАВЛЕНО: Заменяем жесткое '==' на '<=' (меньше или равно).
-                    // Это разрывает жесткую цепочку и полностью убирает конфликт Auto Layout при ширине 0!
-                    headerNameLabel.trailingAnchor.constraint(lessThanOrEqualTo: bellButton.leadingAnchor, constant: -12),
-                    
-                    // Телефон
-                    headerPhoneLabel.leadingAnchor.constraint(equalTo: headerNameLabel.leadingAnchor),
-                    headerPhoneLabel.trailingAnchor.constraint(equalTo: headerNameLabel.trailingAnchor),
-                    headerPhoneLabel.topAnchor.constraint(equalTo: headerNameLabel.bottomAnchor, constant: 4)
-                ])
+            // Аватар
+            headerAvatarImageView.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor, constant: 20),
+            headerAvatarImageView.centerYAnchor.constraint(equalTo: headerContainer.centerYAnchor),
+            headerAvatarImageView.widthAnchor.constraint(equalToConstant: 60),
+            headerAvatarImageView.heightAnchor.constraint(equalToConstant: 60),
+            
+            // КНОПКА КОЛОКОЛЬЧИКА: Прижимаем к правому краю
+            bellButton.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -24),
+            bellButton.topAnchor.constraint(equalTo: headerContainer.topAnchor, constant: 16),
+            bellButton.widthAnchor.constraint(equalToConstant: 32),
+            bellButton.heightAnchor.constraint(equalToConstant: 32),
+            
+            // Лейбл имени
+            headerNameLabel.leadingAnchor.constraint(equalTo: headerAvatarImageView.trailingAnchor, constant: 16),
+            headerNameLabel.topAnchor.constraint(equalTo: headerAvatarImageView.topAnchor, constant: 4),
+            headerNameLabel.trailingAnchor.constraint(lessThanOrEqualTo: bellButton.leadingAnchor, constant: -12),
+            
+            // Телефон
+            headerPhoneLabel.leadingAnchor.constraint(equalTo: headerNameLabel.leadingAnchor),
+            headerPhoneLabel.trailingAnchor.constraint(equalTo: headerNameLabel.trailingAnchor),
+            headerPhoneLabel.topAnchor.constraint(equalTo: headerNameLabel.bottomAnchor, constant: 4)
+        ])
         
         // Назначаем готовую шапку в таблицу
         tableView.tableHeaderView = headerContainer
         
-        // Делаем шапку кликабельной для перехода в профиль (при тапе на аватар или имя)
         let tap = UITapGestureRecognizer(target: self, action: #selector(openProfileDetails))
         headerContainer.addGestureRecognizer(tap)
+        
+        // --- 🌟 ИСПРАВЛЕНИЕ: СОЗДАЕМ КОНТЕЙНЕР ДЛЯ ТЕМЫ В КАЧЕСТВЕ ПОДВАЛА ТАБЛИЦЫ ---
+        // Создаем плашку высотой 60 поинтов, которая встанет строго под ячейку "Выход"
+        let footerView = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 60))
+        footerView.backgroundColor = .clear
+        
+        themeLabel.translatesAutoresizingMaskIntoConstraints = false
+        themeSwitch.translatesAutoresizingMaskIntoConstraints = false
+        
+        footerView.addSubview(themeLabel)
+        footerView.addSubview(themeSwitch)
+        
+        NSLayoutConstraint.activate([
+            // Выравниваем тумблер справа (отступ -24, как у колокольчика и ячеек)
+            themeSwitch.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -24),
+            themeSwitch.centerYAnchor.constraint(equalTo: footerView.centerYAnchor),
+            
+            // Выравниваем текст "Тёмная тема" слева (отступ 24, как у аватара)
+            themeLabel.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: 24),
+            themeLabel.centerYAnchor.constraint(equalTo: footerView.centerYAnchor)
+        ])
+        
+        // Устанавливаем готовый контейнер темы вместо старого пустого UIView()
+        tableView.tableFooterView = footerView
     }
+
  
     private func setupActions() {
         themeSwitch.addTarget(self, action: #selector(themeChanged), for: .valueChanged)
