@@ -20,7 +20,8 @@ class PickupModelManager {
             DropDownItem(title: "Пластик", subtitle: "бутылки, крышки, банки, пакеты, посуда, контейнеры", iconName: "takeoutbag.and.cup.and.straw.fill", iconColor: UIColor(red: 0.96, green: 0.71, blue: 0.10, alpha: 1.0)),
             DropDownItem(title: "Металл", subtitle: "консервные банки, гвозди, проволока, мет. лом", iconName: "wrench.adjustable.fill", iconColor: .systemPurple),
             DropDownItem(title: "Органические отходы", subtitle: "Пищевые отходы", iconName: "leaf.fill", iconColor: opacityGrayColor),
-            DropDownItem(title: "Электро", subtitle: "Сломанные телефоны, бытовая техника, провода", iconName: "tv.fill", iconColor: .systemGray)
+            DropDownItem(title: "Электро", subtitle: "Сломанные телефоны, бытовая техника, провода", iconName: "tv.fill", iconColor: .systemGray),
+            DropDownItem(title: "Одежда", subtitle: "Нательная и повседневная одежда (Трикотаж и легкие ткани), Плотная и утепленная одежда (Шерсть, полушерсть, плотный трикотаж), Джинсовая ткань (Деним), Домашний текстиль, Производственные отходы", iconName: "tshirt.fill", iconColor: .systemGray)
         ]
     }()
     
@@ -30,7 +31,8 @@ class PickupModelManager {
         "Пластик": ["ул. Амира Темура, 14", "ул. Нукусская, 89 (Пункт переработки ПЭТ)", "проспект Навои, 89"],
         "Металл": ["Малая кольцевая, 6 (Ангар лома)", "ул. Фархадская, 18"],
         "Органические отходы": ["ул. Богишамол, 11 (Компост-центр)", "ул. Саларская, 5"],
-        "Электро": ["ул. Нукусская, 44 (Эко-хаб электроники)", "проспект Навои, 89"]
+        "Электро": ["ул. Нукусская, 44 (Эко-хаб электроники)", "проспект Навои, 89"],
+        "Одежда": ["ул. Бабура, 83 (головной офис)", "ул. Ойбек, 49"]
     ]
     
     private init() {}

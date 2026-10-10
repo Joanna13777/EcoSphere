@@ -7,7 +7,7 @@ class MapViewController: UIViewController {
         var onAddressSelected: ((String) -> Void)?
 
     // MARK: - Палитра цветов
-    let appBgColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.0) // #F5F5F5 (Светло-серый фон приложения)
+    let localAppBgColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.0) // #F5F5F5 (Светло-серый фон приложения)
     let darkTextColor = UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1.0) // #1A1A1A (Чистый графитовый черный)
     let secondaryTextColor = UIColor(red: 0.49, green: 0.49, blue: 0.49, alpha: 1.0) // #7E7E7E (Чистый серый)
     let accentYellowColor = UIColor(red: 0.96, green: 0.71, blue: 0.10, alpha: 1.0) // #F4B41A (Фирменный желтый)
@@ -82,7 +82,7 @@ class MapViewController: UIViewController {
     
     var allPoints: [RecyclingPoint] = []
     var filteredPoints: [RecyclingPoint] = []
-    let filterCategories = ["Все", "Бумага", "Стекло", "Пластик", "Электро", "Органика", "Металл"]
+    let filterCategories = ["Все", "Бумага", "Стекло", "Пластик", "Металл", "Органика", "Электро","Одежда"]
     var selectedCategoryIndex = 0
     var currentSearchText = ""
 
@@ -140,14 +140,18 @@ class MapViewController: UIViewController {
     // MARK: - Первичная настройка
     private func setupMainConfiguration() {
         
-        // Создаем кастомную кнопку со стрелкой
+            // Создаем кастомную кнопку со стрелкой
             let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"),
                                              style: .plain,
                                              target: self,
                                              action: #selector(backTapped))
             
-            // Красим стрелочку в черный (под ваш стиль)
-            backButton.tintColor = .black
+            // Стрелочка автоматически подстроится под темную/светлую тему
+            backButton.tintColor = .appText
+        
+            // Прячет текст кнопки назад для всех последующих экранов
+            let textResetButton = UIBarButtonItem()
+            textResetButton.title = ""
             
             // Устанавливаем кнопку слева на верхнем баре
             navigationItem.leftBarButtonItem = backButton
@@ -155,18 +159,25 @@ class MapViewController: UIViewController {
 
         // Метод, который будет срабатывать при нажатии
         @objc private func backTapped() {
-            // Если это Push-переход:
-            navigationController?.popViewController(animated: true)
-            
-            // Или если это Modal-переход:
-             dismiss(animated: true, completion: nil)
-        
-        
-        // Прячет текст кнопки назад для всех экранов, открываемых из этого контроллера
-            let backButton = UIBarButtonItem()
-            backButton.title = ""
-            navigationItem.backBarButtonItem = backButton
-    }
+            if let navigationController = self.navigationController {
+                        navigationController.popViewController(animated: true)
+                    } else {
+                        dismiss(animated: true, completion: nil)
+                    }
+                }
+//            // Если это Push-переход:
+//            navigationController?.popViewController(animated: true)
+//            
+//            // Или если это Modal-переход:
+//             dismiss(animated: true, completion: nil)
+//        
+//        
+//        // Прячет текст кнопки назад для всех экранов, открываемых из этого контроллера
+//            let backButton = UIBarButtonItem()
+//            backButton.title = ""
+//            navigationItem.backBarButtonItem = backButton
+//    }
+    
     
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()

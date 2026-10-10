@@ -20,7 +20,7 @@ class ArticleTableViewCell: UITableViewCell {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .semibold)
-        // ИСПРАВЛЕНИЕ: Заменили жесткий RGB-цвет на адаптивный .label (черный/белый)
+        // Заменили жесткий RGB-цвет на адаптивный .label (черный/белый)
         label.textColor = .label
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -30,7 +30,7 @@ class ArticleTableViewCell: UITableViewCell {
     private let subtitleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .regular)
-        // ИСПРАВЛЕНИЕ: Заменили жесткий серый цвет на системный адаптивный .secondaryLabel
+        // Заменили жесткий серый цвет на системный адаптивный .secondaryLabel
         label.textColor = .secondaryLabel
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false

@@ -31,7 +31,11 @@ class PageViewController: UIPageViewController, UIPageViewControllerDataSource, 
         
         WasteType(title: "Электро", imageName: "Electro",
                   shortDescription: "• Сломанные телефоны и зарядки\n• Бытовая техника\n• Провода, клавиатуры и мышки",
-                  fullDescription: "Электронный лом содержит опасные вещества. Не выбрасывайте его в общий бак, сдавайте исключительно в специализированные пункты приема.")
+                  fullDescription: "Электронный лом содержит опасные вещества. Не выбрасывайте его в общий бак, сдавайте исключительно в специализированные пункты приема."),
+        
+        WasteType(title: "Одежда", imageName: "Tshirt",
+                  shortDescription: "• Одежа и текстиль \n• Обувь\n• Одеяла",
+                  fullDescription: "Одежа подлежит перераработке.")
     
     ]
 

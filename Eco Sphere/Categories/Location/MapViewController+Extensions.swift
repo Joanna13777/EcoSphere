@@ -41,6 +41,27 @@ extension MapViewController: UICollectionViewDataSource, UICollectionViewDelegat
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         updateVisiblePoints(animated: true)
     }
+    
+    // метод делегата карты для нажатия на пины 
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        // Извлекаем объект выбранной точки из аннотации
+        guard let annotation = view.annotation as? MKPointAnnotation else { return }
+        
+        // 🌟 ДОБАВЬТЕ ЭТУ ЛОГИКУ:
+        // Передаем адрес выбранного пункта обратно на экран заказа вывоза!
+        // (Поскольку у MKPointAnnotation есть свойство subtitle, там обычно хранится физический адрес)
+        let selectedAddressText = annotation.subtitle ?? annotation.title ?? ""
+        
+        if !selectedAddressText.isEmpty {
+            // Отправляем текст адреса в наш канал связи
+            self.onAddressSelected?(selectedAddressText)
+            print("📍 Передан адрес с карты: \(selectedAddressText)")
+            
+            // Закрываем экран карты и возвращаемся на экран заказа
+            navigationController?.popViewController(animated: true)
+        }
+    }
+
 
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {

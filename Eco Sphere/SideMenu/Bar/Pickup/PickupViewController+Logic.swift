@@ -18,6 +18,11 @@ extension PickupViewController: UITextFieldDelegate {
     }
     
     func setupActions() {
+        // 🌟 ЖЕЛЕЗНАЯ ЗАЩИТА: Стираем все старые привязанные клики с кнопки,
+        // чтобы они физически не могли сработать дважды при одном нажатии!
+        orderButton.removeTarget(nil, action: nil, for: .allEvents)
+        
+        // Спокойно вешаем один единственный таргет
         orderButton.addTarget(self, action: #selector(orderTapped), for: .touchUpInside)
         
         wasteTypeTextField.addTarget(self, action: #selector(wasteTypeFieldTapped), for: .editingDidBegin)
@@ -143,10 +148,38 @@ extension PickupViewController: UITextFieldDelegate {
         self.validateFields()
     }
     
-    // --- ИНТЕЛЛЕКТУАЛЬНЫЙ МАСОЧНЫЙ ВВОД ВЕСА ("... кг") ---
-    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        // обработкa веса:
+    @objc func locationIconTapped() {
+        view.endEditing(true)
+        removeExistingDropDown()
         
+        print("📍 Открываем карту для выбора домашнего адреса пользователя...")
+        
+        // Создаем экран карты для адреса пользователя
+        let userMapVC = UserLocationMapViewController()
+        
+        // Ловим домашний адрес, который пользователь выберет булавкой
+        userMapVC.onAddressSelected = { [weak self] (selectedAddress: String) in
+            guard let self = self else { return }
+            
+            // Вставляем домашний адрес пользователя в текстовое поле!
+            self.pickupAddressTextField.text = selectedAddress
+            
+            // Красим левую иконку в фирменный желтый цвет
+            let favoriteYellowColor = UIColor(red: 251/255, green: 192/255, blue: 45/255, alpha: 1.0)
+            self.setFieldLeftIcon(self.pickupAddressTextField, systemName: "mappin.and.ellipse", color: favoriteYellowColor)
+            
+            // Обновляем состояние кнопки заказа
+            self.validateFields()
+        }
+        
+        // Переходим на экран карты нативно
+        self.navigationController?.pushViewController(userMapVC, animated: true)
+    }
+
+    
+    // --- ИНТЕЛЛЕКТУАЛЬНЫЙ МАСОЧНЫЙ ВВОД ВЕСА И РАЗРЕШЕНИЕ РУЧНОГО ВВОДА АДРЕСА ---
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        // обработкa удаления (Backspace):
         if string.isEmpty {
             if textField == weightTextField {
                 let currentText = textField.text ?? ""
@@ -165,13 +198,13 @@ extension PickupViewController: UITextFieldDelegate {
             }
             return true
         }
-        
-        // Запрещаем ручной ввод букв и в поле адреса вывоза
-        if textField == wasteTypeTextField || textField == pickupPointTextField || textField == pickupAddressTextField {
+
+        // Запрещаем ручной ввод букв строго в полях выпадающего списка вида отхода и хаба:
+        if textField == wasteTypeTextField || textField == pickupPointTextField {
             return false
         }
-
         
+        // Обработка ввода в поле ВЕСА:
         if textField == weightTextField {
             let currentText = textField.text ?? ""
             // Очищаем текст от маски, оставляя цифры, точки и запятые
@@ -196,10 +229,12 @@ extension PickupViewController: UITextFieldDelegate {
             validateFields()
             return false
         }
-
         
+        // ДЛЯ ПОЛЯ АДРЕСА СРАБОТАЕТ ЭТОТ СИСТЕМНЫЙ RETURN:
+        // Он принудительно разрешит стандартный ввод любых букв и символов
         return true
     }
+
     
     public func textFieldDidBeginEditing(_ textField: UITextField) {
         if textField == phoneTextField && (textField.text?.isEmpty ?? true) {
@@ -276,6 +311,7 @@ extension PickupViewController: UITextFieldDelegate {
     }
 
     // Вспомогательный метод для точного определения имени SF Symbols по названию вторсырья
+    // Вспомогательный метод для точного определения имени SF Symbols по названию вторсырья
     private func pickupModelManagerWasteIconName(for wasteType: String) -> String {
         // Переводим текст в нижний регистр, чтобы проверка работала независимо от больших/маленьких букв
         let type = wasteType.lowercased()
@@ -284,58 +320,130 @@ extension PickupViewController: UITextFieldDelegate {
             return "doc.text.fill" // Иконка документа/бумаги
         }
         if type.contains("стекло") {
-            return "wineglass.fill" // Иконка бокала/стекла
+            return "wineglass.fill"
         }
         if type.contains("пластик") {
-            return "takeoutbag.and.cup.and.straw.fill" // Плотная иконка капсулы (идеально смотрится как бутылка/пластик)
+            return "takeoutbag.and.cup.and.straw.fill"
         }
         if type.contains("металл") {
-            return "wrench.adjustable.fill" // Системная иконка металлической гайки (работает для металла)
+            return "wrench.adjustable.fill"
         }
-        if type.contains("Органика") {
-            return "leaf.fill" // иконка лист, Органические отходы
+        
+        if type.contains("органика") || type.contains("органическ") {
+            return "leaf.fill"
         }
-        if type.contains("Электро") {
-            return "tv.fill" // иконка лист, Органические отходы
+        if type.contains("электро") || type.contains("бытов") || type.contains("техник") {
+            return "tv.fill"
         }
+
+        if type.contains("одежда") || type.contains("текстиль") {
+            return "tshirt.fill" // Иконка футболки/одежды
+        }
+        
         // Если вид отхода редкий или не совпал — возвращаем универсальную коробку
         return "shippingbox.fill"
     }
 
     private func showSuccessAlert() {
         let selectedWaste = wasteTypeTextField.text ?? "Вторсырье"
-        // Берём адрес из нового поля адреса вывоза
         let selectedAddress = pickupAddressTextField.text?.isEmpty ?? true ? (pickupPointTextField.text ?? "Адрес не указан") : (pickupAddressTextField.text ?? "")
-
         let selectedWeight = weightTextField.text?.isEmpty ?? true ? "0 кг" : (weightTextField.text ?? "0 кг")
         
-        // Формируем красивую дату из встроенного календаря для экрана истории
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru_RU")
         formatter.dateFormat = "d MMMM, HH:mm"
         let fullDateString = formatter.string(from: inlineDatePicker.date)
         
-        let alertMessage = """
-            
-            Вид: \(selectedWaste)
-            Вес: \(selectedWeight)
-            Дата: \(fullDateString)
-            Адрес: \(selectedAddress)
-            
-            Отследить данные можно
-            в "Истории вывозов"
-            """
+        // --- 1. СОЗДАЕМ ПОДЛОЖКУ И КОНТЕЙНЕРЫ КАСТОВНОГО ОКНА ---
+        let dimmingView = UIView(frame: self.view.bounds)
+        dimmingView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+        dimmingView.alpha = 0.0
         
-        let successAlert = UIAlertController(
-            title: "Заказ принят  \u{2705}",
-            message: alertMessage,
-            preferredStyle: .alert
-        )
-        successAlert.addAction(UIAlertAction(title: "ОК", style: .default) { [weak self] _ in
-            self?.navigationController?.popViewController(animated: true)
-        })
-        present(successAlert, animated: true)
+        let alertContainer = UIView()
+        alertContainer.backgroundColor = .appCardBackground
+        alertContainer.layer.cornerRadius = 20
+        alertContainer.translatesAutoresizingMaskIntoConstraints = false
+        
+        // --- 2. ЭЛЕМЕНТЫ ИНТЕРФЕЙСА (ТОЛЬКО ЗАГОЛОВОК И ТЕКСТ) ---
+        // Заголовок алерта
+        let titleLabel = UILabel()
+        titleLabel.text = "Заказ принят  \u{2705}"
+        titleLabel.font = .systemFont(ofSize: 18, weight: .bold)
+        titleLabel.textColor = .appText
+        titleLabel.textAlignment = .center
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Текстовое описание параметров заказа
+        let messageLabel = UILabel()
+        messageLabel.text = """
+        
+        Вид: \(selectedWaste)
+        Вес: \(selectedWeight)
+        Дата: \(fullDateString)
+        Адрес: \(selectedAddress)
+        
+        Отследить данные можно
+        в "Истории вывозов"
+        """
+        messageLabel.font = .systemFont(ofSize: 14, weight: .regular)
+        messageLabel.textColor = .appText
+        messageLabel.numberOfLines = 0
+        messageLabel.textAlignment = .center
+        messageLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        // --- 3. СБОРКА ИЕРАРХИИ ВЬЮ (БЕЗ КНОПОК И ЛИНИЙ) ---
+        self.view.addSubview(dimmingView)
+        dimmingView.addSubview(alertContainer)
+        alertContainer.addSubview(titleLabel)
+        alertContainer.addSubview(messageLabel)
+        
+        // --- 4. НАСТРОЙКА АВТОЛЕЙАУТА (NSLayoutConstraint) ---
+        NSLayoutConstraint.activate([
+            alertContainer.centerXAnchor.constraint(equalTo: dimmingView.centerXAnchor),
+            alertContainer.centerYAnchor.constraint(equalTo: dimmingView.centerYAnchor),
+            alertContainer.widthAnchor.constraint(equalToConstant: 270),
+            
+            // Заголовок алерта сверху
+            titleLabel.topAnchor.constraint(equalTo: alertContainer.topAnchor, constant: 24),
+            titleLabel.leadingAnchor.constraint(equalTo: alertContainer.leadingAnchor, constant: 20),
+            titleLabel.trailingAnchor.constraint(equalTo: alertContainer.trailingAnchor, constant: -20),
+            
+            // Описание деталей снизу с аккуратным отступом от края контейнера
+            messageLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            messageLabel.leadingAnchor.constraint(equalTo: alertContainer.leadingAnchor, constant: 16),
+            messageLabel.trailingAnchor.constraint(equalTo: alertContainer.trailingAnchor, constant: -16),
+            messageLabel.bottomAnchor.constraint(equalTo: alertContainer.bottomAnchor, constant: -24) // Задаем нижний порог плашки
+        ])
+        
+        // --- 5. ПЛАВНАЯ АНИМАЦИЯ ПОЯВЛЕНИЯ ОКНА ---
+        UIView.animate(withDuration: 0.25) {
+            dimmingView.alpha = 1.0
+        }
+        
+        // --- 6. 🌟 БЕЗОПАСНЫЙ АВТОМАТИЧЕСКИЙ ТАЙМЕР ЗАКРЫТИЯ (ЧЕРЕЗ 4 СЕКУНДЫ) ---
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) { [weak self] in
+            guard let self = self else { return }
+            
+            // ПРОВЕРКА: Если пользователь за эти 4 секунды уже сам нажал стрелочку "Назад"
+            // или вышел с экрана, мы просто тихо удаляем плашку из памяти и ничего больше не делаем!
+            guard self.navigationController?.topViewController == self else {
+                dimmingView.removeFromSuperview()
+                return
+            }
+            
+            // Если пользователь всё ещё на экране формы — плавно закрываем окно и уводим его назад
+            UIView.animate(withDuration: 0.25, animations: {
+                dimmingView.alpha = 0.0
+            }) { _ in
+                dimmingView.removeFromSuperview()
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
     }
+
+
+
+
 }
 
 // MARK: - UITextViewDelegate

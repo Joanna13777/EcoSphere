@@ -66,8 +66,8 @@ class HistoryViewController: UIViewController {
     }
 }
 
-// MARK: - Canvas Preview
-#Preview {
-    let historyVC = HistoryViewController()
-    return UINavigationController(rootViewController: historyVC)
-}
+//// MARK: - Canvas Preview
+//#Preview {
+//    let historyVC = HistoryViewController()
+//    return UINavigationController(rootViewController: historyVC)
+//}

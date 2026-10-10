@@ -10,7 +10,6 @@ extension PickupViewController {
     }
     
     // MARK: - UITextFieldDelegate
-    // MARK: - UITextFieldDelegate
     public func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         if textField == pickupAddressTextField {
             // Мягко закрываем другие списки, если они были открыты, но НЕ трогаем клавиатуру
@@ -164,24 +163,36 @@ extension PickupViewController {
         closeTap.cancelsTouchesInView = false
         view.addGestureRecognizer(closeTap)
     }
-    
-    
-    
-    
+  
     // ПУНКТ 1: Метод установки иконки с увеличенным дочерним отступом для текста
     func setFieldLeftIcon(_ textField: UITextField, systemName: String, color: UIColor) {
-        let iv = UIImageView(image: UIImage(systemName: systemName))
-        iv.tintColor = color
-        iv.contentMode = .scaleAspectFit
-        
         let container = UIView(frame: CGRect(x: 0, y: 0, width: 52, height: 24))
-        iv.frame = CGRect(x: 16, y: 0, width: 24, height: 24)
-        container.addSubview(iv)
+        
+        if textField == pickupAddressTextField {
+            // Превращаем левую иконку поля адреса в кнопку UIButton
+            let locationButton = UIButton(type: .system)
+            locationButton.frame = CGRect(x: 16, y: 0, width: 24, height: 24)
+            locationButton.setImage(UIImage(systemName: systemName), for: .normal)
+            locationButton.tintColor = color
+            locationButton.contentMode = .scaleAspectFit
+            
+            // Привязываем нажатие на иконку к методу в файле логики
+            locationButton.addTarget(self, action: #selector(locationIconTapped), for: .touchUpInside)
+            
+            container.addSubview(locationButton)
+        } else {
+            // Для остальных полей оставляем обычную UIImageView, как и было
+            let iv = UIImageView(image: UIImage(systemName: systemName))
+            iv.tintColor = color
+            iv.contentMode = .scaleAspectFit
+            iv.frame = CGRect(x: 16, y: 0, width: 24, height: 24)
+            container.addSubview(iv)
+        }
         
         textField.leftView = container
         textField.leftViewMode = .always
     }
-    
+
     @objc func closeDropDownByTap(gesture: UITapGestureRecognizer) {
         let touchPoint = gesture.location(in: view)
         if let existingView = view.viewWithTag(999), existingView.frame.contains(touchPoint) {

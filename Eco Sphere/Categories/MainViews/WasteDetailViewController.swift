@@ -14,12 +14,6 @@ class WasteDetailViewController: UIViewController {
     // MARK: - Палитра цветов
     private let accentYellowColor = UIColor.appAccent
     
-    //    // MARK: - Палитра цветов
-    //    private let appBgColor = UIColor(red: 0.96, green: 0.96, blue: 0.96, alpha: 1.0) // #F5F5F5
-    //    private let darkTextColor = UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1.0) // #1A1A1A
-    //    private let secondaryTextColor = UIColor(red: 0.49, green: 0.49, blue: 0.49, alpha: 1.0) // #7E7E7E
-    //    private let accentYellowColor = UIColor.appAccent // #F4B41A (Яркий желтый)
-    
     // MARK: - UI-Элементы
     
     // 1. Главная белая карточка-подложка для контента

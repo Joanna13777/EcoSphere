@@ -12,12 +12,13 @@ class MainContainerViewController: UIViewController, UICollectionViewDataSource,
     
     // массив системных иконок, строго совпадающий по порядку с категориями
     private let tabIcons = [
-        "doc.text.fill",              // Макулатура
-        "wineglass.fill",             // Стекло
-        "takeoutbag.and.cup.and.straw.fill",                 // Пластик
+        "doc.text.fill",                               // Макулатура
+        "wineglass.fill",                             // Стекло
+        "takeoutbag.and.cup.and.straw.fill",          // Пластик
         "wrench.adjustable.fill",                     // Металл
-        "leaf.fill",                  // Органика
-        "tv.fill"                 // Электро (или "iphone")
+        "leaf.fill",                                  // Органика
+        "tv.fill",                                    // Электро (или "iphone")
+        "tshirt.fill"                                 // Одежда и текстил
     ]
     
     // Палитра для главного контейнера
