@@ -95,7 +95,7 @@ extension MenuViewController: UITableViewDataSource, UITableViewDelegate {
             navigationController?.pushViewController(favoriteVC, animated: true)
             
         case 3: // Обратная связь
-            let vc = FeedbackViewController()
+            let vc = SupportChatListViewController()
             vc.title = menuItems[indexPath.row]
             navigationController?.setNavigationBarHidden(false, animated: true)
             navigationController?.pushViewController(vc, animated: true)
@@ -156,6 +156,14 @@ extension MenuViewController: UITableViewDataSource, UITableViewDelegate {
         navigationController?.setNavigationBarHidden(false, animated: true)
         navigationController?.pushViewController(editProfileVC, animated: true)
     }
+    // Внутри вашего MenuViewController найдите метод перехода на обратную связь:
+    @objc private func feedbackMenuRowTapped() {
+        print("📲 Переходим в раздел техподдержки...")
+        // Теперь открываем FeedbackHistoryViewController в качестве стартового!
+        let supportChatListVC = SupportChatListViewController()
+        navigationController?.pushViewController(supportChatListVC, animated: true)
+    }
+
 }
 
 // MARK: - EditProfileDelegate

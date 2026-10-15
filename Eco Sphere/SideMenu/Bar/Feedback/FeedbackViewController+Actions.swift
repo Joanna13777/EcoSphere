@@ -1,5 +1,3 @@
-// экшены нажатия кнопок, навигация и сам асинхронный сетевой запрос отправки в Telegram.
-
 import UIKit
 
 // MARK: - Настройка Экшенов, Навигации и Отправки
@@ -22,33 +20,29 @@ extension FeedbackViewController {
         categoryTextField.delegate = self
         messageTextView.delegate = self
         sendButton.addTarget(self, action: #selector(sendTapped), for: .touchUpInside)
-        
         categoryTextField.addTarget(self, action: #selector(textFieldsChanged), for: .editingChanged)
+        attachFileButton.addTarget(self, action: #selector(attachFileTapped), for: .touchUpInside)
+
         
-        // ГЛАВНОЕ ИСПРАВЛЕНИЕ: Кнопка настраивает свои цвета напрямую через self
+        // Настройка живой валидации цветов кнопки "Отправить"
         sendButton.configurationUpdateHandler = { [weak self] btn in
             guard let self = self else { return }
             
-            // Напрямую и безопасно проверяем текст в полей нашего контроллера
             let isTopicFilled = !(self.categoryTextField.text?.isEmpty ?? true)
             let messageText = self.messageTextView.text ?? ""
             let isMessageFilled = !messageText.isEmpty && messageText != "Ваше сообщение..."
             let isFormValid = isTopicFilled && isMessageFilled
             
-            // Меняем доступность кнопки
             btn.isEnabled = isFormValid
             
             var updatedConfig = btn.configuration
             if !btn.isEnabled {
-                // Светло-серая кнопка, если поля пустые
                 updatedConfig?.baseBackgroundColor = .systemGray5
                 updatedConfig?.baseForegroundColor = .systemGray2
             } else if btn.isHighlighted {
-                // Затемнение при нажатии
                 updatedConfig?.baseBackgroundColor = UIColor.systemGray
                 updatedConfig?.baseForegroundColor = .systemBackground
             } else {
-                // Темно-серая/черная кнопка, когда все заполнено
                 updatedConfig?.baseBackgroundColor = .label
                 updatedConfig?.baseForegroundColor = .systemBackground
             }
@@ -61,48 +55,81 @@ extension FeedbackViewController {
             }
         }
     }
+    
+    //  ВЫПАДАЮЩИЙ СПИСОК СЕРЫХ ТЕМ
+    func showCategoryDropDownMenu() {
+        let dropDownTable = UITableView(frame: .zero, style: .plain)
+        dropDownTable.backgroundColor = .appCardBackground
+        dropDownTable.layer.cornerRadius = 12
+        dropDownTable.layer.borderWidth = 1
+        dropDownTable.layer.borderColor = UIColor.appSeparator.cgColor
+        dropDownTable.separatorStyle = .singleLine
+        dropDownTable.separatorColor = UIColor.appSeparator
+        dropDownTable.showsVerticalScrollIndicator = false
+        
+        dropDownTable.dataSource = self
+        dropDownTable.delegate = self
+        dropDownTable.register(UITableViewCell.self, forCellReuseIdentifier: "TopicDropdownCell")
+        
+        self.categoriesDropDownView = dropDownTable
+        
+        dropDownTable.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(dropDownTable)
+        dropDownTable.alpha = 0
+        
+        // Динамические констрейнты плашки выпадающего списка
+        NSLayoutConstraint.activate([
+            dropDownTable.topAnchor.constraint(equalTo: categoryTextField.bottomAnchor, constant: 2),
+            dropDownTable.leadingAnchor.constraint(equalTo: categoryTextField.leadingAnchor),
+            dropDownTable.trailingAnchor.constraint(equalTo: categoryTextField.trailingAnchor),
+            dropDownTable.heightAnchor.constraint(equalToConstant: 220)
+        ])
+        
+        UIView.animate(withDuration: 0.2) {
+            dropDownTable.alpha = 1
+        }
+        
+        isDropDownVisible = true
+    }
 
     
-    @objc func backTapped() {
-        navigationController?.popViewController(animated: true)
+    // Вспомогательный метод анимированного скрытия
+    func closeDropDownMenuWithAnimation() {
+        // Находим добавленную таблицу в сабвью contentView и убираем её
+        if let dropDownTable = contentView.subviews.first(where: { $0 is UITableView && $0.alpha == 1 }) {
+            UIView.animate(withDuration: 0.15, animations: {
+                dropDownTable.alpha = 0
+            }) { _ in
+                dropDownTable.removeFromSuperview()
+            }
+        }
+        isDropDownVisible = false
+        textFieldsChanged() // Обновляем цвет кнопки "Отправить"
     }
     
     @objc func sendTapped() {
         print("🔘 Нажатие на кнопку 'Отправить' зафиксировано системой!")
-        
-        dismissKeyboardAndDropDown()
+        view.endEditing(true)
         
         let topic = categoryTextField.text ?? ""
         let message = messageTextView.text ?? ""
         
-        print("📝 Текущие данные полей -> Тема: '\(topic)', Сообщение: '\(message)'")
-        
         if topic.isEmpty || message.isEmpty || message == "Ваше сообщение..." {
-            print("⚠️ Валидация не прошла! Поля пустые или содержат плейсхолдер.")
             let alert = UIAlertController(title: "Внимание", message: "Пожалуйста, выберите тему и напишите текст вашего обращения.", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "ОК", style: .default))
             self.present(alert, animated: true)
             return
         }
         
-        print("🚀 Валидация успешна! Собираем URL через системные компоненты Apple...")
-        
-        // ЧИСТЫЕ ДАННЫЕ TELEGRAM (БЕЗ СЛЭШЕЙ ИЛИ СИМВОЛОВ СВЯЗИ)
         let botToken = "8858495099:AAH_Rj7XKCQYmZGNueken7eQA6ni26AvHQQ"
         let chatId = "-1004453945133"
         
-        // БЕЗОПАСНАЯ СБОРКА ИНТЕРНЕТ-АДРЕСА ЧЕРЕЗ URLComponents
         var components = URLComponents()
         components.scheme = "https"
         components.host = "api.telegram.org"
-        components.path = "/bot\(botToken)/sendMessage" // Системный конструктор сам расставит правильные слэши
+        components.path = "/bot\(botToken)/sendMessage"
         
-        guard let url = components.url else {
-            print("❌ КРИТИЧЕСКАЯ ОШИБКА: URLComponents не смогли собрать адрес. Проверьте токен!")
-            return
-        }
-        
-        print("🔗 СФОРМИРОВАН ИДЕАЛЬНЫЙ СЕТЕВОЙ АДРЕС: '\(url.absoluteString)'")
+        guard let url = components.url else { return }
         
         let defaults = UserDefaults.standard
         let userName = defaults.string(forKey: "user_profile_name") ?? "Гость"
@@ -129,56 +156,47 @@ extension FeedbackViewController {
             "parse_mode": "Markdown"
         ]
         
-        guard let httpBody = try? JSONSerialization.data(withJSONObject: jsonParameters, options: []) else {
-            print("❌ Ошибка сериализации JSON")
-            return
-        }
+        guard let httpBody = try? JSONSerialization.data(withJSONObject: jsonParameters, options: []) else { return }
         request.httpBody = httpBody
         
-        // Вместо жесткого выключения кнопки (которое ломало CoreGraphics), просто делаем её прозрачной визуально
         sendButton.alpha = 0.4
         
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
-                self?.sendButton.alpha = 1.0
+                guard let self = self else { return }
+                self.sendButton.alpha = 1.0
                 
                 if let error = error {
-                    print("❌ ОШИБКА СЕТИ iOS: \(error.localizedDescription)")
-                    self?.showResultAlert(title: "Ошибка сети", message: "Не удалось связаться с сервером.")
+                    self.showResultAlert(title: "Ошибка сети", message: error.localizedDescription)
                     return
                 }
                 
-                if let data = data, let responseString = String(data: data, encoding: .utf8) {
-                    print("📬 ПОЛНЫЙ ОТВЕТ ОТ СЕРВЕРА TELEGRAM: \(responseString)")
-                }
-                
                 if let httpResponse = response as? HTTPURLResponse {
-                    print("📊 HTTP STATUS CODE ОТ СЕРВЕРА: \(httpResponse.statusCode)")
-                    
                     if httpResponse.statusCode == 200 {
-                        self?.messageTextView.text = "Ваше сообщение..."
-                        self?.messageTextView.textColor = .placeholderText
-                        self?.textFieldsChanged() // Сбрасываем кнопку в серый цвет
+                        SupportChatManager.shared.addNewRequest(category: topic, message: message, attachmentData: self.selectedImageData)
                         
-                        self?.showResultAlert(title: "Успешно", message: "Ваше обращение доставлено техподдержке!") {
-                            self?.navigationController?.popViewController(animated: true)
+                        self.messageTextView.text = "Ваше сообщение..."
+                        self.messageTextView.textColor = .placeholderText
+                        self.textFieldsChanged()
+                        
+                        self.showResultAlert(title: "Успешно", message: "Ваше обращение доставлено техподдержке!") {
+                            self.navigationController?.popViewController(animated: true)
                         }
                     } else {
-                        self?.showResultAlert(title: "Ошибка отправки", message: "Сервер вернул код: \(httpResponse.statusCode). Проверьте настройки чата.")
+                        self.showResultAlert(title: "Ошибка отправки", message: "Сервер вернул код: \(httpResponse.statusCode).")
                     }
                 }
             }
         }.resume()
     }
-
-
-        // функция проверки textFieldsChanged()
-    @objc func textFieldsChanged() {
-        // Просто даем команду кнопке: "Элементы на экране изменились, обнови свои цвета!"
-                sendButton.setNeedsUpdateConfiguration()
+    
+    @objc func backTapped() {
+        navigationController?.popViewController(animated: true)
     }
-
-
+    
+    @objc func textFieldsChanged() {
+        sendButton.setNeedsUpdateConfiguration()
+    }
     
     func showResultAlert(title: String, message: String, completion: (() -> Void)? = nil) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -186,5 +204,31 @@ extension FeedbackViewController {
             completion?()
         }))
         present(alert, animated: true)
+    }
+}
+
+extension FeedbackViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    @objc func attachFileTapped() {
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        imagePicker.sourceType = .photoLibrary
+        imagePicker.allowsEditing = false
+        present(imagePicker, animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        if let pickedImage = info[.originalImage] as? UIImage {
+            // Сжимаем картинку в Data для хранения в UserDefaults
+            self.selectedImageData = pickedImage.jpegData(compressionQuality: 0.7)
+            
+            // Показываем мини-превью на экране
+            self.previewImageView.image = pickedImage
+            self.previewImageView.isHidden = false
+            
+            // Меняем текст на кнопке
+            self.attachFileButton.setTitle("Изменить фото", for: .normal)
+        }
+        picker.dismiss(animated: true, completion: nil)
     }
 }

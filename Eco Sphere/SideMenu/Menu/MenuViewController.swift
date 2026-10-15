@@ -67,7 +67,7 @@ class MenuViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // --- ГЛАВНОЕ ИСПРАВЛЕНИЕ: Запрещаем контенту залезать ПОД навигационный бар ---
+        // Запрещаем контенту залезать ПОД навигационный бар
                 // Это автоматически сдвинет таблицу вниз ровно под линию бара, и колокольчик появится!
                 self.edgesForExtendedLayout = []
         
@@ -128,7 +128,7 @@ class MenuViewController: UIViewController {
 
     
     private func setupLayout() {
-        // 🌟 ОСТАВЛЯЕМ НА ЭКРАНЕ ТОЛЬКО ТАБЛИЦУ (Тумблер и текст уйдут внутрь неё)
+        // ОСТАВЛЯЕМ НА ЭКРАНЕ ТОЛЬКО ТАБЛИЦУ (Тумблер и текст уйдут внутрь неё)
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
@@ -192,7 +192,7 @@ class MenuViewController: UIViewController {
         let tap = UITapGestureRecognizer(target: self, action: #selector(openProfileDetails))
         headerContainer.addGestureRecognizer(tap)
         
-        // --- 🌟 ИСПРАВЛЕНИЕ: СОЗДАЕМ КОНТЕЙНЕР ДЛЯ ТЕМЫ В КАЧЕСТВЕ ПОДВАЛА ТАБЛИЦЫ ---
+        // --- СОЗДАЕМ КОНТЕЙНЕР ДЛЯ ТЕМЫ В КАЧЕСТВЕ ПОДВАЛА ТАБЛИЦЫ ---
         // Создаем плашку высотой 60 поинтов, которая встанет строго под ячейку "Выход"
         let footerView = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 60))
         footerView.backgroundColor = .clear
@@ -241,6 +241,7 @@ class MenuViewController: UIViewController {
             navController.modalPresentationStyle = .fullScreen
             present(navController, animated: true, completion: nil)
         }
+        
     }
     
     /// кнопку колокольчика в шапке таблицы и перекрашивать её

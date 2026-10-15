@@ -3,8 +3,9 @@ import UIKit
 class FeedbackViewController: UIViewController {
     
     // MARK: - Properties
-    var categoriesDropDownView: SortingDropDownView?
+    var categoriesDropDownView: UITableView?
     var isDropDownVisible = false
+    var selectedImageData: Data? = nil
     
     // MARK: - UI Elements (Containers)
     let scrollView: UIScrollView = {
@@ -26,11 +27,42 @@ class FeedbackViewController: UIViewController {
         let label = UILabel()
         label.text = "Напишите нам, если у вас возникли вопросы или предложения. Мы обязательно ответим!"
         label.font = .systemFont(ofSize: 14, weight: .regular)
-        label.textColor = .appSecondaryText
+        label.textColor = .secondaryLabel
         label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
+
+    // Кнопка скрепки или текста "Прикрепить скриншот"
+    let attachFileButton: UIButton = {
+        let button = UIButton(type: .system)
+        var config = UIButton.Configuration.plain()
+        config.image = UIImage(systemName: "paperclip")
+        config.imagePadding = 8
+        
+        var titleAttr = AttributedString("Прикрепить фото или скриншот")
+        titleAttr.font = .systemFont(ofSize: 14, weight: .medium)
+        config.attributedTitle = titleAttr
+        
+        button.configuration = config
+        button.tintColor = .systemBlue
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
+    // Маленький ImageView для предпросмотра выбранного изображения
+    let previewImageView: UIImageView = {
+        let iv = UIImageView()
+        iv.contentMode = .scaleAspectFill
+        iv.layer.cornerRadius = 8
+        iv.clipsToBounds = true
+        iv.backgroundColor = .systemGray6
+        iv.isHidden = true // Скрыт, пока фото не выбрано
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+
     
     // Поле выбора темы обращения со стрелочкой вниз
     let categoryTextField = FeedbackViewController.createFeedbackTextField(placeholder: "Тема обращения", hasChevron: true)
@@ -70,7 +102,7 @@ class FeedbackViewController: UIViewController {
         super.viewDidLoad()
         setupNavigationBar()
         setupLayout() // Вызов из файла +Layout.swift
-        setupKeyboardInteractions()
+//        setupKeyboardInteractions()
         setupActions()
     }
     
@@ -87,6 +119,7 @@ class FeedbackViewController: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
     
+
     // MARK: - Factory Method
     private static func createFeedbackTextField(placeholder: String, hasChevron: Bool = false) -> UITextField {
         let tf = UITextField()
@@ -98,20 +131,29 @@ class FeedbackViewController: UIViewController {
         tf.setLeftPadding(16)
         
         if hasChevron {
-            // 🌟 ИСПРАВЛЕНИЕ: Создаем прозрачный контейнер-подложку фиксированной ширины
-            let chevronContainer = UIView(frame: CGRect(x: 0, y: 0, width: 44, height: 48))
+            // Создаем аккуратный квадратный контейнер-подложку для правой части поля
+            let chevronContainer = UIView()
+            chevronContainer.translatesAutoresizingMaskIntoConstraints = false
             
             let chevronImageView = UIImageView(image: UIImage(systemName: "chevron.down"))
             chevronImageView.tintColor = .systemGray2
             chevronImageView.contentMode = .scaleAspectFit
+            chevronImageView.translatesAutoresizingMaskIntoConstraints = false
             
-            // Сдвигаем иконку влево (x: 4), оставляя справа красивый пустой отступ в 16 поинтов
-            chevronImageView.frame = CGRect(x: 4, y: 12, width: 24, height: 24)
-            
-            // Собираем иерархию вью
             chevronContainer.addSubview(chevronImageView)
             
-            // Назначаем контейнер в качестве правой части поля
+            // 🌟 ИСПРАВЛЕНИЕ: Выравниваем шеврон строго по центру вертикали через констрейнты
+            NSLayoutConstraint.activate([
+                chevronContainer.widthAnchor.constraint(equalToConstant: 44),
+                chevronContainer.heightAnchor.constraint(equalToConstant: 44),
+                
+                chevronImageView.centerYAnchor.constraint(equalTo: chevronContainer.centerYAnchor),
+                // Увеличенный отступ от правого края поля (constant: -16)
+                chevronImageView.trailingAnchor.constraint(equalTo: chevronContainer.trailingAnchor, constant: -16),
+                chevronImageView.widthAnchor.constraint(equalToConstant: 20),
+                chevronImageView.heightAnchor.constraint(equalToConstant: 20)
+            ])
+            
             tf.rightView = chevronContainer
             tf.rightViewMode = .always
         }
@@ -119,10 +161,13 @@ class FeedbackViewController: UIViewController {
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
     }
+
+
 }
-    // Старый неактуальный код topMostViewController полностью удален!
-    extension UIViewController {
-        var currentNavigationController: UINavigationController? {
-            return self.navigationController ?? self.tabBarController?.navigationController
-        }
+
+extension UIViewController {
+    var currentNavigationController: UINavigationController? {
+        return self.navigationController ?? self.tabBarController?.navigationController
     }
+}
+
